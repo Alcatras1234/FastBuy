@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: "FastBuy_DB"
+      POSTGRES_USER: "amogus"
+      POSTGRES_PASSWORD: "1234"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./db/data:/var/lib/postgresql/data/pgdata
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "2750:5432"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U amogus -d FastBuy_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+  # auth:
+  #   build:
+  #     context: ./task_manager
+  #     dockerfile: Dockerfile
+  #   container_name: server_auth
+  #   ports:
+  #     - "8080:8080"
+  # work:
+  #   build:
+  #     context: ./task_manager_work
+  #     dockerfile: Dockerfile
+  #   container_name: server_work
+  #   ports:
+  #     - "2751:2751"
