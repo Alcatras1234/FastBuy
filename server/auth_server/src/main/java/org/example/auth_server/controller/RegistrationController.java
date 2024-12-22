@@ -25,6 +25,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
+    // TODO: Добавить обработку ошибок при невалидных данных
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
         return ResponseEntity.ok("All good");
