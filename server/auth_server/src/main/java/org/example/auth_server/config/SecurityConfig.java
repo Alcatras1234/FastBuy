@@ -37,6 +37,7 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
                         .requestMatchers("/api/auth_service/registration").permitAll()
+                        .anyRequest().permitAll()
 
 
                 )

@@ -1,26 +1,35 @@
 package org.example.auth_server.service;
 
+import lombok.extern.log4j.Log4j2;
+import org.example.auth_server.dto.RegRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-
+@Log4j2
 @Service
 public class RegAdminService {
     // TODO: Добавить метод для проверки валидности имейла, отпарвляя на почту код или ссылку с подтверждением!
-    private final String STRINGWITHNUMBERS = "0123456789";
-    private final int PASSWORDLENGTH = 6;
-    private final SecureRandom random = new SecureRandom();
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
-    private String OTPGenerator() {
-        StringBuffer password = new StringBuffer();
-        for (int i = 0; i < PASSWORDLENGTH; i++) {
-            password.append(STRINGWITHNUMBERS.charAt(random.nextInt(STRINGWITHNUMBERS.length())));
-        }
-        return password.toString();
+    @Autowired
+    public RegAdminService(EmailService emailService, PasswordEncoder passwordEncoder) {
+        this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    private String hasherPassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    public void registrateUser(RegRequest regRequest) {
+        String fromAddress = regRequest.getEmail();
+
+        emailService.sendEmailForVerify(fromAddress);
 
 
+    }
 
 }
 
