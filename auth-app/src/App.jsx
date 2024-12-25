@@ -12,11 +12,15 @@ const App = () => {
     setMode("success"); // Move to the success page
   };
 
+  const navigateToLogin = () => {
+    setMode("login"); // Redirect user to Login page
+  };
+
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
       {mode === "register" && (
         <div>
-          <RegisterComponent onSuccess={handleSuccess} />
+          <RegisterComponent onSuccess={handleSuccess} navigateToLogin={navigateToLogin} />
           <p style={{ textAlign: "center", marginTop: "10px" }}>
             Already have an account?{" "}
             <button

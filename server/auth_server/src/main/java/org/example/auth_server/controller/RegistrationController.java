@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 
 @RestController
 @Log4j2
@@ -41,6 +43,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
     // Потом сюда запрос после verify-email
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
         regAdminService.registrateUser(regRequest);
@@ -53,6 +56,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
     // Потом ваалидируем почту
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/verify-code")
     public ResponseEntity<String> checkOTGPasswor(@RequestBody @Valid OTGRequest otgRequest) {
         emailService.checkOTGPassword(otgRequest);
@@ -65,6 +69,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/send-code")
     public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
         regAdminService.userIsExist(sendCodeRequest);
