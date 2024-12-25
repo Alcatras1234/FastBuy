@@ -5,10 +5,7 @@ import org.example.auth_server.dto.AuthRequest;
 import org.example.auth_server.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -22,6 +19,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/auth")
     public ResponseEntity<Map<String, String>> authUser(@RequestBody @Valid AuthRequest authRequest) {
         Map<String, String> tokens = authService.authUser(authRequest);
