@@ -1,0 +1,119 @@
+/* Reset Styles for All Elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Body: Center Everything */
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f0f4f8; /* Subtle light gray-blue background */
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center;    /* Vertically center */
+    min-height: 100vh;      /* Ensure the body spans the entire screen height */
+  }
+  
+  /* Container for Authentication Forms */
+  .auth-container {
+    display: flex;
+    justify-content: center; /* Center children horizontally */
+    align-items: center;     /* Center children vertically */
+    width: 100%; /* Take full width to prevent overflow issues */
+    max-width: 400px; /* Limit the container width */
+    background: white; /* Form container background */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px; /* Space between the container content and edges */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+  }
+  
+  /* Form Card */
+  .form-card {
+    width: 100%; /* Full width inside the auth-container */
+    text-align: center; /* Center all text inside the form */
+  }
+  
+  /* Form Heading */
+  .form-card h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem; /* Larger heading size */
+    color: #333;
+  }
+  
+  /* Input Fields */
+  .input {
+    width: 100%; /* Make input fields take full width of the container */
+    padding: 10px; /* Add padding for space inside the input */
+    margin: 10px 0; /* Space between each input field margin: 10px 0; /* Space between each input field */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px; /* Rounded corners for the inputs */
+    font-size: 1rem; /* Adjust the font size for better readability */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition effects */
+  }
+  
+  .input:focus {
+    border-color: #007bff; /* Highlight border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle glow to the input */
+    outline: none; /* Remove the default browser outline */
+  }
+  
+  /* Button Styling */
+  .button {
+    width: 100%; /* Buttons should fill the container width */
+    padding: 10px; /* Padding for better button size */
+    background-color: #007bff; /* Primary button color */
+    color: white; /* White text on the button */
+    font-size: 1rem; /* Font size for button text */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners for the button */
+    cursor: pointer; /* Change cursor to pointer */
+    margin-top: 10px; /* Space above the button */
+    transition: background-color 0.3s, transform 0.3s; /* Smooth transition effects */
+  }
+  
+  .button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.02); /* Slightly enlarge button on hover */
+  }
+  
+  .button:active {
+    transform: scale(0.98); /* Slightly shrink button for click effect */
+  }
+  
+  /* Error Messages */
+  .error-message {
+    color: red; /* Display error text in red */
+    margin-top: 5px; /* Add slight spacing above the message */
+    font-size: 0.9rem; /* Slightly smaller font size for error */
+    animation: fadeIn 0.5s ease-in; /* Add fade-in animation for error messages */
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  /* Responsive Design for Smaller Screens */
+  @media (max-width: 500px) {
+    .auth-container {
+      width: 90%; /* Take up more horizontal space on small screens */
+      padding: 15px; /* Reduce internal padding for more space */
+    }
+  
+    .form-card h2 {
+      font-size: 1.5rem; /* Shrink the heading size slightly */
+    }
+  
+    .button {
+      font-size: 0.9rem; /* Adjust button font size */
+      padding: 8px; /* Reduce button padding for smaller screens */
+    }
+  }
+  

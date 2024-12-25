@@ -1,0 +1,84 @@
+/* Reset Margins, Paddings, and Box Sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body with Flexbox for Centering */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5; /* Light gray for the background */
+}
+
+/* App Container for Form */
+.app-container {
+  text-align: center;
+  padding: 20px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for a modern look */
+  width: 100%;
+  max-width: 400px; /* Limit the size for smaller screens */
+}
+
+/* Input Fields */
+input {
+  margin: 10px 0;
+  padding: 8px;
+  width: 100%;
+  max-width: 300px; /* Optional: Scale inputs smaller if you'd like */
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+}
+
+/* Buttons */
+button {
+  margin: 10px 0;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3; /* Slightly darker on hover for feedback */
+}
+
+/* Paragraph Styling */
+p {
+  margin-top: 10px;
+  font-size: 0.9rem; /* Optional: Smaller font for secondary messages */
+  color: #666; /* Gray for secondary text */
+}
+
+/* Optional: Reduce title font size for mobile */
+h1 {
+  color: #333;
+  font-size: 1.5rem; /* Optional: Scale the title down for smaller screens */
+}
+
+/* Responsive Design: Ensure things look great on all screens */
+@media (max-width: 500px) {
+  .app-container {
+    padding: 15px;
+  }
+  input {
+    max-width: 100%; /* Remove input constraints for smaller screens */
+  }
+  button {
+    font-size: 0.9rem; /* Reduce button size */
+  }
+}
