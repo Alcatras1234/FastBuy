@@ -3,5 +3,10 @@ package org.example.auth_server.enums;
 public enum StatusEnum {
     ACTIVE,
     INACTIVE,
-    SUSPENDED
+    SUSPENDED;
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

@@ -3,6 +3,8 @@ package org.example.auth_server.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.auth_server.annotationValidator.RoleEnumConverter;
+import org.example.auth_server.annotationValidator.StatusEnumConverter;
 import org.example.auth_server.enums.RoleEnum;
 import org.example.auth_server.enums.StatusEnum;
 
@@ -18,28 +20,33 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username")
     private String username;
 
-    @Column(name = "surname", nullable = false)
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "surname")
     private String surname;
 
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "role")
+    @Convert(converter = RoleEnumConverter.class)
     private RoleEnum role;
 
     @Column(name = "status", nullable = false)
+    @Convert(converter = StatusEnumConverter.class)
     private StatusEnum status;
 
-    @Column(name = "created_dttm", nullable = false)
+    @Column(name = "created_dttm")
     private LocalDateTime createdDttm;
 
-    @Column(name = "updated_dttm", nullable = false)
+    @Column(name = "updated_dttm")
     private LocalDateTime updatedDttm;
 
 }

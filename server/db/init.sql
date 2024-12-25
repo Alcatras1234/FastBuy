@@ -1,15 +1,34 @@
+CREATE TABLE OTGPassword (
+	id SERIAL PRIMARY KEY,
+	password VARCHAR(6) NOT NULL,
+    expired TIMESTAMP,
+    validate BOOLEAN
+);
+
+CREATE TABLE validatedemails (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL
+);
+
+
 -- Создаём таблицы, которые не зависят от других
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    name VARCHAR(50) NOT NULL,
-    surname VARCHAR(50) NOT NULL,
+    username VARCHAR(50) UNIQUE,
+    name VARCHAR(50),
+    surname VARCHAR(50),
     email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(50) CHECK (role IN ('admin', 'user', 'organizer')) NOT NULL,
+    password VARCHAR(255),
+    role VARCHAR(50) CHECK (role IN ('admin', 'user', 'organizer')),
     status VARCHAR(50) CHECK (status IN ('active', 'inactive', 'suspended')) NOT NULL,
     created_dttm TIMESTAMP DEFAULT NOW(),
     updated_dttm TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE tokens (
+	id SERIAL PRIMARY KEY,
+	access VARCHAR(255) NOT NULL,
+	refresh VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE stadiums (

@@ -25,13 +25,13 @@ services:
         limits:
           cpus: '1'
           memory: 4G
-  # auth:
-  #   build:
-  #     context: ./task_manager
-  #     dockerfile: Dockerfile
-  #   container_name: server_auth
-  #   ports:
-  #     - "8080:8080"
+  auth:
+    build:
+      context: ./auth_server
+      dockerfile: Dockerfile
+    container_name: server_auth
+    ports:
+      - "8080:8080"
   # work:
   #   build:
   #     context: ./task_manager_work

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OTGPasswordRepository extends JpaRepository<OTGPassword, Integer> {
-    OTGPassword findOTGPasswordByOtgpassword(String password);
-    void deleteOTGPassword(String password);
+    OTGPassword findByOtgpassword(String otgpassword);
+    void deleteByOtgpassword(String otgpassword);
 }
