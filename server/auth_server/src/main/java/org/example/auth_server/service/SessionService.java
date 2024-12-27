@@ -69,10 +69,10 @@ public class SessionService {
 
     }
 
-    private User findUserByEmail(String email) {
+    @Transactional
+    protected User findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
     }
-
 
 
 }

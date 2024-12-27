@@ -4,16 +4,18 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.experimental.UtilityClass;
 import org.example.auth_server.model.User;
 
 import java.security.Key;
 import java.util.Date;
 
+@UtilityClass
 public class JWTUtils {
     private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public static String generateRefreshToken(User user) {
-        long expirationTimeMillis =  7 * 24 * 60 * 60 * 1000; // неделя
+        long expirationTimeMillis = 7 * 24 * 60 * 60 * 1000; // неделя
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + expirationTimeMillis);
         return Jwts.builder()
