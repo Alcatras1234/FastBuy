@@ -22,7 +22,7 @@ const events = [
     { id: 5, name: "5th", description: "Описание пятого события" },
 ];
 
-const HomePage: React.FC = () => {
+const UserHomePage: React.FC = () => {
     const [activeTab, setActiveTab] = useState(0);
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -110,4 +110,4 @@ const HomePage: React.FC = () => {
     );
 };
 
-export default HomePage;
+export default UserHomePage;

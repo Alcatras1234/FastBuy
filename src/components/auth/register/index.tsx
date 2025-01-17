@@ -1,17 +1,20 @@
 import { Button, TextField, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { IPropsRegister } from "../../../common/types/auth";
-import { SelectChangeEvent } from "@mui/material"; // Импортируем тип SelectChangeEvent
+import { SelectChangeEvent } from "@mui/material";
+import { useState } from "react";
 
 const RegisterPage = (props: IPropsRegister) => {
-    const { setFullName, setEmail, setPassword, setConfirmPassword, setSelectedRole } = props;
+    const { setFullName, setEmail, setPassword, setConfirmPassword, setSelectedRole} = props;
     const navigate = useNavigate();
-
+    const [role, setRole] = useState<string>("");
 
     const handleRoleChange = (event: SelectChangeEvent<string>) => {
-        const role = event.target.value;
-        setSelectedRole(role);
+        const selectedRole = event.target.value;
+        setRole(selectedRole);
+        setSelectedRole(selectedRole);
     };
+
 
     const handleLoginRedirect = () => {
         navigate("/login");
@@ -57,12 +60,11 @@ const RegisterPage = (props: IPropsRegister) => {
                     placeholder="Повторите пароль"
                     onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-
-                {/* Select для выбора роли */}
                 <FormControl fullWidth margin="normal">
-                    <InputLabel id="role-select-label"></InputLabel>
+                    <InputLabel id="role-select-label">Роль</InputLabel>
                     <Select
                         labelId="role-select-label"
+                        value={role}
                         onChange={handleRoleChange}
                     >
                         <MenuItem value="admin">Администратор</MenuItem>
@@ -73,6 +75,7 @@ const RegisterPage = (props: IPropsRegister) => {
                 <Button
                     sx={{ fontFamily: "Poppins", marginTop: 2, width: "30%" }}
                     variant="contained"
+                    type="submit"
                 >
                     Войти
                 </Button>

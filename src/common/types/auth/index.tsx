@@ -9,5 +9,16 @@ export interface IPropsRegister {
     setPassword: (password: string) => void,
     setConfirmPassword: (email: string) => void,
     setSelectedRole: (role: string) => void,
-    setRole?: (value: (((prevState: string) => string) | string)) => void
+}
+
+export interface IAuthState {
+    user:IPublicUser,
+    isLogged: boolean,
+
+}
+
+export interface IPublicUser {
+    id: number | null,
+    fullName: string,
+    email: string,
 }
