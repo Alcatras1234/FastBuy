@@ -46,7 +46,7 @@
   /* Input Fields */
   .input {
     width: 100%; /* Make input fields take full width of the container */
-    padding: 10px; /* Add padding for space inside the input */
+    padding: 10px; /* add padding for space inside the input */
     margin: 10px 0; /* Space between each input field margin: 10px 0; /* Space between each input field */
     border: 1px solid #ccc; /* Light gray border */
     border-radius: 5px; /* Rounded corners for the inputs */
@@ -56,7 +56,7 @@
   
   .input:focus {
     border-color: #007bff; /* Highlight border on focus */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle glow to the input */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* add a subtle glow to the input */
     outline: none; /* Remove the default browser outline */
   }
   
@@ -86,9 +86,9 @@
   /* Error Messages */
   .error-message {
     color: red; /* Display error text in red */
-    margin-top: 5px; /* Add slight spacing above the message */
+    margin-top: 5px; /* add slight spacing above the message */
     font-size: 0.9rem; /* Slightly smaller font size for error */
-    animation: fadeIn 0.5s ease-in; /* Add fade-in animation for error messages */
+    animation: fadeIn 0.5s ease-in; /* add fade-in animation for error messages */
   }
   
   @keyframes fadeIn {
