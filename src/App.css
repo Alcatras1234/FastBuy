@@ -1,0 +1,17 @@
+.app {
+    display: flex;
+    justify-content: center;
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.page-background {
+    background-image: url('https://centerfootballspb.ru/wp-content/uploads/2020/02/IMG_4486.jpg'); /* Замените 'background.jpg' на ваш путь */
+    background-size: cover; /* Покрывает всю страницу */
+    background-position: center; /* Центрирует изображение */
+    height: 100vh; /* Высота страницы */
+    width: 100%; /* Ширина страницы */
+}
