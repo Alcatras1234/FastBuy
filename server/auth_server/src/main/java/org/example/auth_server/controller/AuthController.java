@@ -19,7 +19,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/auth")
     public ResponseEntity<Map<String, String>> authUser(@RequestBody @Valid AuthRequest authRequest) {
         Map<String, String> tokens = authService.authUser(authRequest);
