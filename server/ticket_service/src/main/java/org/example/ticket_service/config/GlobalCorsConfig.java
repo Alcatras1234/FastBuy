@@ -1,4 +1,4 @@
-package org.example.auth_server.config;
+package org.example.ticket_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,7 @@ public class GlobalCorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*"); // Allow requests from React frontend
+        configuration.addAllowedOrigin("http://localhost:3000"); // Allow requests from React frontend
         configuration.addAllowedHeader("*"); // Allow all headers
         configuration.addAllowedMethod("*"); // Allow all HTTP methods (POST, GET, etc.)
         configuration.setAllowCredentials(true); // Send credentials (cookies, authorization headers)

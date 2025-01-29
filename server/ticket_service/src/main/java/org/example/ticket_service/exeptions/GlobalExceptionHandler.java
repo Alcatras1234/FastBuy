@@ -1,4 +1,4 @@
-package org.example.auth_server.exeptions;
+package org.example.ticket_service.exeptions;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;

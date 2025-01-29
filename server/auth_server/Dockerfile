@@ -9,7 +9,7 @@ RUN mvn verify clean --fail-never
 COPY src /auth_service/src/
 RUN mvn clean package -DskipTests
 
-FROM openjdk:21-jdk-slim
+FROM openjdk:21-jdk-slim AS server_app
 
 
 WORKDIR /app
@@ -17,5 +17,4 @@ WORKDIR /app
 COPY --from=build /auth_service/target/*.jar /app/auth.jar
 
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "auth.jar"]
