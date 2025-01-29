@@ -102,6 +102,7 @@ services:
       context: ./auth_server
       dockerfile: Dockerfile
     container_name: server_auth
+    hostname: server_auth
     ports:
       - "8080:8080"
     networks:
