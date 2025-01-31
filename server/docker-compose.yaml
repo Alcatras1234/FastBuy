@@ -3,16 +3,16 @@ version: "3.9"
 networks:
   dev:
 services:
-  nginx:
-    image: nginx:stable-alpine
-    ports:
-      - "80:80"
-    volumes:
-      - './nginx.conf:/etc/nginx/nginx.conf'
-    depends_on:
-      - auth
-    networks:
-      - dev
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - './nginx.conf:/etc/nginx/nginx.conf'
+  #   depends_on:
+  #     - auth
+  #   networks:
+  #     - dev
     
   auth_db:
     image: postgres:15
@@ -97,15 +97,15 @@ services:
         limits:
           cpus: '1'
           memory: 4G
-  auth:
-    build:
-      context: ./auth_server
-      dockerfile: Dockerfile
-    container_name: server_auth
-    ports:
-      - "8080:8080"
-    networks:
-      - dev
+  # auth:
+  #   build:
+  #     context: ./auth_server
+  #     dockerfile: Dockerfile
+  #   container_name: server_auth
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - dev
   broker:
     image: apache/kafka:latest
     container_name: broker
