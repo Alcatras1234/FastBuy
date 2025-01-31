@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 
 @RestController
@@ -67,6 +66,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
+    //TODO: сохранять код не в базе данных, а в кеше!!!!!!
     @PostMapping("/send-code")
     public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
         regAdminService.userIsExist(sendCodeRequest);
