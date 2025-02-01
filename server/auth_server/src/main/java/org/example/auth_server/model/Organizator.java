@@ -17,7 +17,7 @@ public class Organizator {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
     @Column(name = "company_name", nullable = false)
@@ -36,8 +36,7 @@ public class Organizator {
     private String postalCode;
 
     @Column(name = "contact_type", nullable = false, length = 50)
-    @Enumerated(EnumType.STRING)
-    private ContactTypeEnum contactType;
+    private String contactType;
 
     @Column(name = "contact_value", nullable = false, length = 255)
     private String contactValue;

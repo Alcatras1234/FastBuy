@@ -101,8 +101,12 @@ services:
   #   build:
   #     context: ./auth_server
   #     dockerfile: Dockerfile
+<<<<<<< HEAD
   #   container_name: server-auth
   #   hostname: server-auth
+=======
+  #   container_name: server_auth
+>>>>>>> develop
   #   ports:
   #     - "8080:8080"
   #   networks:

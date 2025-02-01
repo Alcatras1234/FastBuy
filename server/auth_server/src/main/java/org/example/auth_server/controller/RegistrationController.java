@@ -66,7 +66,10 @@ public class RegistrationController {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
+<<<<<<< HEAD
     //TODO: сохранять код не в базе данных, а в кеше!!!!!!
+=======
+>>>>>>> develop
     @PostMapping("/send-code")
     public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
         regAdminService.userIsExist(sendCodeRequest);

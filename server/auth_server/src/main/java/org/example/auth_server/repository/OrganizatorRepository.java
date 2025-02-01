@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrganizatorRepository extends JpaRepository<Organizator, Long> {
+    Organizator findOrganizatorById(Long id);
 }

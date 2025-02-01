@@ -1,7 +1,9 @@
 package org.example.auth_server.service;
 
 import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.OrganizatorBankDetailsRequest;
 import org.example.auth_server.enums.ContactTypeEnum;
+import org.example.auth_server.model.OrdanizerBankDetails;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.model.User;
 import org.example.auth_server.repository.OrganizatorRepository;
@@ -34,10 +36,17 @@ public class OrganizatorService {
         organizator.setRegistrationNumber(contactOrganizatorInfoRequest.getRegistrationNumber());
         organizator.setTaxId(contactOrganizatorInfoRequest.getTaxId());
         organizator.setPostalCode(contactOrganizatorInfoRequest.getPostalCode());
-        organizator.setContactType(ContactTypeEnum.valueOf(contactOrganizatorInfoRequest.getContactType()));
+        organizator.setContactType(contactOrganizatorInfoRequest.getContactType());
         organizator.setContactValue(contactOrganizatorInfoRequest.getContactValue());
         organizator.setIsPrimary(true);
         organizator.setCreatedDttm(LocalDateTime.now());
         organizatorRepository.save(organizator);
+    }
+
+    @Transactional
+    public void updateBankInfo(OrganizatorBankDetailsRequest oBDR) {
+        OrdanizerBankDetails ordanizerBankDetails = new OrdanizerBankDetails();
+        Organizator organizator = organizatorRepository.findOrganizatorById(oBDR.getLegalInfoId());
+        
     }
 }
