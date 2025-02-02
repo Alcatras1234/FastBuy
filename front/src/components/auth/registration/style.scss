@@ -1,0 +1,48 @@
+.root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+
+  /* Форма авторизации */
+  .form {
+    display: flex;
+    flex-direction: column; /* Выравниваем элементы по вертикали */
+
+    /* Стили для ссылки */
+    .reg {
+      color: cornflowerblue;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Задний фон */
+.background-container {
+  background-image: url('https://avatars.mds.yandex.net/i?id=9cf65932116e4591be5c58555a480ff2_l-12422391-images-thumbs&n=13'); /* Укажите путь к вашему изображению */
+  background-size: cover; /* Покрывает весь экран */
+  background-position: center;
+  height: 100vh;
+  width: 100vw; /* Убедитесь, что покрываете весь экран */
+  display: flex;
+  justify-content: center; /* Центрируем содержимое */
+  align-items: center;
+}
+
+/* Белый квадрат */
+.box {
+  background-color: floralwhite; /* Белый фон */
+  width: 400px; /* Ширина квадрата */
+  padding: 20px;
+  border-radius: 8px; /* Скругление углов */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25); /* Тень для визуального акцента */
+}
+
+/* Стили для ссылки внутри формы */
+.register-link {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}
