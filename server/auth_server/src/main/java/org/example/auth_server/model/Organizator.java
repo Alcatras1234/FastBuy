@@ -3,7 +3,6 @@ package org.example.auth_server.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.auth_server.enums.ContactTypeEnum;
 
 import java.time.LocalDateTime;
 

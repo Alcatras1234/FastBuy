@@ -8,7 +8,7 @@ import OrganizerRegisterPageBaseInfo from "./registration/organizer/base_info";
 import OrganizerRegisterPageCorpInfo from "./registration/organizer/corp_info";
 import "./style.scss";
 import AdminLoginPage from "./login/admin";
-import {verifyEmailCode} from "../../utils/axios";
+import {registerUser} from "../../utils/axios";
 
 const AuthRootComponent: React.FC = (): JSX.Element => {
     const [email, setEmail] = useState("");
@@ -35,7 +35,8 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                     const userRegistrationData = {
                         email,
                         password };
-                    verifyEmailCode(userRegistrationData.email);
+                        // ТУТ Я ПОМЕНЯЛ, ДОБАВИЛ ОТПРАВКУ ПАРОЛЯ И РОЛИ
+                    registerUser(userRegistrationData.email, userRegistrationData.password, "USER"); 
                     navigate("/verify", { state: { fromUserRegister: true } });
                     //console.log("Регистрация пользователя: ", userRegistrationData);// После регистрации переход на логин
                 } else {

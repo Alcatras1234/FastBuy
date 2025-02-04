@@ -8,9 +8,12 @@ export const instance = axios.create({
 });
 
 // Register user
-export const registerUser = async (email: string, password: string) => {
+// ТУТ Я МЕНЯЛ, ДОБАВИЛ В ПАРАМЕТРАХ РОЛЬ
+export const registerUser = async (email: string, password: string, role: string) => {
     try {
-        const response = await instance.post('/api/auth_service/registration', { email, password });
+        const response = await instance.post('/api/auth_service/registration', { email, password, role});
+        console.log("Отправленные данные:", { email, password });
+        console.log("Ответ сервера:", response.data);
         return response.data;
     } catch (error) {
         throw new Error("Ошибка при регистрации пользователя");
@@ -38,9 +41,10 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Register organizer
-export const registerOrganizer = async (email: string, password: string) => {
+// ТУТ Я ТОЖЕ ИЗМЕНИЛ ПАРАМЕТРЫ, ДОБАВИВ РОЛЬ, ЕЕ НАДО ОТПАРВЛЯТЬ
+export const registerOrganizer = async (email: string, password: string, role: string) => {
     try {
-        const response = await instance.post('/api/auth_service/registration', { email, password });
+        const response = await instance.post('/api/auth_service/registration', { email, password, role });
         return response.data;
     } catch (error) {
         throw new Error("Ошибка при регистрации организатора");
