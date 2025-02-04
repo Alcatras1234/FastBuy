@@ -25,20 +25,7 @@ public class SessionController {
     public SessionController(SessionService sessionService) {
         this.sessionService = sessionService;
     }
-
-    @Operation(summary = "Обновить access токен")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Успешный ответ"),
-            @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
-            @ApiResponse(responseCode = "401", description = "Токен просрочен"),
-            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
-    })
-    @PutMapping("/refresh")
-    public ResponseEntity<String> refreshAccessToken(@Valid @RequestBody TokenRequest tokenRequest) {
-        String accessToken = sessionService.refreshAccessToken(tokenRequest.getToken());
-        return ResponseEntity.ok(accessToken);
-
-    }
+    
 
     @Operation(summary = "Проверка, валиден ли токен")
     @ApiResponses(value = {

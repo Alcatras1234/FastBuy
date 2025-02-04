@@ -12,13 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SessionService {
-    private final JWTTokensRepository sessionRepository;
     private final UserRepository userRepository;
 
 
     @Autowired
-    public SessionService(JWTTokensRepository sessionRepository, UserRepository userRepository) {
-        this.sessionRepository = sessionRepository;
+    public SessionService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -43,34 +41,6 @@ public class SessionService {
         }
     }
 
-    @Transactional
-    public String refreshAccessToken(String refreshToken) {
-        if (JWTUtils.validateToken(refreshToken)) {
-
-            JWTTokens session = sessionRepository.findJWTTokensByRefreshToken(refreshToken);
-
-            String email = getEmailFromRefreshToken(session.getRefreshToken());
-            User user = findUserByEmail(email);
-            if (user == null)
-                throw new EntityNotFoundException("User with email " + email + " not found");
-            String accessToken = JWTUtils.generateAccessToken(user);
-
-
-            session.setAccessToken(accessToken);
-
-            sessionRepository.save(session);
-
-            return accessToken;
-        } else {
-            throw new JwtException("Авторизуйтесь снова, refresh токен истек");
-        }
-
-    }
-
-    @Transactional
-    protected User findUserByEmail(String email) {
-        return userRepository.findUserByEmail(email);
-    }
 
 
 }
