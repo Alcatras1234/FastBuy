@@ -46,8 +46,6 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults()) // Добавьте эту строку
-
                 .httpBasic(Customizer.withDefaults());
 
         return http.build();
