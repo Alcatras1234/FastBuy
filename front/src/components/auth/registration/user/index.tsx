@@ -6,14 +6,11 @@ const UserRegisterPage: React.FC<IPropsUserRegister> = (props: IPropsUserRegiste
     const { setEmail, setPassword, setConfirmPassword } = props;
     const navigate = useNavigate();
 
-    const handleVerify = () => {
-        navigate("/verify", { state: { fromUserRegister: true } }); // Перенаправление на страницу логина
-    };
     const handleOrganizerRedirect = () => {
         navigate("/organizer/register/baseInfo");
     };
     const handleBack = () => {
-        navigate(-1); // Возвращает на предыдущую страницу в истории
+        navigate("/login/users"); // Возвращает на предыдущую страницу в истории
     };
 
     return (
@@ -35,7 +32,6 @@ const UserRegisterPage: React.FC<IPropsUserRegister> = (props: IPropsUserRegiste
                 >
                     Регистрация
                 </Typography>
-                <form>
                     <TextField
                         fullWidth
                         margin="normal"
@@ -66,10 +62,9 @@ const UserRegisterPage: React.FC<IPropsUserRegister> = (props: IPropsUserRegiste
                         required
                     />
                     <Button
+                        type="submit"
                         sx={{ fontFamily: "Poppins", marginTop: 2, width: "100%" }}
                         variant="contained"
-                        type="submit"
-                        onClick={handleVerify}
                     >
                         Зарегистрироваться
                     </Button>
@@ -95,7 +90,6 @@ const UserRegisterPage: React.FC<IPropsUserRegister> = (props: IPropsUserRegiste
                     >
                         Назад
                     </Button>
-                </form>
             </div>
         </div>
     );

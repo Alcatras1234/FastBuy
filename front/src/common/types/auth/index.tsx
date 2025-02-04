@@ -1,4 +1,4 @@
-export interface IPropsUserLogin {
+export interface IPropsUsersLogin {
     setEmail: (email: string) => void;
     setPassword: (password: string) => void;
 }
@@ -12,6 +12,14 @@ export interface IPropsOrganizerRegisterCorpInfo {
     setPhoneNumber: (phoneNumber: string) => void,
     setCorpName: (corpName: string) => void,
 }
+export interface IPropsAdminLogin {
+    setEmail: (email: string) => void;
+    setPassword: (password: string) => void;
+}
+export interface IPropsVerificationCode {
+    setVerificationCode: (code: string) => void;
+}
+
 export interface IPropsUserRegister {
     setEmail: (email: string) => void,
     setPassword: (email: string) => void

@@ -1,30 +1,10 @@
 import { Button, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import {IPropsVerificationCode} from "../../../common/types/auth";
 
-const VerificationPage: React.FC = (): JSX.Element => {
-    const [verificationCode, setVerificationCode] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+const VerificationPage: React.FC<IPropsVerificationCode> = (props: IPropsVerificationCode): JSX.Element => {
+    const {setVerificationCode} = props
     const navigate = useNavigate();
-    const location = useLocation();
-
-    const handleVerification = () => {
-        if (verificationCode === "123456") { // Пример верификационного кода
-            // Проверяем откуда пришел пользователь
-            if (location.state?.fromBaseInfo) {
-                // Если пришел с /organizer/register/baseInfo, переходим на /organizer/register/corpInfo
-                navigate("/organizer/register/corpInfo");
-            } else if (location.state?.fromUserRegister) {
-                // Если пришел с /user/register, переходим на /user/login
-                navigate("/login/users");
-            } else {
-                // Если не передано состояние, просто перенаправляем на логин
-                navigate("/login/users");
-            }
-        } else {
-            setErrorMessage("Неверный код. Попробуйте снова.");
-        }
-    };
 
     const handleBack = () => {
         navigate(-1); // Возвращаем пользователя на предыдущую страницу
@@ -42,26 +22,19 @@ const VerificationPage: React.FC = (): JSX.Element => {
                     >
                         Верификация
                     </Typography>
-                    <form className="form">
-                        {errorMessage && (
-                            <Typography variant="body2" color="error" textAlign="center">
-                                {errorMessage}
-                            </Typography>
-                        )}
                         <TextField
                             fullWidth
                             margin="normal"
                             label="Введите код подтверждения"
                             variant="standard"
                             placeholder="Код подтверждения"
-                            value={verificationCode}
                             onChange={(e) => setVerificationCode(e.target.value)}
                             required
                         />
                         <Button
+                            type="submit"
                             sx={{ fontFamily: "Poppins", marginTop: 2, width: "100%" }}
                             variant="contained"
-                            onClick={handleVerification}
                         >
                             Подтвердить
                         </Button>
@@ -72,7 +45,6 @@ const VerificationPage: React.FC = (): JSX.Element => {
                         >
                             Назад
                         </Button>
-                    </form>
                 </div>
             </div>
         </div>

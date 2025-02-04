@@ -6,9 +6,9 @@ const OrganizerRegisterPageBaseInfo: React.FC<IPropsOrganizerRegisterBaseInfo> =
     const { setEmail, setPassword, setConfirmPassword } = props;
     const navigate = useNavigate();
 
-    const handleCorpRegistrationRedirect = () => {
+/*    const handleCorpRegistrationRedirect = () => {
         navigate("/verify", { state: { fromBaseInfo: true } }); // Перенаправление на страницу логина
-    };
+    };*/
     const handleBack = () => {
         navigate("/user/register"); // Возвращает на предыдущую страницу в истории
     };
@@ -24,7 +24,6 @@ const OrganizerRegisterPageBaseInfo: React.FC<IPropsOrganizerRegisterBaseInfo> =
                 >
                     Регистрация
                 </Typography>
-                <form>
                     <TextField
                         fullWidth
                         margin="normal"
@@ -58,7 +57,7 @@ const OrganizerRegisterPageBaseInfo: React.FC<IPropsOrganizerRegisterBaseInfo> =
                         sx={{ fontFamily: "Poppins", marginTop: 2, width: "100%" }}
                         variant="contained"
                         type="submit"
-                        onClick={handleCorpRegistrationRedirect}
+/*                        onClick={handleCorpRegistrationRedirect}*/
                     >
                         Далее
                     </Button>
@@ -69,22 +68,6 @@ const OrganizerRegisterPageBaseInfo: React.FC<IPropsOrganizerRegisterBaseInfo> =
                     >
                         Назад
                     </Button>
-                </form>
-{/*                <Typography
-                    variant="body1"
-                    fontFamily="Poppins"
-                    textAlign="center"
-                    padding={3}
-                >
-                    Есть аккаунт?{" "}
-                    <span
-                        className="reg"
-                        onClick={handleLoginRedirect}
-                        style={{ cursor: "pointer", color: "blue" }}
-                    >
-                        Авторизация
-                    </span>
-                </Typography>*/}
             </div>
         </div>
     );

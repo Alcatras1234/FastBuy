@@ -1,41 +1,39 @@
-import { useState } from "react";
 import { TextField, Button, Typography, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import {IPropsUsersLogin} from "../../../../common/types/auth";
 
-const UsersLoginPage: React.FC = (): JSX.Element => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
+const UsersLoginPage: React.FC<IPropsUsersLogin> = (props: IPropsUsersLogin): JSX.Element => {
+    const {setEmail, setPassword} = props
 
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleRedirecRegister = () => {
+        navigate("/user/register");
+    }
 
-        try {
-            if (!email || !password) {
-                throw new Error("Заполните все поля");
+    /*    const handleSubmit = async (e: React.FormEvent) => {
+            e.preventDefault();
+
+            try {
+                if (!email || !password) {
+                    throw new Error("Заполните все поля");
+                }
+
+                const userData = { email, password };
+                console.log("Авторизация пользователя:", userData);
+
+                navigate("/");
+            } catch (error: any) {
+                setErrorMessage(error.message || "Ошибка входа");
             }
-
-            const userData = { email, password };
-            console.log("Авторизация пользователя:", userData);
-
-            // Здесь можно добавить запрос к серверу через fetch/axios
-            navigate("/"); // Переход на главную страницу после успешного входа
-        } catch (error: any) {
-            setErrorMessage(error.message || "Ошибка входа");
-        }
-    };
+        };*/
 
     return (
         <div className="background-container">
             <div className="box">
-                <form onSubmit={handleSubmit}>
                     <Typography variant="h2" fontFamily="Poppins" textAlign="center" padding={3}>
                         Авторизация
                     </Typography>
-
-                    {errorMessage && <p style={{ color: "red", textAlign: "center" }}>{errorMessage}</p>}
 
                     <TextField
                         fullWidth
@@ -43,7 +41,6 @@ const UsersLoginPage: React.FC = (): JSX.Element => {
                         label="E-mail"
                         variant="standard"
                         placeholder="Введите E-mail"
-                        value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
@@ -54,7 +51,6 @@ const UsersLoginPage: React.FC = (): JSX.Element => {
                         label="Пароль"
                         variant="standard"
                         placeholder="Введите пароль"
-                        value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
@@ -64,17 +60,10 @@ const UsersLoginPage: React.FC = (): JSX.Element => {
                         <Button type="submit" variant="contained" sx={{ width: "60%", mb: 1 }}>
                             Войти
                         </Button>
-
-                        {/* Кнопка Зарегистрироваться */}
-                        <Button
-                            variant="outlined"
-                            sx={{ width: "60%" }}
-                            onClick={() => navigate("/user/register")}
-                        >
-                            Зарегистрироваться
+                        <Button variant="contained" sx={{ width: "60%", mb: 1 }} onClick={handleRedirecRegister}>
+                            Регистрация
                         </Button>
                     </Box>
-                </form>
             </div>
         </div>
     );

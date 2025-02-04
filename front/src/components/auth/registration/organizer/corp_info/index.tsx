@@ -6,9 +6,6 @@ const OrganizerRegisterPageCorpInfo: React.FC<IPropsOrganizerRegisterCorpInfo> =
     const { setCorpName, setPhoneNumber } = props;
     const navigate = useNavigate();
 
-    const handleLoginRedirect = () => {
-        navigate("/organizer/login"); // Перенаправление на страницу логина
-    };
     const handleBack = () => {
         navigate("/organizer/register/baseInfo"); // Возвращает на предыдущую страницу в истории
     };
@@ -24,7 +21,6 @@ const OrganizerRegisterPageCorpInfo: React.FC<IPropsOrganizerRegisterCorpInfo> =
                 >
                     Регистрация
                 </Typography>
-                <form>
                     <TextField
                         fullWidth
                         margin="normal"
@@ -58,22 +54,6 @@ const OrganizerRegisterPageCorpInfo: React.FC<IPropsOrganizerRegisterCorpInfo> =
                     >
                         Назад
                     </Button>
-                </form>
-                {/*                <Typography
-                    variant="body1"
-                    fontFamily="Poppins"
-                    textAlign="center"
-                    padding={3}
-                >
-                    Есть аккаунт?{" "}
-                    <span
-                        className="reg"
-                        onClick={handleLoginRedirect}
-                        style={{ cursor: "pointer", color: "blue" }}
-                    >
-                        Авторизация
-                    </span>
-                </Typography>*/}
             </div>
         </div>
     );

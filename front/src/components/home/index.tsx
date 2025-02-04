@@ -1,10 +1,32 @@
+import { useLocation } from "react-router-dom";
+import UserHomePage from "./user";
+import OrganizerHomePage from "./organizer";
+import AdminHomePage from "./admin";
 
-const HomePage: React.FC = () => {
+
+const HomeRootComponent: React.FC = () => {
+    const location = useLocation();
+
+    const handleSubmit = () => {
+        if (location.pathname === "/user/home") {
+            console.log("Home page");
+        }
+    }
+
     return (
-        <div>
-            <h1> Privet</h1>
+        <div className="homepage" onChange={handleSubmit}>
+            { location.pathname === "/user/home" ? (
+                <UserHomePage
+                />
+            ) : location.pathname === "/organizer/home" ? (
+                <OrganizerHomePage
+                />
+            ) : location.pathname === "/admin/home" ? (
+                <AdminHomePage
+                />
+            )  : null}
         </div>
     );
 };
 
-export default HomePage;
+export default HomeRootComponent;
