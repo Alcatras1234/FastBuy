@@ -25,7 +25,7 @@ public class SessionController {
     public SessionController(SessionService sessionService) {
         this.sessionService = sessionService;
     }
-    
+
 
     @Operation(summary = "Проверка, валиден ли токен")
     @ApiResponses(value = {
