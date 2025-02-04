@@ -41,7 +41,6 @@ public class RegistrationController {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
-    // Потом сюда запрос после verify-email
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
         regAdminService.registrateUser(regRequest);
