@@ -27,7 +27,7 @@ public class CorsConfig {
         config.setAllowedHeaders(List.of("*"));
 
         // Разрешаем отправку куки (если не нужно, установите false)
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(false);
 
         // Время кеширования preflight-запроса (1 час)
         config.setMaxAge(3600L);
