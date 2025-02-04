@@ -3,9 +3,7 @@ package org.example.auth_server.service;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.example.auth_server.dto.AuthRequest;
-import org.example.auth_server.model.JWTTokens;
 import org.example.auth_server.model.User;
-import org.example.auth_server.repository.JWTTokensRepository;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +20,10 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordencoder;
 
-    private final JWTTokensRepository jwtTokensRepository;
-
-
-
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordencoder, JWTTokensRepository jwtTokensRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordencoder) {
         this.userRepository = userRepository;
         this.passwordencoder = passwordencoder;
-        this.jwtTokensRepository = jwtTokensRepository;
     }
 
     @Transactional
@@ -45,11 +38,6 @@ public class AuthService {
         tokens.put("refreshToken", refreshToken);
         tokens.put("accessToken", accessToken);
 
-        JWTTokens jwtTokens = new JWTTokens();
-        jwtTokens.setAccessToken(accessToken);
-        jwtTokens.setRefreshToken(refreshToken);
-
-        jwtTokensRepository.save(jwtTokens);
         return tokens;
     }
 
