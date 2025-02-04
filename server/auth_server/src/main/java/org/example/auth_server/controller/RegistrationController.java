@@ -47,29 +47,5 @@ public class RegistrationController {
         regAdminService.registrateUser(regRequest);
         return ResponseEntity.ok("All is good");
     }
-    @Operation(summary = "Verify email address")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "500", description = "Server Error")
-    })
-    // Потом ваалидируем почту
-    @PostMapping("/verify-code")
-    public ResponseEntity<String> checkOTGPasswor(@RequestBody @Valid OTGRequest otgRequest) {
-        emailService.checkOTGPassword(otgRequest);
-        return ResponseEntity.ok("Email is valid");
-    }
-    // Сначала отправляем код на почту
-    @Operation(summary = "Send Code on email")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "500", description = "Server Error")
-    })
-    @PostMapping("/send-code")
-    public ResponseEntity<String> sendCode(@RequestBody @Valid SendCodeRequest sendCodeRequest) {
-        regAdminService.userIsExist(sendCodeRequest);
-        emailService.sendEmailForVerify(sendCodeRequest.getEmail());
-        return ResponseEntity.ok("Code is sended");
-    }
+
 }

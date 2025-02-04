@@ -1,14 +1,4 @@
-CREATE TABLE OTGPassword (
-	id SERIAL PRIMARY KEY,
-	password VARCHAR(6) NOT NULL,
-    expired TIMESTAMP,
-    validate BOOLEAN
-);
 
-CREATE TABLE validatedemails (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(100) NOT NULL
-);
 
 
 CREATE TABLE users (
@@ -17,6 +7,7 @@ CREATE TABLE users (
     name VARCHAR(50),
     surname VARCHAR(50),
     email VARCHAR(100) UNIQUE NOT NULL,
+    is_verify BOOLEAN,
     password VARCHAR(255),
     role VARCHAR(50) CHECK (role IN ('admin', 'user', 'organizer')),
     status VARCHAR(50) CHECK (status IN ('active', 'inactive', 'suspended')) NOT NULL,

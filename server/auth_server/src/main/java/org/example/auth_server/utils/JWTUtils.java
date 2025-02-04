@@ -43,6 +43,18 @@ public class JWTUtils {
                 .compact();
     }
 
+    public static String generateValidateToken(String email) {
+        long expirationTimeMillis = 15 * 60 * 1000; // 15 минут
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + expirationTimeMillis);
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expirationDate)
+                .signWith(SECRET_KEY)
+                .compact();
+    }
+
     public static Claims extractClaim(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(SECRET_KEY)

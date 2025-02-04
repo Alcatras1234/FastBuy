@@ -35,6 +35,9 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "is_verify")
+    private boolean isVerify = false;
+
     @Column(name = "role")
     @Convert(converter = RoleEnumConverter.class)
     private RoleEnum role;
