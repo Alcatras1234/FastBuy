@@ -36,7 +36,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                         email,
                         password };
                         // ТУТ Я ПОМЕНЯЛ, ДОБАВИЛ ОТПРАВКУ ПАРОЛЯ И РОЛИ
-                    registerUser(userRegistrationData.email, userRegistrationData.password, "USER"); 
+                    const data = registerUser(userRegistrationData.email, userRegistrationData.password, "USER"); 
                     navigate("/verify", { state: { fromUserRegister: true } });
                     //console.log("Регистрация пользователя: ", userRegistrationData);// После регистрации переход на логин
                 } else {
