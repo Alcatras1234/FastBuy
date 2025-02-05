@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 
 @RestController
 @Log4j2
@@ -43,8 +45,9 @@ public class RegistrationController {
     })
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
-        regAdminService.registrateUser(regRequest);
-        return ResponseEntity.ok("All is good");
+        String uuid = UUID.randomUUID().toString();
+        regAdminService.registrateUser(regRequest, uuid);
+        return ResponseEntity.ok(uuid);
     }
 
 }

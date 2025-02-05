@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.OTGRequest;
+import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,10 @@ public class EmailService {
 
 
     @Async
-    public void sendEmailForVerify(String email) {
+    public void sendEmailForVerify(String email, String uuid) {
         String host = "smtp.gmail.com";
-        String link = "http:/45.150.4.240:8080/api/auth_service/verify_email";
+        String validateToken = JWTUtils.generateValidateToken(email);
+        String link = "http:/45.150.4.240:8080/api/chat?token=" + validateToken + "&uuid="+uuid;
 
         properties = System.getProperties();
         properties.put("mail.smtp.host", host);
