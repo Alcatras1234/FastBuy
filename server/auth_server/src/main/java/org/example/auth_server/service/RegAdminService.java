@@ -38,17 +38,18 @@ public class RegAdminService {
         User user = userRepository.findUserByEmail(regRequest.getEmail());
         if (user != null) {
             throw new EntityExistsException("Пользователь существует!");
+        } else {
+            user = new User();
+            emailService.sendEmailForVerify(toAddress);
+
+            user.setEmail(regRequest.getEmail());
+            user.setRole(RoleEnum.valueOf(regRequest.getRole()));
+            user.setPassword(hashedPassword);
+            user.setCreatedDttm(LocalDateTime.now());
+            user.setStatus(StatusEnum.ACTIVE);
+
+            userRepository.save(user);
         }
-        emailService.sendEmailForVerify(toAddress);
-
-        user.setEmail(regRequest.getEmail());
-        user.setRole(RoleEnum.valueOf(regRequest.getRole()));
-        user.setPassword(hashedPassword);
-        user.setCreatedDttm(LocalDateTime.now());
-        user.setStatus(StatusEnum.ACTIVE);
-
-        userRepository.save(user);
-
     }
 
     @Transactional
