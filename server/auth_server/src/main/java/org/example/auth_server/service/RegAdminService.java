@@ -47,14 +47,17 @@ public class RegAdminService {
             user.setPassword(hashedPassword);
             user.setCreatedDttm(LocalDateTime.now());
             user.setStatus(StatusEnum.ACTIVE);
+            log.info("Пользователь " + user);
 
             userRepository.save(user);
         }
     }
 
     @Transactional
-    public void validateEmail(String token) throws Exception{
+    public void validateEmail(String token) {
+        log.info("Старт валидации имейла");
         if (!JWTUtils.validateToken(token)) {
+            log.error("Токен не валиден!");
             throw new JwtException("Токен не валиден");
         }
         Claims claims = JWTUtils.extractClaim(token);
@@ -62,13 +65,15 @@ public class RegAdminService {
         User user = userRepository.findUserByEmail(email);
         user.setVerify(true);
         userRepository.save(user);
+        log.info("Статус пользователя изменен на " + user.isVerify());
     }
 
     @Transactional(readOnly = true)
     public void checkValidation(String email) {
         User user = userRepository.findUserByEmail(email);
+        log.info("Пользователь для валидации " + user);
         if (!user.isVerify()) {
-            throw new IllegalStateException("почта не провалидирована");
+            throw new IllegalStateException("почта не провалидирована " + user);
         }
     }
 
