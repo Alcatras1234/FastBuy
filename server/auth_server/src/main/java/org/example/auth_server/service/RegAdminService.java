@@ -2,6 +2,7 @@ package org.example.auth_server.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityExistsException;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.RegRequest;
 import org.example.auth_server.enums.RoleEnum;
@@ -31,11 +32,15 @@ public class RegAdminService {
     }
 
     @Transactional
-    public void registrateUser(RegRequest regRequest, String uuid) {
+    public void registrateUser(RegRequest regRequest) {
         String toAddress = regRequest.getEmail();
         String hashedPassword = hasherPassword(regRequest.getPassword());
-        emailService.sendEmailForVerify(regRequest.getEmail(), uuid);
-        User user = new User();
+        User user = userRepository.findUserByEmail(regRequest.getEmail());
+        if (user != null) {
+            throw new EntityExistsException("Пользователь существует!");
+        }
+        emailService.sendEmailForVerify(toAddress);
+
         user.setEmail(regRequest.getEmail());
         user.setRole(RoleEnum.valueOf(regRequest.getRole()));
         user.setPassword(hashedPassword);

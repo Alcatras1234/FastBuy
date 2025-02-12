@@ -46,8 +46,10 @@ public class RegistrationController {
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
         String uuid = UUID.randomUUID().toString();
-        regAdminService.registrateUser(regRequest, uuid);
-        return ResponseEntity.ok(uuid);
+        regAdminService.registrateUser(regRequest);
+        return ResponseEntity.ok("Провалидируйте email!");
     }
+
+
 
 }
