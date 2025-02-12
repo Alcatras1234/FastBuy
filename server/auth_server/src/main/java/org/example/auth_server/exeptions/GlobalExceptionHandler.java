@@ -1,15 +1,22 @@
 package org.example.auth_server.exeptions;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
+@Log4j2
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -50,5 +57,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleValidationException(RuntimeException ex) {
         return ResponseEntity.status(500).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Resource> handleJwtException(JwtException ex) {
+        log.info("Токен не действителен");
+        Path path = Paths.get("src/main/resources/templates/not_confirmed.html");
+        Resource resource = new FileSystemResource(path);
+        return ResponseEntity.status(401)
+                .contentType(MediaType.TEXT_HTML)
+                .body(resource);
     }
 }

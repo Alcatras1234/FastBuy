@@ -10,9 +10,14 @@ import org.example.auth_server.dto.RegRequest;
 import org.example.auth_server.service.EmailService;
 import org.example.auth_server.service.RegAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 
@@ -50,11 +55,13 @@ public class RegistrationController {
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
     @GetMapping("/valid-email")
-    public ResponseEntity<String> validateEmail(@RequestParam(name = "token") String token) throws Exception {
-
+    public ResponseEntity<Resource> validateEmail(@RequestParam(name = "token") String token) {
         regAdminService.validateEmail(token);
-        return ResponseEntity.ok("email провалидирован!");
-
+        Path path = Paths.get("src/main/resources/templates/confirmation.html");
+        org.springframework.core.io.Resource resource = new FileSystemResource(path);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .body(resource);
     }
 
     @GetMapping("/email")

@@ -43,7 +43,7 @@ public class EmailService {
     public void sendEmailForVerify(String email) {
         String host = "smtp.gmail.com";
         String validateToken = JWTUtils.generateValidateToken(email);
-        String link = "http://45.150.4.240:8080/api/valid-email?token=" + validateToken;
+        String link = "http://45.150.4.240:8080/api/auth_service/valid-email?token=" + validateToken;
 
         properties = System.getProperties();
         properties.put("mail.smtp.host", host);
