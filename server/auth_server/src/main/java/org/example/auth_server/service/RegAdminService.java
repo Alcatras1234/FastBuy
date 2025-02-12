@@ -64,6 +64,14 @@ public class RegAdminService {
         userRepository.save(user);
     }
 
+    @Transactional(readOnly = true)
+    public void checkValidation(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if (!user.isVerify()) {
+            throw new IllegalStateException("почта не провалидирована");
+        }
+    }
+
 
     private String hasherPassword(String password) {
         return passwordEncoder.encode(password);
