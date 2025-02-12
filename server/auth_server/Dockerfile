@@ -17,4 +17,12 @@ WORKDIR /app
 COPY --from=build /auth_service/target/*.jar /app/auth.jar
 
 EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "auth.jar"]
+
+FROM nginx:stable-alpine
+
+COPY --from=build /src/main/resources/templates /urs/share/nginx/html
+COPY --from=build nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 8081
+CMD [ "nginx", "-g", "daemon off;"]
