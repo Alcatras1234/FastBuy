@@ -22,7 +22,7 @@ ENTRYPOINT ["java", "-jar", "auth.jar"]
 
 FROM nginx:stable-alpine
 
-COPY --from=build /auth_service/src/main/resources/templates /urs/share/nginx/html
+COPY --from=build /auth_service/src/main/resources/templates /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 8081
 CMD [ "nginx", "-g", "daemon off;"]
