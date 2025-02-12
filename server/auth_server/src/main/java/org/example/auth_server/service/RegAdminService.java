@@ -2,6 +2,7 @@ package org.example.auth_server.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityExistsException;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.RegRequest;
 import org.example.auth_server.enums.RoleEnum;
@@ -31,19 +32,24 @@ public class RegAdminService {
     }
 
     @Transactional
-    public void registrateUser(RegRequest regRequest, String uuid) {
+    public void registrateUser(RegRequest regRequest) {
         String toAddress = regRequest.getEmail();
         String hashedPassword = hasherPassword(regRequest.getPassword());
-        emailService.sendEmailForVerify(regRequest.getEmail(), uuid);
-        User user = new User();
-        user.setEmail(regRequest.getEmail());
-        user.setRole(RoleEnum.valueOf(regRequest.getRole()));
-        user.setPassword(hashedPassword);
-        user.setCreatedDttm(LocalDateTime.now());
-        user.setStatus(StatusEnum.ACTIVE);
+        User user = userRepository.findUserByEmail(regRequest.getEmail());
+        if (user != null) {
+            throw new EntityExistsException("Пользователь существует!");
+        } else {
+            user = new User();
+            emailService.sendEmailForVerify(toAddress);
 
-        userRepository.save(user);
+            user.setEmail(regRequest.getEmail());
+            user.setRole(RoleEnum.valueOf(regRequest.getRole()));
+            user.setPassword(hashedPassword);
+            user.setCreatedDttm(LocalDateTime.now());
+            user.setStatus(StatusEnum.ACTIVE);
 
+            userRepository.save(user);
+        }
     }
 
     @Transactional
@@ -56,6 +62,14 @@ public class RegAdminService {
         User user = userRepository.findUserByEmail(email);
         user.setVerify(true);
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public void checkValidation(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if (!user.isVerify()) {
+            throw new IllegalStateException("почта не провалидирована");
+        }
     }
 
 
