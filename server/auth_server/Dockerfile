@@ -9,20 +9,19 @@ RUN mvn verify clean --fail-never
 COPY src /auth_service/src/
 RUN mvn clean package -DskipTests
 
+
 FROM openjdk:21-jdk-slim AS server_app
 
+RUN apt-get update && apt-get install -y tini nginx
 
 WORKDIR /app
 
 COPY --from=build /auth_service/target/*.jar /app/auth.jar
-
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "auth.jar"]
-
-FROM nginx:stable-alpine
-
 COPY --from=build /auth_service/src/main/resources/templates /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 8081
-CMD [ "nginx", "-g", "daemon off;"]
+
+EXPOSE 8080 8081
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+CMD ["bash", "-c", "java -jar /app/auth.jar & /usr/sbin/nginx -g 'daemon off;'"]
