@@ -37,6 +37,7 @@ public class RegAdminService {
         String hashedPassword = hasherPassword(regRequest.getPassword());
         User user = userRepository.findUserByEmail(regRequest.getEmail());
         if (user != null) {
+            log.error("Пользователь уже зарегестрирован");
             throw new EntityExistsException("Пользователь существует!");
         } else {
             user = new User();
@@ -47,7 +48,7 @@ public class RegAdminService {
             user.setPassword(hashedPassword);
             user.setCreatedDttm(LocalDateTime.now());
             user.setStatus(StatusEnum.ACTIVE);
-            log.info("Пользователь " + user);
+            log.info("Пользователь " + user.toString());
 
             userRepository.save(user);
         }
@@ -71,9 +72,9 @@ public class RegAdminService {
     @Transactional(readOnly = true)
     public void checkValidation(String email) {
         User user = userRepository.findUserByEmail(email);
-        log.info("Пользователь для валидации " + user);
+        log.info("Пользователь для валидации " + user.toString());
         if (!user.isVerify()) {
-            throw new IllegalStateException("почта не провалидирована " + user);
+            throw new IllegalStateException("почта не провалидирована " + user.toString());
         }
     }
 
