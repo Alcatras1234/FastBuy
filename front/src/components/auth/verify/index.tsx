@@ -1,9 +1,7 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import {IPropsVerificationCode} from "../../../common/types/auth";
 
-const VerificationPage: React.FC<IPropsVerificationCode> = (props: IPropsVerificationCode): JSX.Element => {
-    const {setVerificationCode} = props
+const VerificationPage: React.FC = (): JSX.Element => {
     const navigate = useNavigate();
 
     const handleBack = () => {
@@ -15,36 +13,41 @@ const VerificationPage: React.FC<IPropsVerificationCode> = (props: IPropsVerific
             <div className="background-container">
                 <div className="box">
                     <Typography
-                        variant="h2"
+                        variant="h4"
                         fontFamily="Poppins"
                         textAlign="center"
                         padding={3}
                     >
-                        Верификация
+                        Подтвердите ваш email
                     </Typography>
-                        <TextField
-                            fullWidth
-                            margin="normal"
-                            label="Введите код подтверждения"
-                            variant="standard"
-                            placeholder="Код подтверждения"
-                            onChange={(e) => setVerificationCode(e.target.value)}
-                            required
-                        />
-                        <Button
-                            type="submit"
-                            sx={{ fontFamily: "Poppins", marginTop: 2, width: "100%" }}
-                            variant="contained"
-                        >
-                            Подтвердить
-                        </Button>
-                        <Button
-                            sx={{ fontFamily: "Poppins", marginTop: 2, width: "100%" }}
-                            variant="outlined"
-                            onClick={handleBack}
-                        >
-                            Назад
-                        </Button>
+                    <Typography
+                        variant="body1"
+                        fontFamily="Poppins"
+                        textAlign="center"
+                        padding={2}
+                    >
+                        Мы отправили вам письмо с ссылкой для подтверждения.
+                        Пожалуйста, проверьте вашу почту и перейдите по ссылке.
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        fontFamily="Poppins"
+                        textAlign="center"
+                        padding={2}
+                        color="gray"
+                    >
+                        Если письмо не пришло, проверьте папку "Спам".
+                    </Typography>
+
+                    {/* Кнопка назад */}
+                    <Button
+                        variant="outlined"
+                        fullWidth
+                        sx={{ marginTop: 3, fontFamily: "Poppins", color: "#555" }}
+                        onClick={handleBack}
+                    >
+                        Назад
+                    </Button>
                 </div>
             </div>
         </div>

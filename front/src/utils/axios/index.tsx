@@ -16,7 +16,11 @@ export const registerUser = async (email: string, password: string, role: string
         console.log("Ответ сервера:", response.data);
         return response.data;
     } catch (error) {
-        throw new Error("Ошибка при регистрации пользователя");
+        if(error.response.status === 400){
+            throw new Error("Вы уже зарегистрированы")
+        }else {
+            throw new Error("Ошибка при регистрации пользователя");
+        }
     }
 };
 
@@ -50,3 +54,52 @@ export const registerOrganizer = async (email: string, password: string, role: s
         throw new Error("Ошибка при регистрации организатора");
     }
 };
+
+export const submitOrganizerCorpInfo = async (corpName: string, phoneNumber: string, email: string) => {
+    try {
+        const response = await instance.post('/api/organizer_service/register', { corpName, phoneNumber, email });
+        console.log("📨 Корпоративные данные отправлены:", { corpName, phoneNumber, email });
+        return response.data;
+    } catch (error) {
+        throw new Error("Ошибка при отправке корпоративных данных");
+    }
+};
+
+// Получение списка заявок организаторов
+export const fetchPendingOrganizers = async () => {
+    try {
+        const response = await instance.get('/api/admin_service/pending_organizers');
+        return response.data;
+    } catch (error) {
+        throw new Error("Ошибка загрузки заявок");
+    }
+};
+
+// Подтверждение организатора
+export const approveOrganizer = async (organizerId: string) => {
+    try {
+        await instance.post('/api/admin_service/approve_organizer', { organizerId });
+        console.log("✅ Организатор одобрен:", organizerId);
+    } catch (error) {
+        throw new Error("Ошибка подтверждения организатора");
+    }
+};
+
+// Отклонение организатора
+export const rejectOrganizer = async (organizerId: string) => {
+    try {
+        await instance.post('/api/admin_service/reject_organizer', { organizerId });
+        console.log("❌ Организатор отклонен:", organizerId);
+    } catch (error) {
+        throw new Error("Ошибка отклонения организатора");
+    }
+};
+
+export const checkEmailVerification = async (email: string) => {
+    try {
+        const response = await instance.get(`/api/auth_service/email?email=${email}`);
+        return response.data;
+    }catch (error){
+        throw new Error("Ошибка валидации");
+    }
+}
