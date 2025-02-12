@@ -7,9 +7,7 @@ import VerificationPage from "./verify";
 import OrganizerRegisterPageBaseInfo from "./registration/organizer/base_info";
 import OrganizerRegisterPageCorpInfo from "./registration/organizer/corp_info";
 import AdminLoginPage from "./login/admin";
-import { registerUser, submitOrganizerCorpInfo } from "../../utils/axios";
-import * as SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import { registerUser, submitOrganizerCorpInfo, checkEmailVerification } from "../../utils/axios";
 import "./style.scss";
 
 const AuthRootComponent: React.FC = (): JSX.Element => {
@@ -19,12 +17,9 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
     const [errorMessage, setErrorMessage] = useState("");
     const [corpName, setCorpName] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [userUUID, setUserUUID] = useState<string | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
 
     const location = useLocation();
     const navigate = useNavigate();
-    const stompClientRef = useRef<Client | null>(null);
 
     // Функция проверки email
     const isValidEmail = (email: string) => {
@@ -36,32 +31,28 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
         return password.length >= 8;
     };
 
+    useEffect(() => {
+        if (email) {
+            const interval = setInterval(async () => {
+                try {
+                    const isVerified = await checkEmailVerification(email);
+                    console.log(isVerified.response);
+
+                    if (isVerified.response.status === 200) {
+                        console.log("✅ Email подтвержден!");
+                        clearInterval(interval);
+                        navigate("/login/users");
+                    }
+                } catch (error) {
+                    console.error("Ошибка проверки email:", error);
+                }
+            }, 5000); // Проверка каждые 5 секунд
+
+            return () => clearInterval(interval);
+        }
+    }, [navigate]);
+
     // Подключение к WebSocket
-    const connect = (uuid: string) => {
-        if (stompClientRef.current) return;
-
-        const socket = new SockJS("http://45.145.4.240:8080/ws");
-        const stompClient = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-
-            onConnect: (frame) => {
-                console.log("✅ WebSocket подключен:", frame);
-                stompClient.subscribe(`/topic/message/${uuid}`, (response) => {
-                    const receivedMessage = JSON.parse(response.body);
-                    setMessage(receivedMessage);
-                });
-            },
-
-            onStompError: (frame) => {
-                console.error("❌ Ошибка STOMP:", frame);
-            },
-        });
-
-        stompClient.activate();
-        stompClientRef.current = stompClient;
-    };
-
     // Обработчик отправки формы
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,15 +66,11 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
 
                 if (location.pathname === "/user/register") {
                     const response = await registerUser(email, password, "USER");
-                    const userUUID = response.body;
-                    setUserUUID(userUUID);
-                    connect(userUUID);
+                    console.log(response.body);
                     navigate("/verify", { state: { fromUserRegister: true } });
                 } else {
                     const response = await registerUser(email, password, "ORGANIZER");
-                    const userUUID = response.body;
-                    setUserUUID(userUUID);
-                    connect(userUUID);
+                    console.log("Server response:", response);
                     navigate("/verify", { state: { fromBaseInfo: true } });
                 }
 
@@ -92,7 +79,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
 
                 try {
                     await submitOrganizerCorpInfo(corpName, phoneNumber, email);
-                    console.log("✅ Корпоративные данные успешно отправлены");
+                    console.log("Корпоративные данные успешно отправлены");
                     navigate("/organizer/pending"); // Перенаправляем организатора на страницу ожидания
                 } catch (error: any) {
                     setErrorMessage(error.message || "Ошибка отправки данных");
@@ -111,20 +98,6 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
         }
     };
 
-    // Проверяем WebSocket-сообщение
-    useEffect(() => {
-        if (message === "true") {
-            console.log("✅ Email подтверждён! Перенаправление на страницу логина...");
-            navigate("/login/users");
-        }
-    }, [message, navigate]);
-
-    // Подключаем WebSocket при наличии UUID
-    useEffect(() => {
-        if (userUUID) {
-            connect(userUUID);
-        }
-    }, [userUUID]);
 
     return (
         <div className="root">

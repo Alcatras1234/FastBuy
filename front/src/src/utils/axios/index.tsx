@@ -16,7 +16,11 @@ export const registerUser = async (email: string, password: string, role: string
         console.log("Ответ сервера:", response.data);
         return response.data;
     } catch (error) {
-        throw new Error("Ошибка при регистрации пользователя");
+        if(error.response.status === 400){
+            throw new Error("Вы уже зарегистрированы")
+        }else {
+            throw new Error("Ошибка при регистрации пользователя");
+        }
     }
 };
 
@@ -90,3 +94,12 @@ export const rejectOrganizer = async (organizerId: string) => {
         throw new Error("Ошибка отклонения организатора");
     }
 };
+
+export const checkEmailVerification = async (email: string) => {
+    try {
+        const response = await instance.get(`/api/auth_service/email?email=${email}`);
+        return response.data;
+    }catch (error){
+        throw new Error("Ошибка валидации");
+    }
+}
