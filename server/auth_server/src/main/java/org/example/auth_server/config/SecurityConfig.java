@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -19,7 +20,7 @@ import java.util.Properties;
 @Configuration
 @EnableWebSecurity
 @EnableAsync
-public class SecurityConfig implements WebMvcConfigurer {
+public class SecurityConfig implements WebMvcConfigurer  {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -45,8 +46,14 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .anyRequest().permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults());
-
+                .httpBasic(Customizer.withDefaults())
+                .headers(headers -> headers
+                        .addHeaderWriter(new ContentSecurityPolicyHeaderWriter("default-src 'self'; " +
+                                "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
+                                "https://cdn.jsdelivr.net " +  // добавляем нужные домены
+                                "https://cdnjs.cloudflare.com " +
+                                "style-src 'self' 'unsafe-inline'; " +
+                                "font-src 'self' data:;")));
         return http.build();
     }
 
@@ -59,5 +66,6 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .allowCredentials(false);
 
     }
+
 
 }
