@@ -15,6 +15,7 @@ FROM openjdk:21-jdk-slim AS server_app
 WORKDIR /app
 
 COPY --from=build /auth_service/target/*.jar /app/auth.jar
+COPY --from=build /auth_service/src/main/resources/templates /app/src/main/resources/templates
 
 EXPOSE 8080
 
