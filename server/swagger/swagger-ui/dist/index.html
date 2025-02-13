@@ -15,22 +15,5 @@
     <script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
     <script src="./swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
     <script src="./swagger-initializer.js" charset="UTF-8"> </script>
-    <script>
-      const ui = SwaggerUIBundle({
-        url: "http://45.145.4.250/v3/api-docs",  // Здесь укажи путь к своей спецификации
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIBundle.SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        layout: "BaseLayout",
-        docExpansion: "none"
-      });
-    </script>
   </body>
 </html>
-
