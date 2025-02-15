@@ -142,4 +142,5 @@ volumes:
   auth_data:
   ticket_data:
   paymant_data:
+  redis-data:
 
