@@ -9,12 +9,17 @@ import org.example.auth_server.model.User;
 import org.example.auth_server.repository.OrganizatorRepository;
 import org.example.auth_server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ConvertingCursor;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Log4j2
@@ -51,26 +56,41 @@ public class OrganizatorService {
     }
 
     @Transactional(readOnly = true)
-    public Organizator getOrganizator(ContactOrgInfoForApproveRequest info) {
+    public List<Organizator> getOrganizators(ContactOrgInfoForApproveRequest info) {
         log.info("Начал процесс GET информации организатора: " + info.getEmail());
-        Organizator organizator = null;
-        String key = "organizator:" + info.getEmail();
-        organizator = (Organizator) redisTemplate.opsForValue().get(key);
+        String redisKey = "organizator:" + info.getEmail();
+        List<Organizator> organizators = new ArrayList<>();
 
-        if (organizator == null) {
-            User user = userRepository.findUserByEmail(info.getEmail()).orElseThrow(() -> {
-                throw new EntityNotFoundException("Пользователь не найден");
-            });
+        String pattern = "organizator:" + "*";
+        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(100).build();
 
-            organizator = organizatorRepository.findOrganizatorByUser(user).orElseThrow(() -> {
-                throw new EntityNotFoundException("Организатор не найден не найден");
-            });
+        try (Cursor<String> cursor = (Cursor<String>) redisTemplate.executeWithStickyConnection(redisConnection ->
+                new ConvertingCursor<>(redisConnection.scan(options), redisTemplate.getKeySerializer()::deserialize))) {
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                Object value = redisTemplate.opsForValue().get(key);
 
+                // Выводим класс объекта для отладки
+                System.out.println("Value class: " + value.getClass());
+
+                if (value instanceof List) {
+                    List<Organizator> albumList = (List<Organizator>) value;  // Это список альбомов
+                    organizators.addAll(albumList);  // Добавляем все элементы из списка в результат
+                } else if (value instanceof Organizator) {
+                    organizators.add((Organizator) value);  // Если это одиночный объект, добавляем его в результат
+                }
+            }
         }
 
-        log.info("Закончил процесс GET информации организатора: " + info.getEmail());
-        return organizator;
+        if (!organizators.isEmpty()) {
+            return organizators;
+        }
 
+        organizators = organizatorRepository.findAll();
+
+        log.info("Закончил процесс GET информации организатора: " + info.getEmail());
+
+        return organizators;
     }
 
     @Transactional

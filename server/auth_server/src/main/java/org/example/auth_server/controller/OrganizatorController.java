@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/auth/auth_service")
 public class OrganizatorController {
@@ -26,10 +28,10 @@ public class OrganizatorController {
     }
 
     @GetMapping("/organizator/data")
-    public ResponseEntity<Organizator> getOrganizator(@RequestParam(name = "email") String email) {
+    public ResponseEntity<List<Organizator>> getOrganizator(@RequestParam(name = "email") String email) {
         ContactOrgInfoForApproveRequest info = new ContactOrgInfoForApproveRequest();
         info.setEmail(email);
-        return ResponseEntity.ok(organizatorService.getOrganizator(info));
+        return ResponseEntity.ok(organizatorService.getOrganizators(info));
     }
 
     @PatchMapping("/organizator/data/approve")
