@@ -8,19 +8,10 @@ import lombok.Data;
 @Schema(description = "Заполнение контактных данных об организаторе")
 public class ContactOrganizatorInfoRequest {
 
-    private Long userId;
+    @NotBlank(message =  "Email не может быть пустым")
+    private String email;
     @NotBlank(message = "Названии компании пользователя не может быть пустым")
     private String companyName;
-    @NotBlank(message = "Регистрационный номер пользователя не может быть пустым")
-    private String registrationNumber;
-    @NotBlank(message = "TaxId пользователя не может быть пустым")
-    private String taxId;
-    @NotBlank(message = "Легальный адресс пользователя не может быть пустым")
-    private String legalAdress;
-    @NotBlank(message = "PostalCode пользователя не может быть пустым")
-    private String postalCode;
-    @NotBlank(message = "ContactType пользователя не может быть пустым")
-    private String contactType;
-    @NotBlank(message = "id пользователя не может быть пустым")
-    private String contactValue;
+    @NotBlank(message = "Номер пользователя не может быть пустым")
+    private String contactNumber;
 }

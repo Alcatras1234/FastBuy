@@ -1,7 +1,9 @@
 package org.example.auth_server.controller;
 
 import jakarta.validation.Valid;
+import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
+import org.example.auth_server.model.Organizator;
 import org.example.auth_server.service.OrganizatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +19,22 @@ public class OrganizatorController {
         this.organizatorService = organizatorService;
     }
 
-    @PutMapping("/update_org_data")
-    public ResponseEntity<String> updateOrganizatorData(@RequestBody @Valid ContactOrganizatorInfoRequest contactOrganizatorInfoRequest) {
-        organizatorService.updateLegalInfo(contactOrganizatorInfoRequest);
-        return ResponseEntity.ok("Данные обновленны");
+    @PostMapping("/organizator")
+    public ResponseEntity<String> safeOrganizator(@RequestBody @Valid ContactOrganizatorInfoRequest contactOrganizatorInfoRequest) {
+        organizatorService.safeApproveInfo(contactOrganizatorInfoRequest);
+        return ResponseEntity.ok("Данные организатора отправленны");
     }
 
-    @PostMapping("/update_bank_info")
-    public ResponseEntity<String> updateOrganizatorBankInfo(@RequestBody @Valid ContactOrganizatorInfoRequest contactOrganizatorInfoRequest) {
-        organizatorService.updateLegalInfo(contactOrganizatorInfoRequest);
-        return ResponseEntity.ok("Данные обновленны");
+    @GetMapping("/organizator/data")
+    public ResponseEntity<Organizator> getOrganizator(@RequestParam(name = "email") String email) {
+        ContactOrgInfoForApproveRequest info = new ContactOrgInfoForApproveRequest();
+        info.setEmail(email);
+        return ResponseEntity.ok(organizatorService.getOrganizator(info));
+    }
+
+    @PatchMapping("/organizator/data/approve")
+    public ResponseEntity<String> approveOrganizator(@RequestBody @Valid ContactOrgInfoForApproveRequest contactOrganizatorInfoRequest) {
+        organizatorService.changeApproveState(contactOrganizatorInfoRequest);
+        return ResponseEntity.ok("Организатор одобрен");
     }
 }

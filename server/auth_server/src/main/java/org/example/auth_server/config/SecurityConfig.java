@@ -47,13 +47,7 @@ public class SecurityConfig implements WebMvcConfigurer  {
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults());
-//                .headers(headers -> headers
-//                        .addHeaderWriter(new ContentSecurityPolicyHeaderWriter("default-src 'self'; " +
-//                                "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
-//                                "https://cdn.jsdelivr.net " +  // добавляем нужные домены
-//                                "https://cdnjs.cloudflare.com " +
-//                                "style-src 'self' 'unsafe-inline'; " +
-//                                "font-src 'self' data:;")));
+
         return http.build();
     }
 

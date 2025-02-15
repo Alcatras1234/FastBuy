@@ -35,7 +35,7 @@ public class RegAdminService {
     public void registrateUser(RegRequest regRequest) {
         String toAddress = regRequest.getEmail();
         String hashedPassword = hasherPassword(regRequest.getPassword());
-        User user = userRepository.findUserByEmail(regRequest.getEmail());
+        User user = userRepository.findUserByEmail(regRequest.getEmail()).get();
         if (user != null) {
             log.error("Пользователь уже зарегестрирован");
             throw new EntityExistsException("Пользователь существует!");
@@ -63,7 +63,7 @@ public class RegAdminService {
         }
         Claims claims = JWTUtils.extractClaim(token);
         String email = claims.getSubject();
-        User user = userRepository.findUserByEmail(email);
+        User user = userRepository.findUserByEmail(email).get();
         user.setVerify(true);
         userRepository.save(user);
         log.info("Статус пользователя изменен на " + user.isVerify());
@@ -71,7 +71,7 @@ public class RegAdminService {
 
     @Transactional(readOnly = true)
     public void checkValidation(String email) {
-        User user = userRepository.findUserByEmail(email);
+        User user = userRepository.findUserByEmail(email).get();
         log.info("Пользователь для валидации " + user.toString());
         if (!user.isVerify()) {
             throw new IllegalStateException("почта не провалидирована " + user.toString());

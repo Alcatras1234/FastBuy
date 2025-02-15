@@ -43,7 +43,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     protected User getUser(String email) {
-        User user = userRepository.findUserByEmail(email);
+        User user = userRepository.findUserByEmail(email).get();
         if (user == null) {
             throw new EntityNotFoundException("Пользователь не существует");
         }
