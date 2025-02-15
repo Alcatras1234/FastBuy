@@ -58,8 +58,11 @@ public class OrganizatorService {
         organizator = (Organizator) redisTemplate.opsForValue().get(key);
 
         if (organizator == null) {
+            User user = userRepository.findUserByEmail(info.getEmail()).orElseThrow(() -> {
+                throw new EntityNotFoundException("Пользователь не найден");
+            });
 
-            organizator = organizatorRepository.findOrganizatorByEmail(info.getEmail()).orElseThrow(() -> {
+            organizator = organizatorRepository.findOrganizatorByUser(user).orElseThrow(() -> {
                 throw new EntityNotFoundException("Организатор не найден не найден");
             });
 
@@ -79,7 +82,11 @@ public class OrganizatorService {
 
         if (organizator == null) {
 
-            organizator = organizatorRepository.findOrganizatorByEmail(info.getEmail()).orElseThrow(() -> {
+            User user = userRepository.findUserByEmail(info.getEmail()).orElseThrow(() -> {
+                throw new EntityNotFoundException("Пользователь не найден");
+            });
+
+            organizator = organizatorRepository.findOrganizatorByUser(user).orElseThrow(() -> {
                 throw new EntityNotFoundException("Организатор не найден не найден");
             });
 
