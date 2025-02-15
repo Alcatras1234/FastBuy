@@ -29,7 +29,7 @@ CREATE TABLE organizer_legal_info (
     contact_number VARCHAR(50),
     approved BOOLEAN,
     created_dttm TIMESTAMP DEFAULT NOW(),
-    updated_dttm TIMESTAMP DEFAULT NOW(),
+    updated_dttm TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE organizer_bank_details (
