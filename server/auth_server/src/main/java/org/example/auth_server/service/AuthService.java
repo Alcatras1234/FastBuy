@@ -3,7 +3,9 @@ package org.example.auth_server.service;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.example.auth_server.dto.AuthRequest;
+import org.example.auth_server.model.Admin;
 import org.example.auth_server.model.User;
+import org.example.auth_server.repository.AdminRepository;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +20,26 @@ import java.util.Map;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordencoder;
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordencoder) {
+    public AuthService(UserRepository userRepository, AdminRepository adminRepository, PasswordEncoder passwordencoder) {
         this.userRepository = userRepository;
+        this.adminRepository = adminRepository;
         this.passwordencoder = passwordencoder;
     }
 
+    @Transactional(readOnly = true)
+    public void authAdmin(String login, String password) {
+        Admin admin = adminRepository.findAdminByLogin(login).orElseThrow(() -> {
+            throw new EntityNotFoundException("Админ не найден");
+        });
+
+        if (admin.getPassword() != password) {
+            throw new IllegalArgumentException("Пароли не совпадают");
+        }
+    }
     @Transactional
     public Map<String, String> authUser(AuthRequest authRequest) {
         User user = getUser(authRequest.getEmail());

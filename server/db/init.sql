@@ -1,4 +1,10 @@
+CREATE TABLE admin (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(100) UNIQUE,
+    password VARCHAR(100) UNIQUE
+);
 
+INSERT INTO admin (login, password) VALUES ("root", "admin");
 
 
 CREATE TABLE users (
