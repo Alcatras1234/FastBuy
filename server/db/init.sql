@@ -24,7 +24,7 @@ CREATE TABLE users (
 
 CREATE TABLE organizer_legal_info (
     id SERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES users(id),
+    user_id INTEGER REFERENCES users(id),
     company_name VARCHAR(100),
     contact_number VARCHAR(50),
     approved BOOLEAN,
