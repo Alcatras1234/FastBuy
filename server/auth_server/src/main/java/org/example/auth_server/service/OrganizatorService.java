@@ -56,9 +56,7 @@ public class OrganizatorService {
     }
 
     @Transactional(readOnly = true)
-    public List<Organizator> getOrganizators(ContactOrgInfoForApproveRequest info) {
-        log.info("Начал процесс GET информации организатора: " + info.getEmail());
-        String redisKey = "organizator:" + info.getEmail();
+    public List<Organizator> getOrganizators() {
         List<Organizator> organizators = new ArrayList<>();
 
         String pattern = "organizator:" + "*";
@@ -88,7 +86,7 @@ public class OrganizatorService {
 
         organizators = organizatorRepository.findAll();
 
-        log.info("Закончил процесс GET информации организатора: " + info.getEmail());
+        log.info("Закончил процесс GET информации организатора: ");
 
         return organizators;
     }

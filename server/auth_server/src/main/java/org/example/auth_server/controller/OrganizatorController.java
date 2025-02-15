@@ -28,10 +28,8 @@ public class OrganizatorController {
     }
 
     @GetMapping("/organizator/data")
-    public ResponseEntity<List<Organizator>> getOrganizator(@RequestParam(name = "email") String email) {
-        ContactOrgInfoForApproveRequest info = new ContactOrgInfoForApproveRequest();
-        info.setEmail(email);
-        return ResponseEntity.ok(organizatorService.getOrganizators(info));
+    public ResponseEntity<List<Organizator>> getOrganizator() {
+        return ResponseEntity.ok(organizatorService.getOrganizators());
     }
 
     @PatchMapping("/organizator/data/approve")
