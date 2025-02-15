@@ -4,7 +4,7 @@ CREATE TABLE admin (
     password VARCHAR(100) UNIQUE
 );
 
-INSERT INTO admin (login, password) VALUES ("root", "admin");
+INSERT INTO admin (login, password) VALUES ('root', 'admin');
 
 
 CREATE TABLE users (
