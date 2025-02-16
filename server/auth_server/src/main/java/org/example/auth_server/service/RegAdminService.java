@@ -24,6 +24,7 @@ public class RegAdminService {
     private final UserRepository userRepository;
 
     private final EmailService emailService;
+
     @Autowired
     public RegAdminService(PasswordEncoder passwordEncoder, UserRepository userRepository, EmailService emailService) {
         this.passwordEncoder = passwordEncoder;
@@ -35,53 +36,56 @@ public class RegAdminService {
     public void registrateUser(RegRequest regRequest) {
         String toAddress = regRequest.getEmail();
         String hashedPassword = hasherPassword(regRequest.getPassword());
-        User user = userRepository.findUserByEmail(regRequest.getEmail()).get();
-        if (user != null) {
-            log.error("Пользователь уже зарегестрирован");
-            throw new EntityExistsException("Пользователь существует!");
-        } else {
-            user = new User();
-            emailService.sendEmailForVerify(toAddress);
+        userRepository.findUserByEmail(regRequest.getEmail()).ifPresent(
+                user -> {
+                    log.error("Пользователь уже зарегестрирован");
+                    throw new EntityExistsException("Пользователь существует!");
+                }
+        );
 
-            user.setEmail(regRequest.getEmail());
-            user.setRole(RoleEnum.valueOf(regRequest.getRole()));
-            user.setPassword(hashedPassword);
-            user.setCreatedDttm(LocalDateTime.now());
-            user.setStatus(StatusEnum.ACTIVE);
-            log.info("Пользователь " + user.toString());
 
-            userRepository.save(user);
-        }
-    }
+        User user = new User();
+        emailService.sendEmailForVerify(toAddress);
 
-    @Transactional
-    public void validateEmail(String token) {
-        log.info("Старт валидации имейла");
-        if (!JWTUtils.validateToken(token)) {
-            log.error("Токен не валиден!");
-            throw new JwtException("Токен не валиден");
-        }
-        Claims claims = JWTUtils.extractClaim(token);
-        String email = claims.getSubject();
-        User user = userRepository.findUserByEmail(email).get();
-        user.setVerify(true);
+        user.setEmail(regRequest.getEmail());
+        user.setRole(RoleEnum.valueOf(regRequest.getRole()));
+        user.setPassword(hashedPassword);
+        user.setCreatedDttm(LocalDateTime.now());
+        user.setStatus(StatusEnum.ACTIVE);
+        log.info("Пользователь " + user);
+
         userRepository.save(user);
-        log.info("Статус пользователя изменен на " + user.isVerify());
-    }
-
-    @Transactional(readOnly = true)
-    public void checkValidation(String email) {
-        User user = userRepository.findUserByEmail(email).get();
-        log.info("Пользователь для валидации " + user.toString());
-        if (!user.isVerify()) {
-            throw new IllegalStateException("почта не провалидирована " + user.toString());
-        }
     }
 
 
-    private String hasherPassword(String password) {
-        return passwordEncoder.encode(password);
+@Transactional
+public void validateEmail(String token) {
+    log.info("Старт валидации имейла");
+    if (!JWTUtils.validateToken(token)) {
+        log.error("Токен не валиден!");
+        throw new JwtException("Токен не валиден");
     }
+    Claims claims = JWTUtils.extractClaim(token);
+    String email = claims.getSubject();
+    User user = userRepository.findUserByEmail(email).get();
+    user.setVerify(true);
+    userRepository.save(user);
+    log.info("Статус пользователя изменен на " + user.isVerify());
+}
+
+@Transactional(readOnly = true)
+public void checkValidation(String email) {
+    User user = userRepository.findUserByEmail(email).get();
+    log.info("Пользователь для валидации " + user.toString());
+    if (!user.isVerify()) {
+        throw new IllegalStateException("почта не провалидирована " + user.toString());
+    }
+}
+
+
+private String hasherPassword(String password) {
+    return passwordEncoder.encode(password);
+}
 
 
 }

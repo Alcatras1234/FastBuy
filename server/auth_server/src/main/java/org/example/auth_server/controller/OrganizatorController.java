@@ -3,6 +3,7 @@ package org.example.auth_server.controller;
 import jakarta.validation.Valid;
 import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.UnprovenOrganizationRequest;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.service.OrganizatorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +29,20 @@ public class OrganizatorController {
     }
 
     @GetMapping("/organizator/data")
-    public ResponseEntity<List<Organizator>> getOrganizator() {
-        return ResponseEntity.ok(organizatorService.getOrganizators());
+    public ResponseEntity<List<Organizator>> getOrganizator(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                            @RequestParam(name = "count", defaultValue = "10") Integer count) {
+        return ResponseEntity.ok(organizatorService.getOrganizators(page, count));
     }
 
     @PatchMapping("/organizator/data/approve")
     public ResponseEntity<String> approveOrganizator(@RequestBody @Valid ContactOrgInfoForApproveRequest contactOrganizatorInfoRequest) {
         organizatorService.changeApproveState(contactOrganizatorInfoRequest);
         return ResponseEntity.ok("Организатор одобрен");
+    }
+
+    @PatchMapping("/organizator/data/unapproved")
+    public ResponseEntity<String> unapprovedOrganization(@RequestBody @Valid UnprovenOrganizationRequest info) {
+        organizatorService.getUnpproved(info);
+        return ResponseEntity.ok("Организатор не одобрен");
     }
 }

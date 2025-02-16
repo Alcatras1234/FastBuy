@@ -2,6 +2,7 @@ version: "3.9"
 
 networks:
   dev:
+    driver: bridge
 services:
   nginx:
     image: nginx:stable-alpine
@@ -10,7 +11,7 @@ services:
     volumes:
       - './nginx.conf:/etc/nginx/nginx.conf'
     depends_on:
-      - auth
+      - auth_db
     networks:
       - dev
     
@@ -108,14 +109,16 @@ services:
     networks:
        - dev
   redis:
-    image: redis:latest
+    image: redis:7-alpine
     container_name: redis-container
     ports:
       - "6379:6379" # Проброс порта
     volumes:
       - redis-data:/data # Для сохранения данных
-    command: [ "redis-server", "--save", "60", "1", "--loglevel", "warning" ]
+    command: [ "redis-server", "--save", "60", "1", "--loglevel", "debug" ]
     restart: unless-stopped
+    networks:
+      - dev
   # broker:
   #   image: apache/kafka:latest
   #   container_name: broker

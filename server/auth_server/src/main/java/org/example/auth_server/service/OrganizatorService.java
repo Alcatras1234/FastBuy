@@ -1,14 +1,19 @@
 package org.example.auth_server.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.UnprovenOrganizationRequest;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.model.User;
 import org.example.auth_server.repository.OrganizatorRepository;
 import org.example.auth_server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.ConvertingCursor;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,8 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Log4j2
@@ -28,13 +32,16 @@ public class OrganizatorService {
     private final OrganizatorRepository organizatorRepository;
     private final UserRepository userRepository;
 
+    private final ObjectMapper objectMapper;
+
     private final RedisTemplate redisTemplate;
 
 
     @Autowired
-    public OrganizatorService(OrganizatorRepository organizatorRepository, UserRepository userRepository, RedisTemplate redisTemplate) {
+    public OrganizatorService(OrganizatorRepository organizatorRepository, UserRepository userRepository, ObjectMapper objectMapper, RedisTemplate redisTemplate) {
         this.organizatorRepository = organizatorRepository;
         this.userRepository = userRepository;
+        this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
     }
 
@@ -56,38 +63,60 @@ public class OrganizatorService {
     }
 
     @Transactional(readOnly = true)
-    public List<Organizator> getOrganizators() {
-        List<Organizator> organizators = new ArrayList<>();
+    public List<Organizator> getOrganizators(int page, int pageSize) {
+        List<Organizator> organizators = new ArrayList<Organizator>();
 
         String pattern = "organizator:" + "*";
-        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(100).build();
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(pageSize)
+                .build();
+
+        int startIndex = page * pageSize;
 
         try (Cursor<String> cursor = (Cursor<String>) redisTemplate.executeWithStickyConnection(redisConnection ->
                 new ConvertingCursor<>(redisConnection.scan(options), redisTemplate.getKeySerializer()::deserialize))) {
+            int skipped = 0;
             while (cursor.hasNext()) {
                 String key = cursor.next();
                 Object value = redisTemplate.opsForValue().get(key);
 
-                // Выводим класс объекта для отладки
-                System.out.println("Value class: " + value.getClass());
-
-                if (value instanceof List) {
-                    List<Organizator> albumList = (List<Organizator>) value;  // Это список альбомов
-                    organizators.addAll(albumList);  // Добавляем все элементы из списка в результат
-                } else if (value instanceof Organizator) {
-                    organizators.add((Organizator) value);  // Если это одиночный объект, добавляем его в результат
+                if (skipped < startIndex) {
+                    skipped++;
+                    continue;
                 }
+
+
+                organizators.add(objectMapper.convertValue(value, Organizator.class));
+
+                if (organizators.size() >= pageSize) {
+                    break;
+                }
+
             }
         }
 
-        if (!organizators.isEmpty()) {
-            return organizators;
+        if (organizators.isEmpty()) {
+            Pageable pageable = PageRequest.of(page, pageSize);
+            Map<String, Organizator> keys = new HashMap<>();
+            Page<Organizator> orgPage = organizatorRepository.findAll(pageable);
+            organizators = orgPage.getContent();
+            if (!organizators.isEmpty()) {
+                organizators.stream()
+                        .filter(org -> !org.isApproved())
+                        .forEach(organizator -> {
+                            String key = "organizator:" + organizator.getUser().getEmail();
+                            keys.put(key, organizator);
+                        });
+
+
+                keys.entrySet().stream()
+                        .forEach(pair -> {
+                            redisTemplate.opsForValue().set(pair.getKey(), pair.getValue(), Duration.ofMinutes(10));
+                        });
+            }
         }
-
-        organizators = organizatorRepository.findAll();
-
         log.info("Закончил процесс GET информации организатора: ");
-
         return organizators;
     }
 
@@ -117,5 +146,78 @@ public class OrganizatorService {
         log.info("Закончил процесс APPROVE информации орагнизатора: " + info.getEmail());
     }
 
+
+    @Transactional(readOnly = true)
+    public List<Organizator> getApprovedOrganizators(int page, int pageSize) {
+        List<Organizator> organizators = new ArrayList<Organizator>();
+
+        String pattern = "organizator:" + "*";
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(pageSize)
+                .build();
+
+        int startIndex = page * pageSize;
+
+        try (Cursor<String> cursor = (Cursor<String>) redisTemplate.executeWithStickyConnection(redisConnection ->
+                new ConvertingCursor<>(redisConnection.scan(options), redisTemplate.getKeySerializer()::deserialize))) {
+            int skipped = 0;
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                Object value = redisTemplate.opsForValue().get(key);
+
+                if (skipped < startIndex) {
+                    skipped++;
+                    continue;
+                }
+
+
+                organizators.add(objectMapper.convertValue(value, Organizator.class));
+
+                if (organizators.size() >= pageSize) {
+                    break;
+                }
+
+            }
+        }
+
+        if (organizators.isEmpty()) {
+            Pageable pageable = PageRequest.of(page, pageSize);
+            Map<String, Organizator> keys = new HashMap<>();
+            Page<Organizator> orgPage = organizatorRepository.findAll(pageable);
+            organizators = orgPage.getContent();
+            if (!organizators.isEmpty()) {
+                organizators.stream()
+                        .filter(org -> org.isApproved())
+                        .forEach(organizator -> {
+                            String key = "organizator:" + organizator.getUser().getEmail();
+                            keys.put(key, organizator);
+                        });
+
+
+                keys.entrySet().stream()
+                        .forEach(pair -> {
+                            redisTemplate.opsForValue().set(pair.getKey(), pair.getValue(), Duration.ofMinutes(10));
+                        });
+            }
+        }
+        log.info("Закончил процесс GET информации организатора: ");
+        return organizators;
+    }
+
+    @Transactional
+    public void getUnpproved(UnprovenOrganizationRequest info) {
+        log.info("Начал процесс сохранения информации организатора: " + info.getId());
+        User user = userRepository.findUserById(Long.valueOf(info.getId()));
+        String key = "organizator:" + user.getEmail();
+
+        Organizator organizator = organizatorRepository.findOrganizatorByUser(user).get();
+
+        organizator.setApproved(false);
+        organizatorRepository.save(organizator);
+        redisTemplate.delete(key);
+        redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
+        log.info("Закончил процесс сохранения информации организатора: " + info.getId());
+    }
 
 }

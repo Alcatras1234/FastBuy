@@ -25,6 +25,9 @@ public class Organizator {
    @Column(name = "contact_number")
    private String contactNumber;
 
+   @Column(name =  "deleted")
+   private Boolean deleted = false;
+
    @Column(name = "approved")
    private boolean approved = false;
 
