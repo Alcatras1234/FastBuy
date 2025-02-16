@@ -205,10 +205,12 @@ public class OrganizatorService {
         return organizators;
     }
 
-    @Transactional
-    public void getUnpproved(UnprovenOrganizationRequest info) {
-        log.info("Начал процесс сохранения информации организатора: " + info.getId());
-        User user = userRepository.findUserById(Long.valueOf(info.getId()));
+    @Transactional // Убирает организатора из одобренных
+    public void setUnpproved(UnprovenOrganizationRequest info) {
+        log.info("Начал процесс сохранения информации организатора: " + info.getEmail());
+        User user = userRepository.findUserByEmail(info.getEmail()).orElseThrow(() -> {
+            throw new EntityNotFoundException("Пользователь не найден");
+        });
         String key = "organizator:" + user.getEmail();
 
         Organizator organizator = organizatorRepository.findOrganizatorByUser(user).get();
@@ -217,7 +219,7 @@ public class OrganizatorService {
         organizatorRepository.save(organizator);
         redisTemplate.delete(key);
         redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
-        log.info("Закончил процесс сохранения информации организатора: " + info.getId());
+        log.info("Закончил процесс сохранения информации организатора: " + info.getEmail());
     }
 
 }

@@ -28,10 +28,16 @@ public class OrganizatorController {
         return ResponseEntity.ok("Данные организатора отправленны");
     }
 
-    @GetMapping("/organizator/data")
+    @GetMapping("/organizator/data/unprroved")
     public ResponseEntity<List<Organizator>> getOrganizator(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                                             @RequestParam(name = "count", defaultValue = "10") Integer count) {
         return ResponseEntity.ok(organizatorService.getOrganizators(page, count));
+    }
+
+    @PatchMapping("/organizator/data/unpprove")
+    public ResponseEntity<String> setOrganizatorUnpproved(UnprovenOrganizationRequest info) {
+        organizatorService.setUnpproved(info);
+        return ResponseEntity.ok("Статус пользователя " + info.getEmail() + " изменен на 'Не одобрен'");
     }
 
     @PatchMapping("/organizator/data/approve")
@@ -40,9 +46,9 @@ public class OrganizatorController {
         return ResponseEntity.ok("Организатор одобрен");
     }
 
-    @PatchMapping("/organizator/data/unapproved")
-    public ResponseEntity<String> unapprovedOrganization(@RequestBody @Valid UnprovenOrganizationRequest info) {
-        organizatorService.getUnpproved(info);
-        return ResponseEntity.ok("Организатор не одобрен");
+    @GetMapping("/organizator/data/approved")
+    public ResponseEntity<List<Organizator>> unapprovedOrganization(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                                    @RequestParam(name = "count", defaultValue = "10") Integer count) {
+        return ResponseEntity.ok(organizatorService.getApprovedOrganizators(page, count));
     }
 }

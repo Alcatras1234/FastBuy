@@ -9,5 +9,5 @@ import lombok.Data;
 public class UnprovenOrganizationRequest {
     @Schema(description = "id", example = "0")
     @NotBlank(message = "can't be empty")
-    private String id;
+    private String email;
 }
