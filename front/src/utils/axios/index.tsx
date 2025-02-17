@@ -103,3 +103,67 @@ export const checkEmailVerification = async (email: string) => {
         throw new Error("Ошибка валидации");
     }
 }
+
+
+
+
+// отправить данные о созданом матче
+export const createMatch = async (matchData) => {
+    try {
+        const response = await instance.post("/api/match_service/create", matchData);
+        return response.data;
+    } catch (error) {
+        throw new Error("Ошибка при добавлении матча");
+    }
+};
+
+// запросить данные о матчах
+export const fetchOrganizerMatches = async () => {
+    try {
+        const response = await instance.get("/api/match_service/organizer_matches");
+        return response.data;
+    } catch (error) {
+        throw new Error("Ошибка загрузки матчей");
+    }
+};
+
+// обновить данные о матче
+export const updateMatch = async (matchId: string, updatedData: any) => {
+    try {
+        const response = await instance.put(`/api/match_service/matches/${matchId}`, updatedData);
+        return response.data;
+    } catch (error) {
+        throw new Error("Ошибка при обновлении матча");
+    }
+};
+
+// удалить матч
+export const deleteMatch = async (matchId: string) => {
+    try {
+        await instance.delete(`/api/match_service/matches/${matchId}`);
+        console.log(`Матч ${matchId} успешно удален`);
+    } catch (error) {
+        throw new Error("Ошибка при удалении матча");
+    }
+};
+
+
+// получить профиль организатора
+export const fetchOrganizerProfile = async () => {
+    try {
+        const response = await instance.get("/api/organizer_service/profile");
+        return response.data;  
+    } catch (error) {
+        throw new Error("Ошибка при загрузке профиля организатора");
+    }
+};
+
+// обновить профиль организатора
+export const updateOrganizerProfile = async (updatedData) => {
+    try {
+        const response = await instance.put("/api/organizer_service/profile", updatedData);
+        return response.data;
+    } catch (error) {
+        throw new Error("Ошибка при обновлении данных");
+    }
+};
