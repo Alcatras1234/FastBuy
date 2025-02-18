@@ -52,6 +52,7 @@ CREATE TABLE matches (
     stadium_name VARCHAR(255),
     -- stadium_id INTEGER REFERENCES stadiums(id) NOT NULL,
     tickets_cnt INTEGER NOT NULL,
+    ticket_price INTEGER NOT NULL,
     info TEXT,
     team_home_name VARCHAR(255) NOT NULL,
     team_away_name VARCHAR(255) NOT NULL,
