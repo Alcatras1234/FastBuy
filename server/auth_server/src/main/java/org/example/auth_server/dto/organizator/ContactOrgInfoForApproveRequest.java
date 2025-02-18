@@ -1,4 +1,4 @@
-package org.example.auth_server.dto;
+package org.example.auth_server.dto.organizator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

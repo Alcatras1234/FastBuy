@@ -1,10 +1,9 @@
 package org.example.auth_server.service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityExistsException;
 import lombok.extern.log4j.Log4j2;
-import org.example.auth_server.dto.RegRequest;
+import org.example.auth_server.dto.reg_auth.RegRequest;
 import org.example.auth_server.enums.RoleEnum;
 import org.example.auth_server.enums.StatusEnum;
 import org.example.auth_server.exeptions.ExpiredJWTException;

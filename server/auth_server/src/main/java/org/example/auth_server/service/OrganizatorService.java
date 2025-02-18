@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
-import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
-import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
-import org.example.auth_server.dto.OrganizatorUpdateDataRequest;
-import org.example.auth_server.dto.UnprovenOrganizationRequest;
+import org.example.auth_server.dto.AddMatchRequest;
+import org.example.auth_server.dto.organizator.ContactOrgInfoForApproveRequest;
+import org.example.auth_server.dto.organizator.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.organizator.OrganizatorUpdateDataRequest;
+import org.example.auth_server.dto.organizator.UnprovenOrganizationRequest;
+import org.example.auth_server.model.Match;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.model.User;
+import org.example.auth_server.repository.MatchRepository;
 import org.example.auth_server.repository.OrganizatorRepository;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
@@ -34,6 +37,7 @@ public class OrganizatorService {
 
     private final OrganizatorRepository organizatorRepository;
     private final UserRepository userRepository;
+    private final MatchRepository matchRepository;
 
     private final ObjectMapper objectMapper;
 
@@ -41,9 +45,10 @@ public class OrganizatorService {
 
 
     @Autowired
-    public OrganizatorService(OrganizatorRepository organizatorRepository, UserRepository userRepository, ObjectMapper objectMapper, RedisTemplate redisTemplate) {
+    public OrganizatorService(OrganizatorRepository organizatorRepository, UserRepository userRepository, MatchRepository matchRepository, ObjectMapper objectMapper, RedisTemplate redisTemplate) {
         this.organizatorRepository = organizatorRepository;
         this.userRepository = userRepository;
+        this.matchRepository = matchRepository;
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
     }
@@ -275,6 +280,33 @@ public class OrganizatorService {
 
         redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
         return organizator;
+    }
+
+    @Transactional
+    public Match addMatch(AddMatchRequest info) {
+        String token = info.getToken();
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+        User user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+            throw new EntityNotFoundException("пользователь не найден");
+        });
+
+        Match match = new Match();
+
+        String key = "match:" + user.getEmail() + ":" + UUID.randomUUID();
+        match.setTeamHomeName(info.getTeamA());
+        match.setTeamAwayName(info.getTeamB());
+        match.setScheduleDate(info.getDate());
+        match.setScheduleTimeLocal(info.getTime());
+        match.setStadiumName(info.getStadium());
+        match.setTicketsCount(info.getTickets());
+        match.setTicketsPrice(info.getTicketPrice());
+        match.setOrganizer(user);
+        redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
+        matchRepository.save(match);
+        return match;
     }
 
 }

@@ -1,7 +1,7 @@
 package org.example.auth_server.controller;
 
 import jakarta.validation.Valid;
-import org.example.auth_server.dto.AuthRequest;
+import org.example.auth_server.dto.reg_auth.AuthRequest;
 import org.example.auth_server.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

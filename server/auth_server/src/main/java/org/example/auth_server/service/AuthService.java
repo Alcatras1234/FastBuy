@@ -2,7 +2,7 @@ package org.example.auth_server.service;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import org.example.auth_server.dto.AuthRequest;
+import org.example.auth_server.dto.reg_auth.AuthRequest;
 import org.example.auth_server.model.Admin;
 import org.example.auth_server.model.User;
 import org.example.auth_server.repository.AdminRepository;

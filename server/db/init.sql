@@ -44,4 +44,23 @@ CREATE TABLE organizer_bank_details (
     updated_dttm TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE matches (
+    id SERIAL PRIMARY KEY,
+    league VARCHAR(100),
+    schedule_dt VARCHAR(100) NOT NULL,
+    schedule_time_lcl VARCHAR(100) NOT NULL,
+    stadium_name VARCHAR(255),
+    -- stadium_id INTEGER REFERENCES stadiums(id) NOT NULL,
+    tickets_cnt INTEGER NOT NULL,
+    info TEXT,
+    team_home_name VARCHAR(255) NOT NULL,
+    team_away_name VARCHAR(255) NOT NULL,
+    -- team_home_id INTEGER REFERENCES teams(id) NOT NULL,
+    -- team_away_id INTEGER REFERENCES teams(id) NOT NULL,
+    photo_url VARCHAR(255),
+    organizer_id INTEGER NOT NULL, -- REFERENCES users(id)
+    status VARCHAR(50) CHECK (status IN ('scheduled', 'ongoing', 'completed', 'cancelled')) NOT NULL,
+    created_dttm TIMESTAMP DEFAULT NOW(),
+    updated_dttm TIMESTAMP DEFAULT NOW()
+);
 

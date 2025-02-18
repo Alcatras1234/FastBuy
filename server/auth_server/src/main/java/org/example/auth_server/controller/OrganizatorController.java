@@ -1,10 +1,12 @@
 package org.example.auth_server.controller;
 
 import jakarta.validation.Valid;
-import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
-import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
-import org.example.auth_server.dto.OrganizatorUpdateDataRequest;
-import org.example.auth_server.dto.UnprovenOrganizationRequest;
+import org.example.auth_server.dto.AddMatchRequest;
+import org.example.auth_server.dto.organizator.ContactOrgInfoForApproveRequest;
+import org.example.auth_server.dto.organizator.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.organizator.OrganizatorUpdateDataRequest;
+import org.example.auth_server.dto.organizator.UnprovenOrganizationRequest;
+import org.example.auth_server.model.Match;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.service.OrganizatorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,11 @@ public class OrganizatorController {
     @PutMapping("/profile/data")
     public ResponseEntity<Organizator> updateProfile(@RequestBody @Valid OrganizatorUpdateDataRequest info) {
         return ResponseEntity.ok(organizatorService.updateProfile(info));
+    }
+
+    @PostMapping("/match")
+    public ResponseEntity<Match> addMatch(@RequestBody @Valid AddMatchRequest info) {
+        return ResponseEntity.ok(organizatorService.addMatch(info));
     }
 
 }
