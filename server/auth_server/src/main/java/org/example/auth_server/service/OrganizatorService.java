@@ -10,6 +10,7 @@ import org.example.auth_server.model.Organizator;
 import org.example.auth_server.model.User;
 import org.example.auth_server.repository.OrganizatorRepository;
 import org.example.auth_server.repository.UserRepository;
+import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -220,6 +221,30 @@ public class OrganizatorService {
         redisTemplate.delete(key);
         redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
         log.info("Закончил процесс сохранения информации организатора: " + info.getEmail());
+    }
+
+    @Transactional(readOnly = true)
+    public Organizator getProfile(String token) {
+        if (!JWTUtils.validateToken(token)) {
+            throw new RuntimeException("Токен не валиден");
+        }
+
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+        User user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+            throw new EntityNotFoundException("пользователь не найден");
+        });
+
+        String key = "organizator:" + user.getEmail();
+        Organizator organizator = objectMapper.convertValue( redisTemplate.opsForValue().get(key), Organizator.class);
+        if (organizator == null) {
+            organizator = organizatorRepository.findOrganizatorByUser(user).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+
+            redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
+
+        }
+        return organizator;
     }
 
 }

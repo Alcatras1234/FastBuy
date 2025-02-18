@@ -28,7 +28,7 @@ CREATE TABLE organizer_legal_info (
     company_name VARCHAR(100),
     contact_number VARCHAR(50),
     approved BOOLEAN,
-    deleted BOOLEAN,
+    bank_account VARCHAR(50),
     created_dttm TIMESTAMP DEFAULT NOW(),
     updated_dttm TIMESTAMP DEFAULT NOW()
 );

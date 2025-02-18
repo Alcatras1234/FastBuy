@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth/auth_service")
+@RequestMapping("/api/organizer_service")
 public class OrganizatorController {
     private final OrganizatorService organizatorService;
 
@@ -50,5 +50,10 @@ public class OrganizatorController {
     public ResponseEntity<List<Organizator>> unapprovedOrganization(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                                                     @RequestParam(name = "count", defaultValue = "10") Integer count) {
         return ResponseEntity.ok(organizatorService.getApprovedOrganizators(page, count));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<Organizator> getProfile(@RequestParam(name = "token")String token ) {
+        return ResponseEntity.ok(organizatorService.getProfile(token));
     }
 }
