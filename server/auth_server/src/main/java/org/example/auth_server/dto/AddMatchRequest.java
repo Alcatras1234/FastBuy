@@ -17,8 +17,8 @@ public class AddMatchRequest {
     private String time;
     @NotBlank
     private String stadium;
-    @NotBlank
+
     private Integer tickets;
-    @NotBlank
+  
     private Integer ticketPrice;
 }
