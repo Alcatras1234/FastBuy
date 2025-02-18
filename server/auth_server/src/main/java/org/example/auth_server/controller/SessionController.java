@@ -61,4 +61,6 @@ public class SessionController {
         String userData = sessionService.getRoleFromAccessToken(token);
         return ResponseEntity.ok(userData);
     }
+
+
 }

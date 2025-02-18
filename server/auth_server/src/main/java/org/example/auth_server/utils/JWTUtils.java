@@ -28,7 +28,7 @@ public class JWTUtils {
     }
 
     public static String generateAccessToken(User user) {
-        long expirationTimeMillis = 15 * 60 * 1000; // 15 минут
+        long expirationTimeMillis = 60 * 60 * 1000; // 15 минут
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + expirationTimeMillis);
         return Jwts.builder()
