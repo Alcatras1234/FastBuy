@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.RegRequest;
+import org.example.auth_server.exeptions.ExpiredJWTException;
 import org.example.auth_server.service.EmailService;
 import org.example.auth_server.service.RegAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
     @GetMapping("/valid-email")
-    public ResponseEntity<Resource> validateEmail(@RequestParam(name = "token") String token) {
+    public ResponseEntity<Resource> validateEmail(@RequestParam(name = "token") String token) throws ExpiredJWTException {
         regAdminService.validateEmail(token);
         Path path = Paths.get("src/main/resources/templates/confirmation.html");
         org.springframework.core.io.Resource resource = new FileSystemResource(path);

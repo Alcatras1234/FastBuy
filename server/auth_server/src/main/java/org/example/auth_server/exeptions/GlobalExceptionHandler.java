@@ -60,7 +60,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<Resource> handleJwtException(JwtException ex) {
+    public ResponseEntity<String> handleJwtException(JwtException ex) {
+        return ResponseEntity.status(401).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ExpiredJWTException.class)
+    public ResponseEntity<Resource> handleExpiredJWTException(ExpiredJWTException ex) {
         log.info("Токен не действителен");
         Path path = Paths.get("src/main/resources/templates/not_confirmed.html");
         Resource resource = new FileSystemResource(path);

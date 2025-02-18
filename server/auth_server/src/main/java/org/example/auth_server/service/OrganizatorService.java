@@ -1,10 +1,12 @@
 package org.example.auth_server.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.OrganizatorUpdateDataRequest;
 import org.example.auth_server.dto.UnprovenOrganizationRequest;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.model.User;
@@ -226,7 +228,7 @@ public class OrganizatorService {
     @Transactional(readOnly = true)
     public Organizator getProfile(String token) {
         if (!JWTUtils.validateToken(token)) {
-            throw new RuntimeException("Токен не валиден");
+            throw new JwtException("Токен не валиден");
         }
 
         String email = JWTUtils.extractClaim(token).get("email", String.class);
@@ -244,6 +246,34 @@ public class OrganizatorService {
             redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
 
         }
+        return organizator;
+    }
+
+    @Transactional
+    public Organizator updateProfile(OrganizatorUpdateDataRequest info) {
+        String token = info.getToken();
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+        User user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+            throw new EntityNotFoundException("пользователь не найден");
+        });
+        String key = "organizator:" + user.getEmail();
+        Organizator organizator = objectMapper.convertValue( redisTemplate.opsForValue().get(key), Organizator.class);
+
+        if (organizator == null) {
+            organizator = organizatorRepository.findOrganizatorByUser(user).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
+        organizator.setContactNumber(info.getContactPhone());
+        organizator.setCompanyName(info.getCompanyName());
+        organizator.setBankAccount(info.getBankAccount());
+        organizatorRepository.save(organizator);
+
+        redisTemplate.opsForValue().set(key, organizator, Duration.ofMinutes(10));
         return organizator;
     }
 

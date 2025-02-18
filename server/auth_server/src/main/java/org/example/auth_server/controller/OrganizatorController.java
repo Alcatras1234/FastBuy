@@ -3,6 +3,7 @@ package org.example.auth_server.controller;
 import jakarta.validation.Valid;
 import org.example.auth_server.dto.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.ContactOrganizatorInfoRequest;
+import org.example.auth_server.dto.OrganizatorUpdateDataRequest;
 import org.example.auth_server.dto.UnprovenOrganizationRequest;
 import org.example.auth_server.model.Organizator;
 import org.example.auth_server.service.OrganizatorService;
@@ -56,4 +57,10 @@ public class OrganizatorController {
     public ResponseEntity<Organizator> getProfile(@RequestParam(name = "token")String token ) {
         return ResponseEntity.ok(organizatorService.getProfile(token));
     }
+
+    @PutMapping("/profile/data")
+    public ResponseEntity<Organizator> updateProfile(@RequestBody @Valid OrganizatorUpdateDataRequest info) {
+        return ResponseEntity.ok(organizatorService.updateProfile(info));
+    }
+
 }

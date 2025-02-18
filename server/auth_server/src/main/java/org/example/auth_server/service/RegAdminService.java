@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.RegRequest;
 import org.example.auth_server.enums.RoleEnum;
 import org.example.auth_server.enums.StatusEnum;
+import org.example.auth_server.exeptions.ExpiredJWTException;
 import org.example.auth_server.model.User;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
@@ -59,11 +60,11 @@ public class RegAdminService {
 
 
 @Transactional
-public void validateEmail(String token) {
+public void validateEmail(String token) throws ExpiredJWTException {
     log.info("Старт валидации имейла");
     if (!JWTUtils.validateToken(token)) {
         log.error("Токен не валиден!");
-        throw new JwtException("Токен не валиден");
+        throw new ExpiredJWTException("Токен не валиден");
     }
     Claims claims = JWTUtils.extractClaim(token);
     String email = claims.getSubject();
