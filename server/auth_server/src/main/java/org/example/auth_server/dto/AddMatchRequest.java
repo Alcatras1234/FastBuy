@@ -19,6 +19,6 @@ public class AddMatchRequest {
     private String stadium;
 
     private Integer tickets;
-  
+
     private Integer ticketPrice;
 }

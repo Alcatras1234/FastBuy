@@ -60,7 +60,7 @@ CREATE TABLE matches (
     -- team_away_id INTEGER REFERENCES teams(id) NOT NULL,
     photo_url VARCHAR(255),
     organizer_id INTEGER NOT NULL, -- REFERENCES users(id)
-    status VARCHAR(50) CHECK (status IN ('scheduled', 'ongoing', 'completed', 'cancelled')) NOT NULL,
+    status VARCHAR(50) CHECK (status IN ('scheduled', 'ongoing', 'completed', 'cancelled')),
     created_dttm TIMESTAMP DEFAULT NOW(),
     updated_dttm TIMESTAMP DEFAULT NOW()
 );
