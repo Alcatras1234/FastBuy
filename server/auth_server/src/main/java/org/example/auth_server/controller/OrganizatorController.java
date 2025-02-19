@@ -56,7 +56,7 @@ public class OrganizatorController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<Organizator> getProfile(@RequestParam(name = "token")String token ) {
+    public ResponseEntity<Organizator> getProfile(@RequestParam(name = "token") String token) {
         return ResponseEntity.ok(organizatorService.getProfile(token));
     }
 
@@ -68,6 +68,14 @@ public class OrganizatorController {
     @PostMapping("/match")
     public ResponseEntity<Match> addMatch(@RequestBody @Valid AddMatchRequest info) {
         return ResponseEntity.ok(organizatorService.addMatch(info));
+    }
+
+    @GetMapping("/match/data")
+    public ResponseEntity<List<Match>> getMatches(@RequestParam(name = "token") String token,
+                                                  @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                  @RequestParam(name = "count", defaultValue = "10") Integer count) {
+        return ResponseEntity.ok(organizatorService.getMatches(token, page, count));
+
     }
 
 }

@@ -316,4 +316,66 @@ public class OrganizatorService {
         return match;
     }
 
+    @Transactional(readOnly = true)
+    public List<Match> getMatches(String token, int page, int pageSize) {
+        List<Match> matches = new ArrayList<>();
+
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+
+
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+
+        String pattern = "match:" + email + ":*";
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(pageSize)
+                .build();
+
+        int startIndex = page * pageSize;
+
+        try (Cursor<String> cursor = (Cursor<String>) redisTemplate.executeWithStickyConnection(redisConnection ->
+                new ConvertingCursor<>(redisConnection.scan(options), redisTemplate.getKeySerializer()::deserialize))) {
+            int skipped = 0;
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                Object value = redisTemplate.opsForValue().get(key);
+
+                if (skipped < startIndex) {
+                    skipped++;
+                    continue;
+                }
+
+
+                matches.add(objectMapper.convertValue(value, Match.class));
+
+                if (matches.size() >= pageSize) {
+                    break;
+                }
+
+            }
+        }
+
+        if (matches.isEmpty()) {
+            Pageable pageable = PageRequest.of(page, pageSize);
+            Map<String, Match> keys = new HashMap<>();
+            Page<Match> orgPage = matchRepository.findAll(pageable);
+            matches = orgPage.getContent();
+            if (!matches.isEmpty()) {
+                matches.stream()
+                        .forEach(match -> {
+                            String key = "match:" + email + ":" + UUID.randomUUID();
+                            keys.put(key, match);
+                        });
+                keys.entrySet().stream()
+                        .forEach(pair -> {
+                            redisTemplate.opsForValue().set(pair.getKey(), pair.getValue(), Duration.ofMinutes(10));
+                        });
+            }
+        }
+        log.info("Закончил процесс GET информации матчи: ");
+        return matches;
+    }
+
 }
