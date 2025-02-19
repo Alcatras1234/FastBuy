@@ -3,57 +3,82 @@ import { useState, useEffect, useRef } from "react";
 import { Box } from "@mui/material";
 import UserRegisterPage from "./registration/user";
 import UsersLoginPage from "./login/users";
-import VerificationPage from "./verify";
+import VerificationPage from "./verify/verifyEmail";
 import OrganizerRegisterPageBaseInfo from "./registration/organizer/base_info";
 import OrganizerRegisterPageCorpInfo from "./registration/organizer/corp_info";
 import AdminLoginPage from "./login/admin";
-import { registerUser, submitOrganizerCorpInfo, checkEmailVerification } from "../../utils/axios";
+import PendingPage from "./verify/verifyCorpInfo";
+import { registerUser, submitOrganizerCorpInfo, checkEmailVerification, loginUser, loginAdmin } from "../../utils/axios";
 import "./style.scss";
 
 const AuthRootComponent: React.FC = (): JSX.Element => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [corpName, setCorpName] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
+    const [corpName, setCorpName] = useState<string>("");
+    const [phoneNumber, setPhoneNumber] = useState<string>("");
+    const [isCheckingEmail, setIsCheckingEmail] = useState<boolean>(false);
+    const [userRole, setUserRole] = useState<"USER" | "ORGANIZER" | null>(null);
 
+    const emailRef = useRef<string>("");
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Функция проверки email
-    const isValidEmail = (email: string) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    };
-
-    // Функция проверки пароля
-    const isValidPassword = (password: string) => {
-        return password.length >= 8;
-    };
+    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidPassword = (password: string) => password.length >= 8;
 
     useEffect(() => {
-        if (email) {
-            const interval = setInterval(async () => {
-                try {
-                    const isVerified = await checkEmailVerification(email);
-                    console.log(isVerified.response);
+        const storedEmail = localStorage.getItem("pendingEmail");
 
-                    if (isVerified.response.status === 200) {
-                        console.log("✅ Email подтвержден!");
-                        clearInterval(interval);
-                        navigate("/login/users");
-                    }
-                } catch (error) {
-                    console.error("Ошибка проверки email:", error);
-                }
-            }, 5000); // Проверка каждые 5 секунд
-
-            return () => clearInterval(interval);
+        if (storedEmail) {
+            console.log("✅ Загружаем email пользователя из localStorage...");
+            setEmail(storedEmail);
+            emailRef.current = storedEmail;
+            setIsCheckingEmail(true);
         }
-    }, [navigate]);
+    }, []);
 
-    // Подключение к WebSocket
-    // Обработчик отправки формы
+    useEffect(() => {
+        if (location.pathname !== "/verify") return;
+
+        const storedEmail = localStorage.getItem("pendingEmail");
+        const storedRole = localStorage.getItem("userRole");
+
+        if (!storedEmail || !storedRole) {
+            console.error("🚨 Нет email или роли в localStorage! Останавливаем проверку.");
+            return;
+        }
+
+        console.log("⏳ Начало проверки email...");
+
+        const interval = setInterval(async () => {
+            try {
+                console.log("🔍 Проверяем email:", storedEmail);
+                const response = await checkEmailVerification(storedEmail);
+
+                if (response?.status === 200 && response.data === "email провалидирован!") {
+                    console.log("✅ Email подтвержден! Остановка проверки.");
+
+                    clearInterval(interval);
+                    localStorage.removeItem("pendingEmail");
+                    localStorage.removeItem("userRole");
+
+                    setTimeout(() => {
+                        navigate(storedRole === "ORGANIZER" ? "/organizer/register/corpInfo" : "/login/users");
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error("⚠️ Ошибка при проверке email:", error);
+            }
+        }, 10000); // Проверка email каждые 10 секунд
+
+        return () => {
+            console.log("🛑 Очистка интервала проверки email.");
+            clearInterval(interval);
+        };
+    }, [location.pathname]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -64,40 +89,60 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                 if (!isValidPassword(password)) throw new Error("Пароль должен содержать минимум 8 символов");
                 if (password !== confirmPassword) throw new Error("Пароли не совпадают");
 
-                if (location.pathname === "/user/register") {
-                    const response = await registerUser(email, password, "USER");
-                    console.log(response.body);
-                    navigate("/verify", { state: { fromUserRegister: true } });
-                } else {
-                    const response = await registerUser(email, password, "ORGANIZER");
-                    console.log("Server response:", response);
-                    navigate("/verify", { state: { fromBaseInfo: true } });
+                const role = location.pathname === "/user/register" ? "USER" : "ORGANIZER";
+
+                console.log("📩 Отправка запроса на регистрацию:", email, password, role);
+                localStorage.setItem("pendingEmail", email);
+                localStorage.setItem("userRole", role);
+                const response = await registerUser(email, password, role);
+
+                if (response?.status !== 200) {
+                    throw new Error("Ошибка регистрации. Попробуйте снова.");
                 }
+
+                console.log("✅ Регистрация успешна! Сохранение данных в localStorage...");
+                setIsCheckingEmail(true);
+
+                console.log("🚀 Переход на страницу верификации...");
+                navigate("/verify", { state: { fromUserRegister: role === "USER", fromBaseInfo: role === "ORGANIZER" } });
 
             } else if (location.pathname === "/organizer/register/corpInfo") {
                 if (!corpName || !phoneNumber) throw new Error("Заполните все поля");
+                const storageEmail = localStorage.getItem("pendingEmail");
+                if (!storageEmail) throw new Error("Email не найден");
 
-                try {
-                    await submitOrganizerCorpInfo(corpName, phoneNumber, email);
-                    console.log("Корпоративные данные успешно отправлены");
-                    navigate("/organizer/pending"); // Перенаправляем организатора на страницу ожидания
-                } catch (error: any) {
-                    setErrorMessage(error.message || "Ошибка отправки данных");
-                }
+                console.log("📜 Отправка корпоративных данных...");
+                const response = await submitOrganizerCorpInfo(storageEmail, corpName, phoneNumber);
+                console.log("✅ Корпоративные данные успешно отправлены");
+                console.log(response);
+                navigate("/pending");
 
             } else if (location.pathname === "/login/users" || location.pathname === "/login/admin") {
                 if (!email || !password) throw new Error("Заполните все поля");
-                navigate("/user/home");
+
+                console.log("🔑 Попытка входа...");
+                if (location.pathname === "/login/admin") {
+                    const response = await loginAdmin(email, password);
+                    console.log("🎩 Администратор вошел:", response);
+                } else {
+                    const response = await loginUser(email, password);
+                    if (response?.data === "USER") {
+                        navigate("/user/home");
+                    } else if (response?.data === "ORGANIZER") {
+                        navigate("/organizer/home");
+                    } else {
+                        throw new Error("Неверные учетные данные");
+                    }
+                }
 
             } else if (location.pathname === "/verify") {
-                    if (location.state?.fromBaseInfo) navigate("/organizer/register/corpInfo");
-                    else navigate("/login/users");
+                navigate(location.state?.fromBaseInfo ? "/organizer/register/corpInfo" : "/login/users");
             }
         } catch (error: any) {
+            console.error("❌ Ошибка:", error.message);
             setErrorMessage(error.message || "Ошибка обработки данных");
         }
     };
-
 
     return (
         <div className="root">
@@ -128,10 +173,10 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                             ) : location.pathname === "/login/admin" ? (
                                 <AdminLoginPage setEmail={setEmail} setPassword={setPassword} />
                             ) : location.pathname === "/verify" ? (
-                                <VerificationPage  />
-                            ) : location.pathname === "/verify-email" ? (
-                                <h2>📩 Подтвердите email! Проверьте почту и нажмите на ссылку.</h2>
-                            ) : null}
+                                <VerificationPage />
+                            ) : location.pathname === "/pending" ? (
+                                <PendingPage/>
+                            ): null}
                         </Box>
                     </form>
                 </div>
