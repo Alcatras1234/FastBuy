@@ -148,22 +148,41 @@ export const deleteMatch = async (matchId: string) => {
 };
 
 
-// получить профиль организатора
+const hardcodedToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJka2ltLnNwYkBnbWFpbC5jb20iLCJyb2xlIjoiT1JHQU5JWkVSIiwiaWF0IjoxNzM5OTE1MTQ4LCJleHAiOjE3Mzk5MTg3NDh9.VJ5ZrOIA63u1x0OkI0leHpA-t2bPmgybxY4yyn12cXg";
 export const fetchOrganizerProfile = async () => {
     try {
-        const response = await instance.get("/api/organizer_service/profile");
-        return response.data;  
+        // ✅ Add token inside the URL as a query parameter
+        const response = await instance.get(`/api/organizer_service/profile?token=${hardcodedToken}`);
+
+        return response.data; // ✅ Return the backend response
     } catch (error) {
-        throw new Error("Ошибка при загрузке профиля организатора");
+        console.error("Ошибка при загрузке профиля организатора:", error);
+        throw new Error("Ошибка при загрузке профиля организатора.");
     }
 };
 
-// обновить профиль организатора
+
 export const updateOrganizerProfile = async (updatedData) => {
     try {
-        const response = await instance.put("/api/organizer_service/profile", updatedData);
+        // ✅ Extract only the required fields
+        const { companyName, contactPhone, bankAccount } = updatedData;
+
+        const requestData = {
+            token: hardcodedToken,
+            companyName,
+            contactPhone,
+            bankAccount,
+        };
+
+        //console.log("Отправляемые данные:", requestData); // ✅ Debugging output for request data
+
+        // ✅ Send PUT request with the filtered JSON body
+        const response = await instance.put("/api/organizer_service/profile/data", requestData);
+
+        //console.log("Ответ сервера:", response.data); // ✅ Debugging: Log backend response
         return response.data;
     } catch (error) {
-        throw new Error("Ошибка при обновлении данных");
+        console.error("Ошибка при обновлении профиля организатора:", error.response || error);
+        throw new Error("Ошибка при обновлении данных.");
     }
 };
