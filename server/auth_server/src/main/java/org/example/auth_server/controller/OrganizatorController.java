@@ -38,7 +38,7 @@ public class OrganizatorController {
     }
 
     @PatchMapping("/organizator/data/unpprove")
-    public ResponseEntity<String> setOrganizatorUnpproved(UnprovenOrganizationRequest info) {
+    public ResponseEntity<String> setOrganizatorUnpproved(@RequestBody @Valid UnprovenOrganizationRequest info) {
         organizatorService.setUnpproved(info);
         return ResponseEntity.ok("Статус пользователя " + info.getEmail() + " изменен на 'Не одобрен'");
     }

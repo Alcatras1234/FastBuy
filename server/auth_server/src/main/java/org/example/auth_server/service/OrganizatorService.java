@@ -133,7 +133,7 @@ public class OrganizatorService {
         log.info("Начал процесс APPROVE информации организатора: " + info.getEmail());
         String key = "organizator:" + info.getEmail();
         Organizator organizator = null;
-        organizator = (Organizator) redisTemplate.opsForValue().get(key);
+        organizator = objectMapper.convertValue(redisTemplate.opsForValue().get(key), Organizator.class);
 
         if (organizator == null) {
 
@@ -216,12 +216,19 @@ public class OrganizatorService {
     @Transactional // Убирает организатора из одобренных
     public void setUnpproved(UnprovenOrganizationRequest info) {
         log.info("Начал процесс сохранения информации организатора: " + info.getEmail());
-        User user = userRepository.findUserByEmail(info.getEmail()).orElseThrow(() -> {
-            throw new EntityNotFoundException("Пользователь не найден");
-        });
-        String key = "organizator:" + user.getEmail();
+        String key = "organizator:" + info.getEmail();
 
-        Organizator organizator = organizatorRepository.findOrganizatorByUser(user).get();
+        Organizator organizator = objectMapper.convertValue(redisTemplate.opsForValue().get(key), Organizator.class);
+
+        if (organizator == null) {
+
+            User user = userRepository.findUserByEmail(info.getEmail()).orElseThrow(() -> {
+                throw new EntityNotFoundException("Пользователь не найден");
+            });
+
+            organizator = organizatorRepository.findOrganizatorByUser(user).get();
+
+        }
 
         organizator.setApproved(false);
         organizatorRepository.save(organizator);
