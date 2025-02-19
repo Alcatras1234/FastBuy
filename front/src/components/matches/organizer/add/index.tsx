@@ -10,7 +10,7 @@ const AddMatchPage: React.FC = () => {
         teamB: "",
         date: "",
         time: "",
-        location: "",
+        stadium: "",
         tickets: "",
         ticketPrice: "",
     });
@@ -29,7 +29,7 @@ const AddMatchPage: React.FC = () => {
 
     //! More meaningful validations
     const validateFields = () => {
-        const { teamA, teamB, date, time, location, tickets, ticketPrice } = matchData;
+        const { teamA, teamB, date, time, stadium, tickets, ticketPrice } = matchData;
 
         if (!teamA.trim() || !teamB.trim()) return "Введите названия обеих команд.";
         if (teamA.trim().toLowerCase() === teamB.trim().toLowerCase()) return "Команды должны быть разными.";
@@ -37,7 +37,7 @@ const AddMatchPage: React.FC = () => {
         if (new Date(date) < new Date()) return "Дата матча должна быть в будущем.";
         if (!time) return "Выберите время матча.";
         if (!/^\d{2}:\d{2}$/.test(time)) return "Неверный формат времени (HH:MM).";
-        if (!location.trim()) return "Введите место проведения.";
+        if (!stadium.trim()) return "Введите место проведения.";
         if (!tickets || isNaN(Number(tickets)) || Number(tickets) <= 0) return "Количество билетов должно быть положительным числом.";
         if (!ticketPrice || isNaN(Number(ticketPrice)) || Number(ticketPrice) <= 0) return "Цена билета должна быть положительным числом.";
 
@@ -95,7 +95,7 @@ const AddMatchPage: React.FC = () => {
                         <TextField label="Время" name="time" type="time" value={matchData.time} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
                     </Grid>
                     <Grid item xs={12}>
-                        <TextField label="Место проведения" name="location" value={matchData.location} onChange={handleChange} fullWidth required />
+                        <TextField label="Место проведения" name="stadium" value={matchData.stadium} onChange={handleChange} fullWidth required />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField label="Количество доступных билетов" name="tickets" type="number" value={matchData.tickets} onChange={handleChange} fullWidth required />

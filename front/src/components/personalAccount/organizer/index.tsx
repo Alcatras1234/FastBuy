@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, TextField, Button, Grid, Paper, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Container, Typography, TextField, Button, Grid, Paper, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { fetchOrganizerProfile, updateOrganizerProfile } from "../../../utils/axios";
 
@@ -8,52 +8,41 @@ const OrganizerPersonalAccount: React.FC = () => {
     
     // Organizer profile state
     const [organizer, setOrganizer] = useState({
-        email: "",
         companyName: "",
         contactPhone: "",
         contactEmail: "",
         bankAccount: "",
     });
 
-    // Loading state
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-/*     // Fetch organizer data on mount
+    // ✅ Fetch organizer profile from backend
     useEffect(() => {
         const loadProfile = async () => {
             try {
                 const profileData = await fetchOrganizerProfile();
-                setOrganizer(profileData);
-            } catch (error) {
-                console.error(error);
+                // ✅ Map backend response to frontend state format
+                setOrganizer({
+                    companyName: profileData.companyName || "Не указано",
+                    contactPhone: profileData.contactNumber || "Не указано",
+                    contactEmail: profileData.user.email,
+                    bankAccount: profileData.bankAccount || "Не указано",
+                });
+            } catch (err) {
+                setError("Не удалось загрузить профиль");
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
         loadProfile();
-    }, []); */
-
-     // Simulated backend response (mock data)
-     useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            const mockProfileData = {
-                email: "organizer@example.com",
-                companyName: "Football Masters Ltd.",
-                contactPhone: "+1 234 567 890",
-                contactEmail: "contact@fmasters.com",
-                bankAccount: "1234 5678 9101 1121 - Bank of America",
-            };
-            setOrganizer(mockProfileData);
-            setLoading(false);
-        }, 1000); // Simulated delay (1s)
     }, []);
 
-
-    // Modal handling
+    // ✅ Edit Modal Handling
     const [openModal, setOpenModal] = useState(false);
-    const [editField, setEditField] = useState(""); // The field currently being edited
+    const [editField, setEditField] = useState("");
     const [updatedValue, setUpdatedValue] = useState("");
 
     const handleEdit = (fieldName: string, currentValue: string) => {
@@ -61,6 +50,8 @@ const OrganizerPersonalAccount: React.FC = () => {
         setUpdatedValue(currentValue);
         setOpenModal(true);
     };
+
+
 
     const handleSave = async () => {
         try {
@@ -71,42 +62,39 @@ const OrganizerPersonalAccount: React.FC = () => {
             alert("Ошибка при обновлении данных");
         }
     };
-
+    
     return (
-        <Container maxWidth="sm" style={{ marginTop: "2rem" }}>
-            <Paper elevation={3} style={{ padding: "2rem" }}>
-                <Typography variant="h4" align="center" gutterBottom>
-                    Профиль организатора
+        <Container maxWidth="sm" sx={{ mt: 4 }}>
+            <Paper elevation={3} sx={{ p: 4 }}>
+                <Typography variant="h4" align="center" sx={{ mb: 3, color: "primary.main" }}>
+                    📋 Профиль организатора
                 </Typography>
 
                 {loading ? (
-                    <Typography align="center">Загрузка...</Typography>
+                    <CircularProgress />
+                ) : error ? (
+                    <Typography color="error">{error}</Typography>
                 ) : (
                     <>
-                        <Typography variant="h6">Основная информация</Typography>
-                        <Typography variant="body1">📩 Email: {organizer.email}</Typography>
-                        <Typography variant="body1">🏢 Компания: {organizer.companyName}</Typography>
+                        <Typography>📧 Email: {organizer.contactEmail}</Typography>
+                        <Typography variant="h6" sx={{ mt: 3 }}> {organizer.companyName}</Typography>
                         <Button variant="outlined" color="primary" onClick={() => handleEdit("companyName", organizer.companyName)}>
                             Изменить компанию
                         </Button>
 
-                        <Typography variant="h6" style={{ marginTop: "1rem" }}>Контактные данные</Typography>
-                        <Typography variant="body1">📞 Телефон: {organizer.contactPhone}</Typography>
+                        <Typography>📞 Телефон: {organizer.contactPhone}</Typography>
                         <Button variant="outlined" color="primary" onClick={() => handleEdit("contactPhone", organizer.contactPhone)}>
                             Изменить телефон
                         </Button>
-                        <Typography variant="body1">📧 Email: {organizer.contactEmail}</Typography>
-                        <Button variant="outlined" color="primary" onClick={() => handleEdit("contactEmail", organizer.contactEmail)}>
-                            Изменить email
-                        </Button>
 
-                        <Typography variant="h6" style={{ marginTop: "1rem" }}>Банковские реквизиты</Typography>
-                        <Typography variant="body1">🏦 Счет: {organizer.bankAccount}</Typography>
+
+                        <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>🏦 Банковские реквизиты</Typography>
+                        <Typography>{organizer.bankAccount || "Не указано"}</Typography>
                         <Button variant="outlined" color="primary" onClick={() => handleEdit("bankAccount", organizer.bankAccount)}>
                             Изменить реквизиты
                         </Button>
 
-                        <Grid container justifyContent="flex-end" style={{ marginTop: "1rem" }}>
+                        <Grid container justifyContent="flex-end" sx={{ mt: 4 }}>
                             <Button variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
                                 Назад
                             </Button>
@@ -115,11 +103,11 @@ const OrganizerPersonalAccount: React.FC = () => {
                 )}
             </Paper>
 
-            {/* Edit Modal */}
+            {/* ✅ Edit Modal */}
             <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-                <DialogTitle>Редактировать информацию</DialogTitle>
+                <DialogTitle>✏️ Редактировать {editField}</DialogTitle>
                 <DialogContent>
-                    <TextField label={`Изменить: ${editField}`} value={updatedValue} onChange={(e) => setUpdatedValue(e.target.value)} fullWidth margin="normal" />
+                    <TextField label={`${editField}`} value={updatedValue} onChange={(e) => setUpdatedValue(e.target.value)} fullWidth margin="normal" />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenModal(false)} color="secondary">Отмена</Button>
