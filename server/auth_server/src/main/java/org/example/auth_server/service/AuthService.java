@@ -51,6 +51,7 @@ public class AuthService {
         Map<String, String> tokens = new HashMap<>();
         tokens.put("refreshToken", refreshToken);
         tokens.put("accessToken", accessToken);
+        tokens.put("role", String.valueOf(user.getRole()));
 
         return tokens;
     }
