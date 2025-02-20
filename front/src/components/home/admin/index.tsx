@@ -4,7 +4,7 @@ import {
     rejectOrganizer,
     fetchPendingOrganizers,
     approveOrganizer,
-/*    fetchRejectedOrganizers,*/
+    /*    fetchRejectedOrganizers,*/
     fetchApprovedOrganizers
 } from "../../../utils/axios";
 
@@ -18,7 +18,7 @@ interface Organizer {
 const AdminHomePage: React.FC = () => {
     const [pendingOrganizers, setPendingOrganizers] = useState<Organizer[]>([]);
     const [approvedOrganizers, setApprovedOrganizers] = useState<Organizer[]>([]);
-/*    const [rejectedOrganizers, setRejectedOrganizers] = useState<Organizer[]>([]);*/
+    /*    const [rejectedOrganizers, setRejectedOrganizers] = useState<Organizer[]>([]);*/
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [page, setPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
@@ -29,9 +29,9 @@ const AdminHomePage: React.FC = () => {
                 setIsLoading(true);
                 const responsePendingOrganizers = await fetchPendingOrganizers(page, 5);
                 const responseApprovedOrganizers = await fetchApprovedOrganizers(page, 5);
-/*                const responseRejectedOrganizers = await fetchRejectedOrganizers(page, 5);*/
+                /*                const responseRejectedOrganizers = await fetchRejectedOrganizers(page, 5);*/
                 setPendingOrganizers(responsePendingOrganizers);
-/*                setRejectedOrganizers(responseRejectedOrganizers);*/
+                /*                setRejectedOrganizers(responseRejectedOrganizers);*/
                 setApprovedOrganizers(responseApprovedOrganizers);
                 /*setTotalPages(response.data.totalPages);*/
 
@@ -49,7 +49,6 @@ const AdminHomePage: React.FC = () => {
             await approveOrganizer(organizerEmail);
             const approvedOrganizer = pendingOrganizers.find(org => org.email === organizerEmail);
             if (approvedOrganizer) {
-                setApprovedOrganizers(prev => [...prev, { ...approvedOrganizer, status: "approved" }]);
                 setPendingOrganizers(prev => prev.filter(org => org.email !== organizerEmail));
             }
         } catch (error) {
@@ -115,7 +114,7 @@ const AdminHomePage: React.FC = () => {
                             )}
                         </Box>
 
-                       {/* <Box>
+                        {/* <Box>
                             <Typography variant="h5">Отклоненные</Typography>
                             {rejectedOrganizers.length === 0 ? (
                                 <Typography>Нет отклоненных заявок</Typography>

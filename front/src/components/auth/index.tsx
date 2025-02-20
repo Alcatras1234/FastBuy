@@ -37,7 +37,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
             emailRef.current = storedEmail;
             setIsCheckingEmail(true);
         }
-    }, []);
+    }, [location.pathname]);
 
     useEffect(() => {
         if (location.pathname !== "/verify") return;
@@ -126,9 +126,9 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                     console.log("🎩 Администратор вошел:", response);
                 } else {
                     const response = await loginUser(email, password);
-                    if (response?.data === "USER") {
+                    if (response?.data === "user") {
                         navigate("/user/home");
-                    } else if (response?.data === "ORGANIZER") {
+                    } else if (response?.data === "organizer") {
                         navigate("/organizer/home");
                     } else {
                         throw new Error("Неверные учетные данные");

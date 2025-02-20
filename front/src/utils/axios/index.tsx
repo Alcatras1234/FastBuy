@@ -40,8 +40,10 @@ export const registerUser = async (email: string, password: string, role: string
 // Login user
 export const loginUser = async (email: string, password: string) => {
     try {
+        console.log(email, password);
         const response = await instance.post('/api/auth_service/auth', { email, password });
-        return response.data; // Assuming tokens are returned
+        return response.data;
+        console.log(response.data)// Assuming tokens are returned
     } catch (error) {
         throw new Error("Ошибка при авторизации");
     }
