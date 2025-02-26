@@ -61,8 +61,6 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                     console.log("✅ Email подтвержден! Остановка проверки.");
 
                     clearInterval(interval);
-                    localStorage.removeItem("pendingEmail");
-                    localStorage.removeItem("userRole");
 
                     setTimeout(() => {
                         navigate(storedRole === "ORGANIZER" ? "/organizer/register/corpInfo" : "/login/users");
@@ -94,6 +92,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                 console.log("📩 Отправка запроса на регистрацию:", email, password, role);
                 localStorage.setItem("pendingEmail", email);
                 localStorage.setItem("userRole", role);
+                console.log(localStorage.getItem("pendingEmail"));
                 const response = await registerUser(email, password, role);
 
                 if (response?.status !== 200) {
@@ -107,6 +106,7 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                 navigate("/verify", { state: { fromUserRegister: role === "USER", fromBaseInfo: role === "ORGANIZER" } });
 
             } else if (location.pathname === "/organizer/register/corpInfo") {
+                console.log(localStorage.getItem("pendingEmail"));
                 if (!corpName || !phoneNumber) throw new Error("Заполните все поля");
                 const storageEmail = localStorage.getItem("pendingEmail");
                 if (!storageEmail) throw new Error("Email не найден");
@@ -115,6 +115,8 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                 const response = await submitOrganizerCorpInfo(storageEmail, corpName, phoneNumber);
                 console.log("✅ Корпоративные данные успешно отправлены");
                 console.log(response);
+                localStorage.removeItem("pendingEmail");
+                localStorage.removeItem("userRole");
                 navigate("/pending");
 
             } else if (location.pathname === "/login/users" || location.pathname === "/login/admin") {
@@ -126,9 +128,9 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                     console.log("🎩 Администратор вошел:", response);
                 } else {
                     const response = await loginUser(email, password);
-                    if (response?.data === "user") {
+                    if (response?.data.role === "user") {
                         navigate("/user/home");
-                    } else if (response?.data === "organizer") {
+                    } else if (response?.data.role === "organizer") {
                         navigate("/organizer/home");
                     } else {
                         throw new Error("Неверные учетные данные");

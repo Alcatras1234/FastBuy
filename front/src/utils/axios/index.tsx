@@ -1,11 +1,19 @@
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import Cookies from "js-cookie";
 
 // Create an axios instance with default configurations
 export const instance = axios.create({
     baseURL: "http://45.145.4.240:8080", // Use your backend API URL
     timeout: 10000,
     headers: { 'X-Custom-Header': 'foobar' }
+});
+
+instance.interceptors.request.use(config => {
+    const token = Cookies.get("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
 });
 
 // Register user
@@ -40,10 +48,17 @@ export const registerUser = async (email: string, password: string, role: string
 // Login user
 export const loginUser = async (email: string, password: string) => {
     try {
+        console.log("Отправка данных")
         console.log(email, password);
         const response = await instance.post('/api/auth_service/auth', { email, password });
-        return response.data;
-        console.log(response.data)// Assuming tokens are returned
+        console.log(response.data)
+
+        const token = response.data.token;
+
+        if (token) {
+            Cookies.set("token", token, { expires: 7 }); // Храним токен 7 дней
+        }
+        return response;// Assuming tokens are returned
     } catch (error) {
         throw new Error("Ошибка при авторизации");
     }
@@ -257,3 +272,39 @@ export const updateOrganizerProfile = async (updatedData) => {
         throw new Error("Ошибка при обновлении данных.");
     }
 };
+
+export const fetchUsersMatches = async (page: number, count: number) => {
+    try {
+        const token = Cookies.get("token");
+        if (!token) throw new Error("Токен отсутствует, выполните вход.");
+        const response = await instance.get("/api/organizer_service/match/data", {
+            params: { page, count },
+            headers: { Authorization: `Bearer ${token}` }});
+        const data = response.data;
+
+        if (!Array.isArray(data)) {
+            throw new Error("Некорректный формат данных от сервера");
+        }
+
+        return data.map((item) => ({
+            id: item.id || "Нет данных",
+            league: item.league || "Нет данных",
+            scheduleDate: item.scheduleDate || "Нет данных",
+            scheduleTimeLocal: item.scheduleTimeLocal || "Нет данных",
+            stadiumName: item.stadiumName || "Нет данных",
+            ticketsCount: item.ticketsCount || "Нет данных",
+            ticketsPrice: item.ticketsPrice || "Нет данных",
+            info: item.info || "Нет данных",
+            teamHomeName: item.teamHomeName || "Нет данных",
+            teamAwayName: item.teamAwayName || "Нет данных",
+            photoUrl: item.photoUrl || "",
+            /*organizer: item.organizer?.name ? `${item.organizer.name} ${item.organizer.surname}` : "Нет данных",*/
+            status: item.status || "Нет данных",
+            createdDateTime: item.createdDateTime || "Нет данных",
+            updatedDateTime: item.updatedDateTime || "Нет данных",
+        }));
+
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
