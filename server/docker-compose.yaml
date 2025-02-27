@@ -42,6 +42,8 @@ services:
         limits:
           cpus: '1'
           memory: 4G
+
+          
   auth:
     build:
        context: ./auth_server
