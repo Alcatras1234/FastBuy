@@ -105,9 +105,9 @@ const OrganizerPersonalAccount: React.FC = () => {
 
             {/* ✅ Edit Modal */}
             <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-                <DialogTitle>✏️ Редактировать {editField}</DialogTitle>
+                <DialogTitle>✏️ Редактировать</DialogTitle>
                 <DialogContent>
-                    <TextField label={`${editField}`} value={updatedValue} onChange={(e) => setUpdatedValue(e.target.value)} fullWidth margin="normal" />
+                    <TextField value={updatedValue} onChange={(e) => setUpdatedValue(e.target.value)} fullWidth margin="normal" />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenModal(false)} color="secondary">Отмена</Button>

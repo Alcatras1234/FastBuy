@@ -14,12 +14,12 @@ const OrganizerRegisterPageCorpInfo: React.FC<IPropsOrganizerRegisterCorpInfo> =
         <div className="background-container">
             <div className="box">
                 <Typography
-                    variant="h2"
+                    variant="h3"
                     fontFamily="Poppins"
                     textAlign="center"
                     padding={3}
                 >
-                    Регистрация
+                    Введите данные организации
                 </Typography>
                     <TextField
                         fullWidth

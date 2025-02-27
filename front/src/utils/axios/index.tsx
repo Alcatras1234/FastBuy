@@ -8,13 +8,60 @@ export const instance = axios.create({
     headers: { 'X-Custom-Header': 'foobar' }
 });
 
+// ✅ Перехватываем запросы и подставляем `accessToken`
 instance.interceptors.request.use(config => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("acccessToken");
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
+
+// ✅ Перехватываем ошибки и обновляем accessToken, если он истек
+instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // Если получили 401 Unauthorized и это первый повтор запроса
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            const refreshToken = Cookies.get("refreshToken");
+            if (!refreshToken) {
+                console.log("⛔ Нет refreshToken, пользователь должен войти заново.");
+                Cookies.remove("accessToken");
+                Cookies.remove("refreshToken");
+                return Promise.reject(error);
+            }
+
+            try {
+                console.log("🔄 Попытка обновления `accessToken`...");
+                const response = await axios.post("http://45.145.4.240:8080/api/auth_service/refresh", {
+                    refreshToken,
+                });
+
+                const newAccessToken = response.data.accessToken;
+                console.log("✅ Новый accessToken получен:", newAccessToken);
+                
+                Cookies.set("accessToken", newAccessToken, { expires: 7 });
+
+                // ❗ Повторяем запрос с новым токеном
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                return instance(originalRequest);
+            } catch (refreshError) {
+                console.error("⛔ Ошибка при обновлении токена:", refreshError);
+                Cookies.remove("accessToken");
+                Cookies.remove("refreshToken");
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+
 
 // Register user
 // ТУТ Я МЕНЯЛ, ДОБАВИЛ В ПАРАМЕТРАХ РОЛЬ
@@ -48,21 +95,31 @@ export const registerUser = async (email: string, password: string, role: string
 // Login user
 export const loginUser = async (email: string, password: string) => {
     try {
-        console.log("Отправка данных")
-        console.log(email, password);
+        console.log("📡 Отправка запроса на авторизацию:", email, password);
+
         const response = await instance.post('/api/auth_service/auth', { email, password });
-        console.log(response.data)
+        //console.log("✅ Ответ сервера (авторизация):", response.data);
 
-        const token = response.data.token;
-
-        if (token) {
-            Cookies.set("token", token, { expires: 7 }); // Храним токен 7 дней
+        const { accessToken, refreshToken, role, email: serverEmail} = response.data;
+        if (!accessToken || !refreshToken) {
+            console.error("⛔ Сервер не вернул токены!", response.data);
+            throw new Error("Ошибка: сервер не вернул `accessToken` или `refreshToken`");
         }
+
+        console.log("💾 Сохраняем токены в Cookies...");
+        Cookies.set("accessToken", accessToken, { expires: 7 }); // 7 дней (гарантируем выход из системы)
+        Cookies.set("refreshToken", refreshToken, { expires: 30 }); // 30 дней для обновления
+
+       // ✅ Сохраняем email, если пользователь организатор
+        Cookies.set("Email", email, { expires: 7 });
+        console.log("✅ Токены успешно сохранены!");
+
         return response;// Assuming tokens are returned
     } catch (error) {
         throw new Error("Ошибка при авторизации");
     }
 };
+
 
 export const loginAdmin = async (email: string, password: string) => {
     try {
@@ -196,20 +253,42 @@ export const checkEmailVerification = async (email: string) => {
 // отправить данные о созданом матче
 export const createMatch = async (matchData) => {
     try {
-        const response = await instance.post("/api/match_service/create", matchData);
+        const token = Cookies.get("accessToken"); 
+        if (!token) throw new Error("Токен отсутствует, выполните вход");
+
+        const requestBody = { token, ...matchData };
+
+        console.log("📡 Отправка данных матча:", requestBody);
+
+        const response = await instance.post("/api/organizer_service/match", requestBody);
+        
+        console.log("✅ Ответ сервера:", response.data);
+        
         return response.data;
     } catch (error) {
-        throw new Error("Ошибка при добавлении матча");
+        console.error("❌ Ошибка при добавлении матча:", error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || "Ошибка при добавлении матча");
     }
 };
 
+
 // запросить данные о матчах
-export const fetchOrganizerMatches = async () => {
+export const fetchOrganizerMatches = async (page = 0, count = 10) => {
     try {
-        const response = await instance.get("/api/match_service/organizer_matches");
+        const token = Cookies.get("accessToken");
+        if (!token) throw new Error("Токен отсутствует, выполните вход.");
+        
+        console.log("📡 Загружаем матчи организатора...", { page, count });
+
+        const response = await instance.get("/api/organizer_service/match/data", { 
+            params: { token, page, count } // Добавили параметры
+        });
+
+        console.log("✅ Данные матчей:", response.data);
         return response.data;
     } catch (error) {
-        throw new Error("Ошибка загрузки матчей");
+        console.error("❌ Ошибка загрузки матчей:", error.response?.data || error.message);
+        throw new Error("Ошибка загрузки матчей.");
     }
 };
 
@@ -234,11 +313,14 @@ export const deleteMatch = async (matchId: string) => {
 };
 
 
-const hardcodedToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJka2ltLnNwYkBnbWFpbC5jb20iLCJyb2xlIjoiT1JHQU5JWkVSIiwiaWF0IjoxNzM5OTE1MTQ4LCJleHAiOjE3Mzk5MTg3NDh9.VJ5ZrOIA63u1x0OkI0leHpA-t2bPmgybxY4yyn12cXg";
+//const hardcodedToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1IiwiZW1haWwiOiJka2ltLnNwYkBnbWFpbC5jb20iLCJyb2xlIjoiT1JHQU5JWkVSIiwiaWF0IjoxNzQwNjYzNDgyLCJleHAiOjE3NDA2NjcwODJ9.fI2WQJqDlmyecVCkDjRNV8mM6KJt3KKS7nB-IHXJDK4";
 export const fetchOrganizerProfile = async () => {
     try {
+        const token = Cookies.get("accessToken"); // ✅ Теперь берем токен из Cookies
+        if (!token) throw new Error("Токен отсутствует, выполните вход.");
+
         // ✅ Add token inside the URL as a query parameter
-        const response = await instance.get(`/api/organizer_service/profile?token=${hardcodedToken}`);
+        const response = await instance.get(`/api/organizer_service/profile?token=${token}`);
 
         return response.data; // ✅ Return the backend response
     } catch (error) {
@@ -250,11 +332,14 @@ export const fetchOrganizerProfile = async () => {
 
 export const updateOrganizerProfile = async (updatedData) => {
     try {
+        const token = Cookies.get("accessToken"); // ✅ Теперь берем токен из Cookies
+        if (!token) throw new Error("Токен отсутствует, выполните вход.");
+
         // ✅ Extract only the required fields
         const { companyName, contactPhone, bankAccount } = updatedData;
 
         const requestData = {
-            token: hardcodedToken,
+            token: token,
             companyName,
             contactPhone,
             bankAccount,
