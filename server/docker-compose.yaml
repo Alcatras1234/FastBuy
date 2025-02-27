@@ -42,62 +42,6 @@ services:
         limits:
           cpus: '1'
           memory: 4G
-          
-  ticket_db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: "ticket_DB"
-      POSTGRES_USER: "amogus"
-      POSTGRES_PASSWORD: "1234"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - ticket_data:/var/lib/postgresql/data/pgdata
-      - ./db_ticket/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "2751:5432"
-    networks:
-      - dev
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U amogus -d ticket_DB"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
-
-  paymant_db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: "paymant_DB"
-      POSTGRES_USER: "amogus"
-      POSTGRES_PASSWORD: "1234"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - paymant_data:/var/lib/postgresql/data/pgdata
-      - ./db_paymant/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "2752:5432"
-    networks:
-      - dev
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U amogus -d paymant_DB"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
   auth:
     build:
        context: ./auth_server
@@ -119,31 +63,7 @@ services:
     restart: unless-stopped
     networks:
       - dev
-  # broker:
-  #   image: apache/kafka:latest
-  #   container_name: broker
-  #   environment:
-  #     KAFKA_NODE_ID: 1
-  #     KAFKA_PROCESS_ROLES: broker,controller
-  #     KAFKA_LISTENERS: PLAINTEXT://broker:9092,CONTROLLER://broker:9093,HOST://0.0.0.0:29092
-  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,HOST://localhost:29092
-  #     KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,HOST:PLAINTEXT
-  #     KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-  #     KAFKA_NUM_PARTITIONS: 3
-  #     KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-  #   ports:
-  #     - "9092:9092"
-  #     - "29092:29092" 
-  #   networks:
-  #     - dev
 volumes:
   auth_data:
-  ticket_data:
-  paymant_data:
   redis-data:
 

@@ -84,4 +84,11 @@ public class OrganizatorController {
         return ResponseEntity.ok(organizatorService.updateMatch(info, id));
     }
 
+    @DeleteMapping("/match")
+    public ResponseEntity<String> deleteMatch(@RequestParam(name = "token") String token,
+                                          @RequestParam(name = "id") Long id) {
+        organizatorService.deleteMatch(token, id);
+        return ResponseEntity.ok("Матч с id: " + id + " удален");
+    }
+
 }

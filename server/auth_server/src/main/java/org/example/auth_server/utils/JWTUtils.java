@@ -7,12 +7,14 @@ import io.jsonwebtoken.security.Keys;
 import lombok.experimental.UtilityClass;
 import org.example.auth_server.model.User;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Date;
 
 @UtilityClass
 public class JWTUtils {
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final String SECRET_KEY_SING = "rjgkftyoiuq3045/rl,vz$#@%gqw&*!_";
+    private static final Key SECRET_KEY = new SecretKeySpec(SECRET_KEY_SING.getBytes(), SignatureAlgorithm.HS256.getJcaName());
 
     public static String generateRefreshToken(User user) {
         long expirationTimeMillis = 7 * 24 * 60 * 60 * 1000; // неделя

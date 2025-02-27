@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    Page<Match> findAll(Pageable pageable);
+    Page<Match> findMatchesByOrganizer(User user, Pageable pageable);
 
     Optional<Match> findMatchById(Long id);
+
+    Match findMatchByOrganizer(User user);
 }

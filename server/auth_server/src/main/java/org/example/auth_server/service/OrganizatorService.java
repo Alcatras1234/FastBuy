@@ -244,9 +244,15 @@ public class OrganizatorService {
         }
 
         String email = JWTUtils.extractClaim(token).get("email", String.class);
-        User user = userRepository.findUserByEmail(email).orElseThrow(() -> {
-            throw new EntityNotFoundException("пользователь не найден");
-        });
+        String keyUser = "user:" + email;
+
+        User user = objectMapper.convertValue(redisTemplate.opsForValue().get(keyUser), User.class);
+        if (user == null) {
+
+            user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
 
         String key = "organizator:" + user.getEmail();
         Organizator organizator = objectMapper.convertValue( redisTemplate.opsForValue().get(key), Organizator.class);
@@ -269,9 +275,15 @@ public class OrganizatorService {
         }
 
         String email = JWTUtils.extractClaim(token).get("email", String.class);
-        User user = userRepository.findUserByEmail(email).orElseThrow(() -> {
-            throw new EntityNotFoundException("пользователь не найден");
-        });
+        String keyUser = "user:" + email;
+
+        User user = objectMapper.convertValue(redisTemplate.opsForValue().get(keyUser), User.class);
+        if (user == null) {
+
+            user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
         String key = "organizator:" + user.getEmail();
         Organizator organizator = objectMapper.convertValue( redisTemplate.opsForValue().get(key), Organizator.class);
 
@@ -296,9 +308,16 @@ public class OrganizatorService {
             throw new JwtException("Токен не валиден");
         }
         String email = JWTUtils.extractClaim(token).get("email", String.class);
-        User user = userRepository.findUserByEmail(email).orElseThrow(() -> {
-            throw new EntityNotFoundException("пользователь не найден");
-        });
+
+        String keyUser = "user:" + email;
+
+        User user = objectMapper.convertValue(redisTemplate.opsForValue().get(keyUser), User.class);
+        if (user == null) {
+
+            user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
 
         Match match = new Match();
 
@@ -310,9 +329,10 @@ public class OrganizatorService {
         match.setTicketsCount(info.getTickets());
         match.setTicketsPrice(info.getTicketPrice());
         match.setOrganizer(user);
-        String key = "match:" + user.getEmail() + ":" + match.getId();;
-        redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
         matchRepository.save(match);
+        Match match1 = matchRepository.findMatchByOrganizer(user);
+        String key = "match:" + user.getEmail() + ":" + match1.getId();
+        redisTemplate.opsForValue().set(key, match1, Duration.ofMinutes(10));
         return match;
     }
 
@@ -326,6 +346,16 @@ public class OrganizatorService {
 
 
         String email = JWTUtils.extractClaim(token).get("email", String.class);
+
+        String keyUser = "user:" + email;
+
+        User user = objectMapper.convertValue(redisTemplate.opsForValue().get(keyUser), User.class);
+        if (user == null) {
+
+            user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
 
         String pattern = "match:" + email + ":*";
         ScanOptions options = ScanOptions.scanOptions()
@@ -360,7 +390,7 @@ public class OrganizatorService {
         if (matches.isEmpty()) {
             Pageable pageable = PageRequest.of(page, pageSize);
             Map<String, Match> keys = new HashMap<>();
-            Page<Match> orgPage = matchRepository.findAll(pageable);
+            Page<Match> orgPage = matchRepository.findMatchesByOrganizer(user, pageable);
             matches = orgPage.getContent();
             if (!matches.isEmpty()) {
                 matches.stream()
@@ -407,5 +437,32 @@ public class OrganizatorService {
         matchRepository.save(match);
         redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
         return match;
+    }
+
+    @Transactional
+    public void deleteMatch(String token, Long id) {
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+        String keyUser = "user:" + email;
+        User user = objectMapper.convertValue(redisTemplate.opsForValue().get(keyUser), User.class);
+        if (user == null) {
+            user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
+
+        String key = "match:" + email + ":" + id;
+
+        Match match = objectMapper.convertValue(redisTemplate.opsForValue().get(key), Match.class);
+
+        if (match == null) {
+            match = matchRepository.findMatchById(id).orElseThrow(() -> {
+                throw new EntityNotFoundException("Матч не найден");
+            });
+        }
+
+        matchRepository.delete(match);
     }
 }
