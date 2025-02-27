@@ -302,7 +302,6 @@ public class OrganizatorService {
 
         Match match = new Match();
 
-        String key = "match:" + user.getEmail() + ":" + UUID.randomUUID();
         match.setTeamHomeName(info.getTeamA());
         match.setTeamAwayName(info.getTeamB());
         match.setScheduleDate(info.getDate());
@@ -311,6 +310,7 @@ public class OrganizatorService {
         match.setTicketsCount(info.getTickets());
         match.setTicketsPrice(info.getTicketPrice());
         match.setOrganizer(user);
+        String key = "match:" + user.getEmail() + ":" + match.getId();;
         redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
         matchRepository.save(match);
         return match;
@@ -365,7 +365,7 @@ public class OrganizatorService {
             if (!matches.isEmpty()) {
                 matches.stream()
                         .forEach(match -> {
-                            String key = "match:" + email + ":" + UUID.randomUUID();
+                            String key = "match:" + email + ":" + match.getId();
                             keys.put(key, match);
                         });
                 keys.entrySet().stream()
@@ -379,7 +379,7 @@ public class OrganizatorService {
     }
 
     @Transactional
-    public Match updateMatch(AddMatchRequest info) {
+    public Match updateMatch(AddMatchRequest info, Long id) {
         String token = info.getToken();
         if (!JWTUtils.validateToken(token)) {
             throw new JwtException("Токен не валиден");
@@ -392,8 +392,8 @@ public class OrganizatorService {
                 throw new EntityNotFoundException("пользователь не найден");
             });
         }
-        String key = "match:" + email + ":" + UUID.randomUUID();
-        Match match = matchRepository.findMatchByOrganizer(user).orElseThrow(() -> {
+        String key = "match:" + email + ":" + id;
+        Match match = matchRepository.findMatchById(id).orElseThrow(() -> {
             throw new EntityNotFoundException("Матч не найден");
         });
         match.setTeamHomeName(info.getTeamA());

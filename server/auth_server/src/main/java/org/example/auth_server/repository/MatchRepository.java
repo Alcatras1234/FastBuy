@@ -11,5 +11,5 @@ import java.util.Optional;
 public interface MatchRepository extends JpaRepository<Match, Long> {
     Page<Match> findAll(Pageable pageable);
 
-    Optional<Match> findMatchByOrganizer(User user);
+    Optional<Match> findMatchById(Long id);
 }
