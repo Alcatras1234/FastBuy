@@ -378,4 +378,34 @@ public class OrganizatorService {
         return matches;
     }
 
+    @Transactional
+    public Match updateMatch(AddMatchRequest info) {
+        String token = info.getToken();
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+        String keyUser = "user:" + email;
+        User user = objectMapper.convertValue(redisTemplate.opsForValue().get(keyUser), User.class);
+        if (user == null) {
+            user = userRepository.findUserByEmail(email).orElseThrow(() -> {
+                throw new EntityNotFoundException("пользователь не найден");
+            });
+        }
+        String key = "match:" + email + ":" + UUID.randomUUID();
+        Match match = matchRepository.findMatchByOrganizer(user).orElseThrow(() -> {
+            throw new EntityNotFoundException("Матч не найден");
+        });
+        match.setTeamHomeName(info.getTeamA());
+        match.setTeamAwayName(info.getTeamB());
+        match.setScheduleDate(info.getDate());
+        match.setScheduleTimeLocal(info.getTime());
+        match.setStadiumName(info.getStadium());
+        match.setTicketsCount(info.getTickets());
+        match.setTicketsPrice(info.getTicketPrice());
+
+        matchRepository.save(match);
+        redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
+        return match;
+    }
 }

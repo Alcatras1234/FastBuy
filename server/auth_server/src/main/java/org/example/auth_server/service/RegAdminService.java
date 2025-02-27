@@ -11,10 +11,12 @@ import org.example.auth_server.model.User;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Log4j2
@@ -25,11 +27,14 @@ public class RegAdminService {
 
     private final EmailService emailService;
 
+    private final RedisTemplate redisTemplate;
+
     @Autowired
-    public RegAdminService(PasswordEncoder passwordEncoder, UserRepository userRepository, EmailService emailService) {
+    public RegAdminService(PasswordEncoder passwordEncoder, UserRepository userRepository, EmailService emailService, RedisTemplate redisTemplate) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.redisTemplate = redisTemplate;
     }
 
     @Transactional
@@ -52,6 +57,8 @@ public class RegAdminService {
         user.setPassword(hashedPassword);
         user.setCreatedDttm(LocalDateTime.now());
         user.setStatus(StatusEnum.ACTIVE);
+        String key = "user:" + user.getEmail();
+        redisTemplate.opsForValue().set(key, user, Duration.ofMinutes(10));
         log.info("Пользователь " + user);
 
         userRepository.save(user);

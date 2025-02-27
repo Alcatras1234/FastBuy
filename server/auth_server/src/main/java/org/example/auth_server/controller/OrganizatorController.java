@@ -78,4 +78,9 @@ public class OrganizatorController {
 
     }
 
+    @PutMapping("/match")
+    public ResponseEntity<Match> putMatch(@RequestBody @Valid AddMatchRequest info) {
+        return ResponseEntity.ok(organizatorService.updateMatch(info));
+    }
+
 }
