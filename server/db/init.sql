@@ -47,6 +47,7 @@ CREATE TABLE organizer_bank_details (
 CREATE TABLE matches (
     id SERIAL PRIMARY KEY,
     league VARCHAR(100),
+    uuid VARCHAR(255),
     schedule_dt VARCHAR(100) NOT NULL,
     schedule_time_lcl VARCHAR(100) NOT NULL,
     stadium_name VARCHAR(255),

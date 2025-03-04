@@ -8,6 +8,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -72,5 +73,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401)
                 .contentType(MediaType.TEXT_HTML)
                 .body(resource);
+    }
+
+    @ExceptionHandler(UnexpectedRollbackException.class)
+    public ResponseEntity<String> handleUnexpectedRollbackException(UnexpectedRollbackException ex) {
+        return ResponseEntity.status(500).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalAccessException.class)
+    public ResponseEntity<String> handleIllegalAccessException(IllegalAccessException ex) {
+        return ResponseEntity.status(403).body(ex.getMessage());
     }
 }

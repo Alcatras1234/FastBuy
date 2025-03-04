@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
-
 
 @RestController
 @Log4j2
@@ -34,7 +32,6 @@ public class RegistrationController {
         this.regAdminService = regAdminService;
     }
 
-
     @Operation(summary = "Users registration")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -43,12 +40,11 @@ public class RegistrationController {
     })
     @PostMapping("/registration")
     public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
-        String uuid = UUID.randomUUID().toString();
         regAdminService.registrateUser(regRequest);
         return ResponseEntity.ok("Провалидируйте email!");
     }
 
-    @Operation(summary = "Users registration")
+    @Operation(summary = "Validate email")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -64,13 +60,15 @@ public class RegistrationController {
                 .body(resource);
     }
 
+    @Operation(summary = "Check email validation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Server Error")
+    })
     @GetMapping("/email")
     public ResponseEntity<String> checkValidation(@RequestParam(name = "email") String email) {
         regAdminService.checkValidation(email);
         return ResponseEntity.ok("email провалидирован!");
-
     }
-
-
-
 }

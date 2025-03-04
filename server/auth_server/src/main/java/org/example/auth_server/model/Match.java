@@ -28,6 +28,9 @@ public class Match {
     @Column(name = "stadium_name", length = 255)
     private String stadiumName;
 
+    @Column(name = "uuid", length = 255)
+    private String uuid;
+
     @Column(name = "tickets_cnt", nullable = false)
     private Integer ticketsCount;
 
@@ -46,7 +49,7 @@ public class Match {
     @Column(name = "photo_url", length = 255)
     private String photoUrl;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
 
