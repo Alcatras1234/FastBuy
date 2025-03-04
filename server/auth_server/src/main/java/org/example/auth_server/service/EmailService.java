@@ -30,9 +30,6 @@ public class EmailService {
     private Properties properties;
     private Session session;
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
-
-
     @Async
     public void sendEmailForVerify(String email) throws MessagingException {
         log.info("Начинаю отправку email");
