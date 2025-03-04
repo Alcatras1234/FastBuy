@@ -44,6 +44,7 @@ public class EmailService {
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.starttls.enable", "true");  // Включить TSL
         properties.put("mail.smtp.ssl.trust", host); // Доверять этому хосту
+        properties.put("mail.debug", true);
 
         session = Session.getInstance(properties, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
