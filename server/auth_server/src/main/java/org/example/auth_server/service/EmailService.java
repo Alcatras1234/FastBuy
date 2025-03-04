@@ -3,14 +3,11 @@ package org.example.auth_server.service;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -19,9 +16,6 @@ import java.util.concurrent.Executors;
 @Log4j2
 @Service
 public class EmailService {
-    private final String STRINGWITHNUMBERS = "0123456789";
-    private final int PASSWORDLENGTH = 6;
-    private final SecureRandom random = new SecureRandom();
     @Value("${from.email}")
     private String from;
 
