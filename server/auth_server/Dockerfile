@@ -14,6 +14,9 @@ FROM openjdk:21-jdk-slim AS server_app
 
 WORKDIR /app
 
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
 COPY --from=build /auth_service/target/*.jar /app/auth.jar
 COPY --from=build /auth_service/src/main/resources/templates /app/src/main/resources/templates
 
