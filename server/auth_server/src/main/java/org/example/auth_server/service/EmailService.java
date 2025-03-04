@@ -34,7 +34,8 @@ public class EmailService {
 
 
     @Async
-    public void sendEmailForVerify(String email) {
+    public void sendEmailForVerify(String email) throws MessagingException {
+        log.info("Начинаю отправку email");
         String host = "smtp.yandex.ru";
         String validateToken = JWTUtils.generateValidateToken(email);
         String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
@@ -68,7 +69,8 @@ public class EmailService {
 
 
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new MessagingException(e.getMessage());
         }
     }
 

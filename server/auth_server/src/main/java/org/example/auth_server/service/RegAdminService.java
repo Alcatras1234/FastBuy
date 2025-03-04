@@ -2,6 +2,7 @@ package org.example.auth_server.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityExistsException;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.reg_auth.RegRequest;
@@ -43,7 +44,7 @@ public class RegAdminService {
     }
 
     @Transactional
-    public void registrateUser(RegRequest regRequest) {
+    public void registrateUser(RegRequest regRequest) throws MessagingException {
         String toAddress = regRequest.getEmail();
         String hashedPassword = hasherPassword(regRequest.getPassword());
         userRepository.findUserByEmail(regRequest.getEmail()).ifPresent(

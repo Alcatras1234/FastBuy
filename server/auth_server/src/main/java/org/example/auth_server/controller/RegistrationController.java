@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.reg_auth.RegRequest;
@@ -39,7 +40,7 @@ public class RegistrationController {
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
     @PostMapping("/registration")
-    public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) {
+    public ResponseEntity<String> registerUser(@RequestBody @Valid RegRequest regRequest) throws MessagingException {
         regAdminService.registrateUser(regRequest);
         return ResponseEntity.ok("Провалидируйте email!");
     }
