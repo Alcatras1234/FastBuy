@@ -25,51 +25,57 @@ public class EmailService {
     @Value("${from.email}")
     private String from;
 
-    @Value("${password.email}")
+    @Value("${password.gmail}")
     private String password;
     private Properties properties;
     private Session session;
 
-    @Async
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+
     public void sendEmailForVerify(String email) throws MessagingException {
-        log.info("Начинаю отправку email");
-        String host = "smtp.yandex.ru";
-        String validateToken = JWTUtils.generateValidateToken(email);
-        String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
+        executorService.submit(() -> {
+            String host = "smtp.gmail.com";
+            String validateToken = JWTUtils.generateValidateToken(email);
+            String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
+
+            properties = System.getProperties();
+            properties.put("mail.debug", "true");
+            properties.put("mail.smtp.host", host);
+            properties.put("mail.smtp.port", "587");
+            properties.put("mail.smtp.auth", "true");
+            properties.put("mail.smtp.starttls.enable", "true");
+            properties.put("mail.smtp.starttls.required", "true");
+            properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+
+            session = Session.getInstance(properties, new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(from, password);
+                }
+            });
+
+            try {
+                MimeMessage message = new MimeMessage(session);
+
+                message.setFrom(new InternetAddress(from));
+                message.addRecipients(Message.RecipientType.TO, String.valueOf(new InternetAddress(email)));
+
+                message.setSubject("Validate");
+
+                message.setText(link);
+
+                Transport.send(message);
+                log.info("Email are sended");
 
 
-        properties = System.getProperties();
-        properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", "587"); // Порт для SSL
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.starttls.enable", "true");  // Включить TSL
-        properties.put("mail.smtp.ssl.trust", host); // Доверять этому хосту
-        properties.put("mail.debug", true);
-
-        session = Session.getInstance(properties, new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(from, password);
+            } catch (MessagingException e) {
+                try {
+                    throw new MessagingException(e.getMessage());
+                } catch (MessagingException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
-
-        try {
-            MimeMessage message = new MimeMessage(session);
-
-            message.setFrom(new InternetAddress(from));
-            message.addRecipients(Message.RecipientType.TO, String.valueOf(new InternetAddress(email)));
-
-            message.setSubject("Validate");
-
-            message.setText(link);
-
-            Transport.send(message);
-            log.info("Email are sended");
-
-
-        } catch (MessagingException e) {
-            log.error(e.getMessage());
-            throw new MessagingException(e.getMessage());
-        }
     }
 
     private boolean equalsPassword(String databasePassword, String enteredPassword) {
