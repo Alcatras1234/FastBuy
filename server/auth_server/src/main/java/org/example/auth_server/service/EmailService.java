@@ -16,11 +16,9 @@ import java.util.concurrent.Executors;
 @Log4j2
 @Service
 public class EmailService {
-    @Value("${from.email}")
-    private String from;
+    private String from = "danial.bakirov@gmail.com";
 
-    @Value("${password.gmail}")
-    private String password;
+    private String password = "rzga aysa irrt ywtu";
     private Properties properties;
     private Session session;
 
