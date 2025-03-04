@@ -42,7 +42,7 @@ public class EmailService {
         properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.port", "587"); // Порт для SSL
         properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.ssl.enable", "true"); // Включить SSL
+        properties.put("mail.smtp.starttls.enable", "true");  // Включить TSL
         properties.put("mail.smtp.ssl.trust", host); // Доверять этому хосту
 
         session = Session.getInstance(properties, new Authenticator() {
@@ -66,7 +66,7 @@ public class EmailService {
 
 
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             throw new MessagingException(e.getMessage());
         }
     }
