@@ -25,7 +25,7 @@ public class EmailService {
     @Value("${from.email}")
     private String from;
 
-    @Value("${password.gmail}")
+    @Value("${password.email}")
     private String password;
     private Properties properties;
     private Session session;
@@ -35,16 +35,18 @@ public class EmailService {
 
     @Async
     public void sendEmailForVerify(String email) {
-        String host = "smtp.gmail.com";
+        String host = "smtp.yandex.ru";
         String validateToken = JWTUtils.generateValidateToken(email);
         String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
 
+
         properties = System.getProperties();
         properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", "587");
+        properties.put("mail.smtp.port", "465"); // Порт для SSL
         properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        properties.put("mail.smtp.starttls.enable", "true"); // Для TLS
+        properties.put("mail.smtp.ssl.enable", "true"); // Включить SSL
+        properties.put("mail.smtp.ssl.trust", host); // Доверять этому хосту
 
         session = Session.getInstance(properties, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
