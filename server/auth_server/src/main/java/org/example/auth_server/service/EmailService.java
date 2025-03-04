@@ -40,7 +40,7 @@ public class EmailService {
 
         properties = System.getProperties();
         properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", "465"); // Порт для SSL
+        properties.put("mail.smtp.port", "587"); // Порт для SSL
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.ssl.enable", "true"); // Включить SSL
         properties.put("mail.smtp.ssl.trust", host); // Доверять этому хосту
