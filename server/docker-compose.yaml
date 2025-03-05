@@ -4,16 +4,16 @@ networks:
   dev:
     driver: bridge
 services:
-  nginx:
-    image: nginx:stable-alpine
-    ports:
-      - "80:80"
-    volumes:
-      - './nginx.conf:/etc/nginx/nginx.conf'
-    depends_on:
-      - auth_db
-    networks:
-      - dev
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - './nginx.conf:/etc/nginx/nginx.conf'
+  #   depends_on:
+  #     - auth_db
+  #   networks:
+  #     - dev
     
   auth_db:
     image: postgres:15
