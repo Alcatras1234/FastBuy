@@ -292,23 +292,43 @@ export const fetchOrganizerMatches = async (page = 0, count = 10) => {
     }
 };
 
-// обновить данные о матче
-export const updateMatch = async (matchId: string, updatedData: any) => {
+export const updateMatch = async (matchUuid: string, updatedData: any) => {
     try {
-        const response = await instance.put(`/api/match_service/matches/${matchId}`, updatedData);
+        const token = Cookies.get("accessToken");
+        if (!token) throw new Error("❌ Токен отсутствует, выполните вход.");
+
+        const requestBody = { token, ...updatedData }; // ✅ Ensure `token` is in request body
+
+        console.log("📡 Отправка обновленных данных матча:", { uuid: matchUuid, requestBody });
+
+        const response = await instance.put("/api/organizer_service/match", requestBody, {
+            params: { uuid: matchUuid }, // ✅ Backend expects `uuid` in params
+        });
+
+        console.log("✅ Матч успешно обновлен:", response.data);
         return response.data;
     } catch (error) {
-        throw new Error("Ошибка при обновлении матча");
+        console.error("❌ Ошибка при обновлении матча:", error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || "Ошибка при обновлении матча.");
     }
 };
 
-// удалить матч
-export const deleteMatch = async (matchId: string) => {
+export const deleteMatch = async (matchUuid: string) => {
     try {
-        await instance.delete(`/api/match_service/matches/${matchId}`);
-        console.log(`Матч ${matchId} успешно удален`);
+        const token = Cookies.get("accessToken");
+        if (!token) throw new Error("❌ Токен отсутствует, выполните вход.");
+
+        console.log(`📡 Отправка запроса на удаление матча: ${matchUuid}`);
+
+        const response = await instance.delete(`/api/organizer_service/match`, {
+            params: { token, uuid: matchUuid }, // ✅ Token and UUID in parameters
+        });
+
+        console.log(`✅ Матч ${matchUuid} успешно удален`, response.data);
+        return response.data;
     } catch (error) {
-        throw new Error("Ошибка при удалении матча");
+        console.error("❌ Ошибка при удалении матча:", error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || "Ошибка при удалении матча.");
     }
 };
 

@@ -34,6 +34,7 @@ const OrganizerHomePage: React.FC = () => {
                 // ✅ Приводим к нужному формату
                 const formattedMatches = filteredMatches.map(match => ({
                     id: match.id || "Нет данных",
+                    uuid: match.uuid, // ✅ Add uuid 
                     teamA: match.teamHomeName || "Неизвестно",
                     teamB: match.teamAwayName || "Неизвестно",
                     date: match.scheduleDate || "Неизвестно",
@@ -55,12 +56,12 @@ const OrganizerHomePage: React.FC = () => {
         loadMatches();
     }, []);
    
-    const handleDeleteMatch = async (matchId: string) => {
+    const handleDeleteMatch = async (matchUuid: string) => { // ✅ Change matchId to matchUuid
         if (!window.confirm("Вы уверены, что хотите удалить этот матч?")) return;
-
+    
         try {
-            await deleteMatch(matchId);
-            setMatches(matches.filter(match => match.id !== matchId));
+            await deleteMatch(matchUuid); // ✅ Use matchUuid instead of matchId
+            setMatches(matches.filter(match => match.uuid !== matchUuid)); // ✅ Filter using uuid
         } catch (error) {
             alert("Ошибка удаления матча");
         }
@@ -81,8 +82,16 @@ const OrganizerHomePage: React.FC = () => {
 
     const handleUpdateMatch = async () => {
         try {
-            await updateMatch(editingMatch.id, editingMatch);
-            setMatches(matches.map(match => (match.id === editingMatch.id ? editingMatch : match)));
+            if (!editingMatch || !editingMatch.uuid) { 
+                throw new Error("❌ Ошибка: UUID отсутствует");
+            }
+            
+            await updateMatch(editingMatch.uuid, editingMatch); // ✅ Use uuid instead of id
+            
+            setMatches(matches.map(match => 
+                match.uuid === editingMatch.uuid ? editingMatch : match // ✅ Update by uuid
+            ));
+            
             setOpenDialog(false);
         } catch (error) {
             alert("Ошибка при обновлении матча");
