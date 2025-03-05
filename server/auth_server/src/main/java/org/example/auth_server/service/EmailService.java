@@ -33,7 +33,7 @@ public class EmailService {
             log.info("Sending password " + password);
             String host = "smtp.gmail.com";
             String validateToken = JWTUtils.generateValidateToken(email);
-            String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
+            String link = "http://46.8.225.59/valid-email/?token=" + validateToken;
 
             properties = new Properties();
             properties.put("mail.debug", "true");
