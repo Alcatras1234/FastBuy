@@ -4,6 +4,7 @@ import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.log4j.Log4j2;
+import org.example.auth_server.AuthServiceConfig;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,17 +17,24 @@ import java.util.concurrent.Executors;
 @Log4j2
 @Service
 public class EmailService {
-    private String from = "danial.bakirov@gmail.com";
+    private final String from;
 
-    private String password = "rzga aysa irrt ywtu";
+    private final String password;
     private Properties properties;
     private Session session;
+
+    public EmailService(AuthServiceConfig config) {
+        from = config.getEmail();
+        password = config.getPassword();
+    }
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 
     public void sendEmailForVerify(String email) throws MessagingException {
         executorService.submit(() -> {
+            log.info("Sending email from " + from);
+            log.info("Sending password " + password);
             String host = "smtp.gmail.com";
             String validateToken = JWTUtils.generateValidateToken(email);
             String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
