@@ -6,10 +6,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.AuthServiceConfig;
 import org.example.auth_server.utils.JWTUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,20 +16,18 @@ import java.util.concurrent.Executors;
 @Service
 public class EmailService {
     private final String from;
-
     private final String password;
     private Properties properties;
     private Session session;
 
     public EmailService(AuthServiceConfig config) {
-        from = config.getGmail();
-        password = config.getPassword();
+        this.from = config.getGmail();
+        this.password = config.getPassword();
     }
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-
-    public void sendEmailForVerify(String email) throws MessagingException {
+    public void sendEmailForVerify(String email) {
         executorService.submit(() -> {
             log.info("Sending email from " + from);
             log.info("Sending password " + password);
@@ -39,7 +35,7 @@ public class EmailService {
             String validateToken = JWTUtils.generateValidateToken(email);
             String link = "http://193.187.172.248/valid-email/?token=" + validateToken;
 
-            properties = System.getProperties();
+            properties = new Properties();
             properties.put("mail.debug", "true");
             properties.put("mail.smtp.host", host);
             properties.put("mail.smtp.port", "587");
@@ -55,32 +51,17 @@ public class EmailService {
             });
 
             try {
+                log.info(session.getProperties());
                 MimeMessage message = new MimeMessage(session);
-
                 message.setFrom(new InternetAddress(from));
-                message.addRecipients(Message.RecipientType.TO, String.valueOf(new InternetAddress(email)));
-
+                message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
                 message.setSubject("Validate");
-
                 message.setText(link);
-
                 Transport.send(message);
-                log.info("Email are sended");
-
-
+                log.info("Email sent successfully to " + email);
             } catch (MessagingException e) {
-                try {
-                    throw new MessagingException(e.getMessage());
-                } catch (MessagingException ex) {
-                    throw new RuntimeException(ex);
-                }
+                log.error("Failed to send email to " + email, e);
             }
         });
     }
-
-    private boolean equalsPassword(String databasePassword, String enteredPassword) {
-        return Objects.equals(databasePassword, enteredPassword);
-    }
-
-
 }
