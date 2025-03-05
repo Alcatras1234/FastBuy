@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchUsersMatches } from "../../../utils/axios";
+import {useNavigate} from "react-router-dom";
 import {
     Container,
     Grid,
@@ -44,6 +45,7 @@ const UserHomePage: React.FC = () => {
     const [page, setPage] = useState<number>(1);
     const [selectedMatch, setSelectedMatch] = useState<IMatch | null>(null);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadMatches = async () => {
@@ -82,6 +84,10 @@ const UserHomePage: React.FC = () => {
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setSelectedMatch(null);
+    };
+
+    const handleOpenBuyPage = () => {
+        navigate('/buy');
     };
 
     return (
@@ -159,7 +165,14 @@ const UserHomePage: React.FC = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog} color="secondary">Закрыть</Button>
-                    <Button variant="contained" color="primary">Купить билет</Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={() => handleOpenBuyPage}  // Передаем саму функцию в onClick
+                    >
+                        Перейти к оплате
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Container>
