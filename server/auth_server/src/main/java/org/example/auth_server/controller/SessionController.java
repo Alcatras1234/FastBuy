@@ -4,8 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import org.example.auth_server.dto.TokenRequest;
 import org.example.auth_server.service.SessionService;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth_service/token")
@@ -25,7 +25,6 @@ public class SessionController {
     public SessionController(SessionService sessionService) {
         this.sessionService = sessionService;
     }
-
 
     @Operation(summary = "Проверка, валиден ли токен")
     @ApiResponses(value = {
@@ -47,18 +46,15 @@ public class SessionController {
         }
     }
 
-    @Operation(summary = "Получение роли из access токена")
+    @Operation(summary = "Получение пары токенов по refresh-токену")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешный ответ"),
             @ApiResponse(responseCode = "400", description = "Некорректный запрос"),
+            @ApiResponse(responseCode = "401", description = "Токен просрочен"),
             @ApiResponse(responseCode = "500", description = "Ошибка сервера")
     })
-    @GetMapping("/getrole")
-    public ResponseEntity<String> getDataFromToken(@RequestParam String token) {
-        if (!StringUtils.hasText(token)) {
-            return ResponseEntity.badRequest().body("Токен не может быть пустым");
-        }
-        String userData = sessionService.getRoleFromAccessToken(token);
-        return ResponseEntity.ok(userData);
+    @GetMapping("/tokens")
+    public ResponseEntity<Map<String, String>> getDataFromToken(@RequestParam(name = "refresh_token") String refreshToken) throws IllegalAccessException {
+        return ResponseEntity.ok().body(sessionService.getTokensPair(refreshToken));
     }
 }

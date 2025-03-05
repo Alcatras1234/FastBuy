@@ -1,4 +1,10 @@
+CREATE TABLE admin (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(100) UNIQUE,
+    password VARCHAR(100) UNIQUE
+);
 
+INSERT INTO admin (login, password) VALUES ('root', 'admin');
 
 
 CREATE TABLE users (
@@ -15,23 +21,14 @@ CREATE TABLE users (
     updated_dttm TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE tokens (
-	id SERIAL PRIMARY KEY,
-	access VARCHAR(255) NOT NULL,
-	refresh VARCHAR(255) NOT NULL
-);
 
 CREATE TABLE organizer_legal_info (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) UNIQUE NOT NULL,
-    company_name VARCHAR(100) NOT NULL,
-    registration_number VARCHAR(50) UNIQUE NOT NULL,
-    tax_id VARCHAR(50) UNIQUE NOT NULL,
-    legal_address VARCHAR(255) NOT NULL,
-    postal_code VARCHAR(20) NOT NULL,
-    contact_type VARCHAR(50) CHECK (contact_type IN ('phone', 'email', 'fax')) NOT NULL,
-    contact_value VARCHAR(255) NOT NULL,
-    is_primary BOOLEAN NOT NULL DEFAULT false,
+    user_id INTEGER REFERENCES users(id),
+    company_name VARCHAR(100),
+    contact_number VARCHAR(50),
+    approved BOOLEAN,
+    bank_account VARCHAR(50),
     created_dttm TIMESTAMP DEFAULT NOW(),
     updated_dttm TIMESTAMP DEFAULT NOW()
 );
@@ -47,4 +44,25 @@ CREATE TABLE organizer_bank_details (
     updated_dttm TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE matches (
+    id SERIAL PRIMARY KEY,
+    league VARCHAR(100),
+    uuid VARCHAR(255),
+    schedule_dt VARCHAR(100) NOT NULL,
+    schedule_time_lcl VARCHAR(100) NOT NULL,
+    stadium_name VARCHAR(255),
+    -- stadium_id INTEGER REFERENCES stadiums(id) NOT NULL,
+    tickets_cnt INTEGER NOT NULL,
+    ticket_price INTEGER NOT NULL,
+    info TEXT,
+    team_home_name VARCHAR(255) NOT NULL,
+    team_away_name VARCHAR(255) NOT NULL,
+    -- team_home_id INTEGER REFERENCES teams(id) NOT NULL,
+    -- team_away_id INTEGER REFERENCES teams(id) NOT NULL,
+    photo_url VARCHAR(255),
+    organizer_id INTEGER NOT NULL, -- REFERENCES users(id)
+    status VARCHAR(50) CHECK (status IN ('scheduled', 'ongoing', 'completed', 'cancelled')),
+    created_dttm TIMESTAMP DEFAULT NOW(),
+    updated_dttm TIMESTAMP DEFAULT NOW()
+);
 

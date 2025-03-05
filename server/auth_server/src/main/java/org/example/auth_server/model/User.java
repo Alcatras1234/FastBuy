@@ -52,4 +52,10 @@ public class User {
     @Column(name = "updated_dttm")
     private LocalDateTime updatedDttm;
 
+    @Override
+    public String toString() {
+
+        return "Пользователь: " + this.email + " " + this.isVerify;
+    }
+
 }

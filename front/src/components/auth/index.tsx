@@ -1,106 +1,147 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box } from "@mui/material";
 import UserRegisterPage from "./registration/user";
 import UsersLoginPage from "./login/users";
-import VerificationPage from "./verify";
+import VerificationPage from "./verify/verifyEmail";
 import OrganizerRegisterPageBaseInfo from "./registration/organizer/base_info";
 import OrganizerRegisterPageCorpInfo from "./registration/organizer/corp_info";
-import "./style.scss";
 import AdminLoginPage from "./login/admin";
-import {verifyEmailCode} from "../../utils/axios";
+import PendingPage from "./verify/verifyCorpInfo";
+import { registerUser, submitOrganizerCorpInfo, checkEmailVerification, loginUser, loginAdmin } from "../../utils/axios";
+import "./style.scss";
 
 const AuthRootComponent: React.FC = (): JSX.Element => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [corpName, setCorpName] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [verificationCode, setVerificationCode] = useState("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
+    const [corpName, setCorpName] = useState<string>("");
+    const [phoneNumber, setPhoneNumber] = useState<string>("");
+    const [isCheckingEmail, setIsCheckingEmail] = useState<boolean>(false);
+    const [userRole, setUserRole] = useState<"USER" | "ORGANIZER" | null>(null);
 
+    const emailRef = useRef<string>("");
     const location = useLocation();
     const navigate = useNavigate();
+
+    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const isValidPassword = (password: string) => password.length >= 8;
+
+    useEffect(() => {
+        const storedEmail = localStorage.getItem("pendingEmail");
+
+        if (storedEmail) {
+            console.log("✅ Загружаем email пользователя из localStorage...");
+            setEmail(storedEmail);
+            emailRef.current = storedEmail;
+            setIsCheckingEmail(true);
+        }
+    }, [location.pathname]);
+
+    useEffect(() => {
+        if (location.pathname !== "/verify") return;
+
+        const storedEmail = localStorage.getItem("pendingEmail");
+        const storedRole = localStorage.getItem("userRole");
+
+        if (!storedEmail || !storedRole) {
+            console.error("🚨 Нет email или роли в localStorage! Останавливаем проверку.");
+            return;
+        }
+
+        console.log("⏳ Начало проверки email...");
+
+        const interval = setInterval(async () => {
+            try {
+                console.log("🔍 Проверяем email:", storedEmail);
+                const response = await checkEmailVerification(storedEmail);
+
+                if (response?.status === 200 && response.data === "email провалидирован!") {
+                    console.log("✅ Email подтвержден! Остановка проверки.");
+
+                    clearInterval(interval);
+
+                    setTimeout(() => {
+                        navigate(storedRole === "ORGANIZER" ? "/organizer/register/corpInfo" : "/login/users");
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error("⚠️ Ошибка при проверке email:", error);
+            }
+        }, 10000); // Проверка email каждые 10 секунд
+
+        return () => {
+            console.log("🛑 Очистка интервала проверки email.");
+            clearInterval(interval);
+        };
+    }, [location.pathname]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            // Регистрация Покупателя
-            if (location.pathname === "/user/register") {
-                if (!email || !password || !confirmPassword) {
-                    throw new Error("Заполните все поля");
+            if (location.pathname === "/user/register" || location.pathname === "/organizer/register/baseInfo") {
+                if (!email || !password || !confirmPassword) throw new Error("Заполните все поля");
+                if (!isValidEmail(email)) throw new Error("Некорректный формат email");
+                if (!isValidPassword(password)) throw new Error("Пароль должен содержать минимум 8 символов");
+                if (password !== confirmPassword) throw new Error("Пароли не совпадают");
+
+                const role = location.pathname === "/user/register" ? "USER" : "ORGANIZER";
+
+                console.log("📩 Отправка запроса на регистрацию:", email, password, role);
+                localStorage.setItem("pendingEmail", email);
+                localStorage.setItem("userRole", role);
+                console.log(localStorage.getItem("pendingEmail"));
+                const response = await registerUser(email, password, role);
+
+                if (response?.status !== 200) {
+                    throw new Error("Ошибка регистрации. Попробуйте снова.");
                 }
-                if (password === confirmPassword) {
-                    const userRegistrationData = {
-                        email,
-                        password };
-                    verifyEmailCode(userRegistrationData.email);
-                    navigate("/verify", { state: { fromUserRegister: true } });
-                    //console.log("Регистрация пользователя: ", userRegistrationData);// После регистрации переход на логин
+
+                console.log("✅ Регистрация успешна! Сохранение данных в localStorage...");
+                setIsCheckingEmail(true);
+
+                console.log("🚀 Переход на страницу верификации...");
+                navigate("/verify", { state: { fromUserRegister: role === "USER", fromBaseInfo: role === "ORGANIZER" } });
+
+            } else if (location.pathname === "/organizer/register/corpInfo") {
+                console.log(localStorage.getItem("pendingEmail"));
+                if (!corpName || !phoneNumber) throw new Error("Заполните все поля");
+                const storageEmail = localStorage.getItem("pendingEmail");
+                if (!storageEmail) throw new Error("Email не найден");
+
+                console.log("📜 Отправка корпоративных данных...");
+                const response = await submitOrganizerCorpInfo(storageEmail, corpName, phoneNumber);
+                console.log("✅ Корпоративные данные успешно отправлены");
+                console.log(response);
+                localStorage.removeItem("pendingEmail");
+                localStorage.removeItem("userRole");
+                navigate("/pending");
+
+            } else if (location.pathname === "/login/users" || location.pathname === "/login/admin") {
+                if (!email || !password) throw new Error("Заполните все поля");
+
+                console.log("🔑 Попытка входа...");
+                if (location.pathname === "/login/admin") {
+                    const response = await loginAdmin(email, password);
+                    console.log("🎩 Администратор вошел:", response);
                 } else {
-                    throw new Error("Пароли не совпадают");
-                }
-            }
-            // Регистрация Организатора первая
-            else if (location.pathname === "/organizer/register/baseInfo") {
-                if (!email || !password || !confirmPassword) {
-                    throw new Error("Заполните все поля");
-                }
-                if (password === confirmPassword) {
-/*                    const organizerRegistrationDates = {
-                        email,
-                        password
-                    }*/
-                    navigate("/verify", { state: { fromBaseInfo: true } });
-                }
-            }
-            // Регистрация организатора вторая
-            else if (location.pathname === "/organizer/register/corpInfo") {
-                if (!corpName || !phoneNumber) {
-                    throw new Error("Заполните все поля");
-                }
-/*                const organizerRegistrationDates = {
-                    corpName,
-                    phoneNumber,
-                }*/
-                navigate("/login/users")
-            }
-            // Авторизация пользователя
-            else if (location.pathname === "/login/users") {
-                if (!email || !password) {
-                    throw new Error("Заполните все поля");
-                }
-                navigate("/user/home")
-                console.log(email)
-            }
-            // Авторизация админа
-            else if (location.pathname === "/login/admin") {
-                if (!email || !password) {
-                    throw new Error("Заполните все поля");
-                }
-                navigate("/user/home")
-                console.log(email)
-            }
-            // Верификация
-            else if (location.pathname === "/verify") {
-                if (verificationCode === "123456") { // Пример верификационного кода
-                    // Проверяем откуда пришел пользователь
-                    if (location.state?.fromBaseInfo) {
-                        // Если пришел с /organizer/register/baseInfo, переходим на /organizer/register/corpInfo
-                        navigate("/organizer/register/corpInfo");
-                    } else if (location.state?.fromUserRegister) {
-                        // Если пришел с /user/register, переходим на /user/login
-                        navigate("/login/users");
+                    const response = await loginUser(email, password);
+                    if (response?.data.role === "user") {
+                        navigate("/user/home");
+                    } else if (response?.data.role === "organizer") {
+                        navigate("/organizer/home");
                     } else {
-                        // Если не передано состояние, просто перенаправляем на логин
-                        navigate("/login/users");
+                        throw new Error("Неверные учетные данные");
                     }
-                } else {
-                    console.log("unlucky");
                 }
+
+            } else if (location.pathname === "/verify") {
+                navigate(location.state?.fromBaseInfo ? "/organizer/register/corpInfo" : "/login/users");
             }
         } catch (error: any) {
+            console.error("❌ Ошибка:", error.message);
             setErrorMessage(error.message || "Ошибка обработки данных");
         }
     };
@@ -121,41 +162,23 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                             borderRadius={5}
                             boxShadow={"5px 5px 10px #ccc"}
                         >
-                            {errorMessage && (
-                                <p style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</p>
-                            )}
-                            { location.pathname === "/user/register" ? (
-                                <UserRegisterPage
-                                    setEmail={setEmail}
-                                    setPassword={setPassword}
-                                    setConfirmPassword={setConfirmPassword}
-                                />
+                            {errorMessage && <p style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</p>}
+
+                            {location.pathname === "/user/register" ? (
+                                <UserRegisterPage setEmail={setEmail} setPassword={setPassword} setConfirmPassword={setConfirmPassword} />
                             ) : location.pathname === "/organizer/register/baseInfo" ? (
-                                <OrganizerRegisterPageBaseInfo
-                                    setEmail={setEmail}
-                                    setPassword={setPassword}
-                                    setConfirmPassword={setConfirmPassword}
-                                />
+                                <OrganizerRegisterPageBaseInfo setEmail={setEmail} setPassword={setPassword} setConfirmPassword={setConfirmPassword} />
                             ) : location.pathname === "/organizer/register/corpInfo" ? (
-                                <OrganizerRegisterPageCorpInfo
-                                    setPhoneNumber = {setPhoneNumber}
-                                    setCorpName = {setCorpName}
-                                />
+                                <OrganizerRegisterPageCorpInfo setPhoneNumber={setPhoneNumber} setCorpName={setCorpName} />
                             ) : location.pathname === "/login/users" ? (
-                                <UsersLoginPage
-                                    setEmail = {setEmail}
-                                    setPassword = {setPassword}
-                                />
+                                <UsersLoginPage setEmail={setEmail} setPassword={setPassword} />
                             ) : location.pathname === "/login/admin" ? (
-                                <AdminLoginPage
-                                    setEmail = {setEmail}
-                                    setPassword = {setPassword}
-                                />
+                                <AdminLoginPage setEmail={setEmail} setPassword={setPassword} />
                             ) : location.pathname === "/verify" ? (
-                                <VerificationPage
-                                    setVerificationCode = {setVerificationCode}
-                                />
-                            )  : null}
+                                <VerificationPage />
+                            ) : location.pathname === "/pending" ? (
+                                <PendingPage/>
+                            ): null}
                         </Box>
                     </form>
                 </div>

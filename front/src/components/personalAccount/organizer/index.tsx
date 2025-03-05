@@ -1,115 +1,119 @@
-import React, { useState } from "react";
-import { Container, Typography, TextField, Button, Grid, Paper } from "@mui/material";
-import {useNavigate} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Container, Typography, TextField, Button, Grid, Paper, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { fetchOrganizerProfile, updateOrganizerProfile } from "../../../utils/axios";
 
 const OrganizerPersonalAccount: React.FC = () => {
     const navigate = useNavigate();
-    // Состояние пользователя
-    const [user, setUser] = useState({
-        email: "user@example.com",
-        password: "password123",
+    
+    // Organizer profile state
+    const [organizer, setOrganizer] = useState({
+        companyName: "",
+        contactPhone: "",
+        contactEmail: "",
+        bankAccount: "",
     });
 
-    // Состояние для редактирования
-    const [newEmail, setNewEmail] = useState(user.email);
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Обработчик обновления email
-    const handleUpdateEmail = () => {
-        if (newEmail.trim() === "") {
-            alert("Email не может быть пустым.");
-            return;
-        }
-        setUser((prevUser) => ({ ...prevUser, email: newEmail }));
-        alert("Email успешно обновлен.");
+    // ✅ Fetch organizer profile from backend
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                const profileData = await fetchOrganizerProfile();
+                // ✅ Map backend response to frontend state format
+                setOrganizer({
+                    companyName: profileData.companyName || "Не указано",
+                    contactPhone: profileData.contactNumber || "Не указано",
+                    contactEmail: profileData.user.email,
+                    bankAccount: profileData.bankAccount || "Не указано",
+                });
+            } catch (err) {
+                setError("Не удалось загрузить профиль");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProfile();
+    }, []);
+
+    // ✅ Edit Modal Handling
+    const [openModal, setOpenModal] = useState(false);
+    const [editField, setEditField] = useState("");
+    const [updatedValue, setUpdatedValue] = useState("");
+
+    const handleEdit = (fieldName: string, currentValue: string) => {
+        setEditField(fieldName);
+        setUpdatedValue(currentValue);
+        setOpenModal(true);
     };
 
-    // Обработчик обновления пароля
-    const handleUpdatePassword = () => {
-        if (newPassword.trim() === "") {
-            alert("Пароль не может быть пустым.");
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            alert("Пароли не совпадают.");
-            return;
-        }
-        setUser((prevUser) => ({ ...prevUser, password: newPassword }));
-        alert("Пароль успешно обновлен.");
-        setNewPassword("");
-        setConfirmPassword("");
-    };
-    const handleGoBack = () => {
-        navigate("/organizer/home");
-    };
 
+
+    const handleSave = async () => {
+        try {
+            await updateOrganizerProfile({ ...organizer, [editField]: updatedValue });
+            setOrganizer((prev) => ({ ...prev, [editField]: updatedValue }));
+            setOpenModal(false);
+        } catch (error) {
+            alert("Ошибка при обновлении данных");
+        }
+    };
+    
     return (
-        <Container maxWidth="sm" style={{ marginTop: "2rem" }}>
-            <Paper elevation={3} style={{ padding: "2rem" }}>
-                <Typography variant="h4" align="center" gutterBottom>
-                    Личный кабинет
+        <Container maxWidth="sm" sx={{ mt: 4 }}>
+            <Paper elevation={3} sx={{ p: 4 }}>
+                <Typography variant="h4" align="center" sx={{ mb: 3, color: "primary.main" }}>
+                    📋 Профиль организатора
                 </Typography>
 
-                {/* Текущие данные пользователя */}
-                <Typography variant="h6">Текущая информация</Typography>
-                <Typography variant="body1">Email: {user.email}</Typography>
-                <Typography variant="body1">Пароль: *******</Typography>
-
-                <Grid container spacing={2} style={{ marginTop: "1rem" }}>
-                    {/* Изменение Email */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6">Изменить Email</Typography>
-                        <TextField
-                            label="Новый Email"
-                            value={newEmail}
-                            onChange={(e) => setNewEmail(e.target.value)}
-                            fullWidth
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            style={{ marginTop: "1rem" }}
-                            onClick={handleUpdateEmail}
-                        >
-                            Обновить Email
+                {loading ? (
+                    <CircularProgress />
+                ) : error ? (
+                    <Typography color="error">{error}</Typography>
+                ) : (
+                    <>
+                        <Typography>📧 Email: {organizer.contactEmail}</Typography>
+                        <Typography variant="h6" sx={{ mt: 3 }}> {organizer.companyName}</Typography>
+                        <Button variant="outlined" color="primary" onClick={() => handleEdit("companyName", organizer.companyName)}>
+                            Изменить компанию
                         </Button>
-                    </Grid>
 
-                    {/* Изменение пароля */}
-                    <Grid item xs={12}>
-                        <Typography variant="h6">Изменить пароль</Typography>
-                        <TextField
-                            label="Новый пароль"
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Подтвердите новый пароль"
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            fullWidth
-                            style={{ marginTop: "1rem" }}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            style={{ marginTop: "1rem" }}
-                            onClick={handleUpdatePassword}
-                        >
-                            Обновить пароль
+                        <Typography>📞 Телефон: {organizer.contactPhone}</Typography>
+                        <Button variant="outlined" color="primary" onClick={() => handleEdit("contactPhone", organizer.contactPhone)}>
+                            Изменить телефон
                         </Button>
-                    </Grid>
-                </Grid>
-                <Grid container justifyContent="flex-end" style={{ marginTop: "1rem" }}>
-                    <Button variant="outlined" color="secondary" onClick={handleGoBack}>
-                        Назад
-                    </Button>
-                </Grid>
+
+
+                        <Typography variant="h6" sx={{ mt: 3, color: "primary.main" }}>🏦 Банковские реквизиты</Typography>
+                        <Typography>{organizer.bankAccount || "Не указано"}</Typography>
+                        <Button variant="outlined" color="primary" onClick={() => handleEdit("bankAccount", organizer.bankAccount)}>
+                            Изменить реквизиты
+                        </Button>
+
+                        <Grid container justifyContent="flex-end" sx={{ mt: 4 }}>
+                            <Button variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
+                                Назад
+                            </Button>
+                        </Grid>
+                    </>
+                )}
             </Paper>
+
+            {/* ✅ Edit Modal */}
+            <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+                <DialogTitle>✏️ Редактировать</DialogTitle>
+                <DialogContent>
+                    <TextField value={updatedValue} onChange={(e) => setUpdatedValue(e.target.value)} fullWidth margin="normal" />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenModal(false)} color="secondary">Отмена</Button>
+                    <Button onClick={handleSave} color="primary">Сохранить</Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

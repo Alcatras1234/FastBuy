@@ -3,7 +3,6 @@ package org.example.auth_server.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.auth_server.enums.ContactTypeEnum;
 
 import java.time.LocalDateTime;
 
@@ -20,32 +19,20 @@ public class Organizator {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-    @Column(name = "company_name", nullable = false)
-    private String companyName;
+   @Column(name = "company_name")
+   private String companyName;
 
-    @Column(name = "registration_number", unique = true, nullable = false)
-    private String registrationNumber;
+   @Column(name = "contact_number")
+   private String contactNumber;
 
-    @Column(name = "tax_id", unique = true, nullable = false)
-    private String taxId;
+   @Column(name =  "bank_account")
+   private String bankAccount;
 
-    @Column(name = "legal_address", nullable = false, length = 255)
-    private String legalAddress;
-
-    @Column(name = "postal_code", nullable = false, length = 20)
-    private String postalCode;
-
-    @Column(name = "contact_type", nullable = false, length = 50)
-    private String contactType;
-
-    @Column(name = "contact_value", nullable = false, length = 255)
-    private String contactValue;
-
-    @Column(name = "is_primary", nullable = false)
-    private Boolean isPrimary = false;
+   @Column(name = "approved")
+   private boolean approved = false;
 
     @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
+    private LocalDateTime createdDttm = LocalDateTime.now();
 
     @Column(name = "updated_dttm")
     private LocalDateTime updatedDttm;
