@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 // Create an axios instance with default configurations
 export const instance = axios.create({
-    baseURL: "http://localhost:8081", // Use your backend API URL
+    baseURL: "http://localhost:8080", // Use your backend API URL
     timeout: 10000,
     headers: { 'X-Custom-Header': 'foobar' }
 });
@@ -37,7 +37,7 @@ instance.interceptors.response.use(
 
             try {
                 console.log("🔄 Попытка обновления `accessToken`...");
-                const response = await axios.post("http://localhost:8081/api/auth_service/refresh", {
+                const response = await axios.post("http://localhost:8080/api/auth_service/refresh", {
                     refreshToken,
                 });
 
@@ -360,11 +360,10 @@ export const updateOrganizerProfile = async (updatedData) => {
 
 export const fetchUsersMatches = async (page: number, count: number) => {
     try {
-        const token = Cookies.get("token");
+        const token = Cookies.get("accessToken");
         if (!token) throw new Error("Токен отсутствует, выполните вход.");
-        const response = await instance.get("/api/organizer_service/match/data", {
-            params: { page, count },
-            headers: { Authorization: `Bearer ${token}` }});
+        const response = await instance.get("/match", {
+            params: { page, count, token }});
         const data = response.data;
 
         if (!Array.isArray(data)) {
