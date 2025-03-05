@@ -11,6 +11,6 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 public class AuthServiceConfig {
-    @NotEmpty String email;
+    @NotEmpty String gmail;
     @NotEmpty String password;
 }

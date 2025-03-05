@@ -24,7 +24,7 @@ public class EmailService {
     private Session session;
 
     public EmailService(AuthServiceConfig config) {
-        from = config.getEmail();
+        from = config.getGmail();
         password = config.getPassword();
     }
 
