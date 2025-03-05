@@ -49,7 +49,7 @@ public class EmailService {
                     return new PasswordAuthentication(from, password);
                 }
             });
-
+            session.setDebug(true);
             try {
                 log.info(session.getProperties());
                 MimeMessage message = new MimeMessage(session);
