@@ -27,6 +27,8 @@ const OrganizerHomePage: React.FC = () => {
 
                 // ✅ Загружаем все матчи
                 const realData = await fetchOrganizerMatches(0, 10);
+
+                console.log(realData);
     
                 // ✅ Фильтруем только матчи этого организатора
                 const filteredMatches = realData.filter(match => match.organizer?.email === organizerEmail);
@@ -56,12 +58,13 @@ const OrganizerHomePage: React.FC = () => {
         loadMatches();
     }, []);
    
-    const handleDeleteMatch = async (matchUuid: string) => { // ✅ Change matchId to matchUuid
+    const handleDeleteMatch = async (match: any) => { // ✅ Change matchId to matchUuid
         if (!window.confirm("Вы уверены, что хотите удалить этот матч?")) return;
     
         try {
-            await deleteMatch(matchUuid); // ✅ Use matchUuid instead of matchId
-            setMatches(matches.filter(match => match.uuid !== matchUuid)); // ✅ Filter using uuid
+            console.log(match.uuid);
+            await deleteMatch(match.uuid); // ✅ Use matchUuid instead of matchId
+            setMatches(matches.filter(match => match.uuid !== match.uuid)); // ✅ Filter using uuid
         } catch (error) {
             alert("Ошибка удаления матча");
         }
