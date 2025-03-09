@@ -10,7 +10,7 @@ export const instance = axios.create({
 
 // ✅ Перехватываем запросы и подставляем `accessToken`
 instance.interceptors.request.use(config => {
-    const token = Cookies.get("acccessToken");
+    const token = Cookies.get("accessToken");
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

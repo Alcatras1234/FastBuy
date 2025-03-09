@@ -6,6 +6,7 @@ import HomePage from "./components/home";
 import PrivateRoute from "./utils/router/privateRoute.tsx";
 import OrganizerPersonalAccount from "./components/personalAccount/organizer";
 import AddMatchPage from "./components/matches/organizer/add";
+import BuyPage from "./components/matches/user/buy";
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/user/home" element={<HomeRootComponent />} />
                 <Route path="/organizer/home" element={<HomeRootComponent />} />
                 <Route path="/admin/home" element={<HomeRootComponent />} />
+                <Route path="/buy" element={<BuyPage />} />
 
             </Routes>
         </div>
