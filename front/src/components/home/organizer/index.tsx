@@ -97,7 +97,6 @@ const OrganizerHomePage: React.FC = () => {
 
     const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-
         setEditingMatch((prev: any) => ({
             ...prev,
             [name]: value,

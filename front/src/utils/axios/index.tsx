@@ -389,14 +389,15 @@ export const updateOrganizerProfile = async (updatedData) => {
     }
 };
 
-export const fetchUsersMatches = async (page: number, count: number) => {
+export const fetchUsersMatches = async (page = 0, count = 5) => {
     try {
-        const token = Cookies.get("accessToken");
-        if (!token) throw new Error("Токен отсутствует, выполните вход.");
+        const access_token = Cookies.get("accessToken");
+        console.log(access_token);
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
         const response = await instance.get("/match", {
-            params: { page, count, token }});
+            params: { page, count, access_token }});
         const data = response.data;
-
+        console.log(data);
         if (!Array.isArray(data)) {
             throw new Error("Некорректный формат данных от сервера");
         }

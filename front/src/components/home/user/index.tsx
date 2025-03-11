@@ -51,10 +51,20 @@ const UserHomePage: React.FC = () => {
         const loadMatches = async () => {
             try {
                 setIsLoading(true);
-                const responseMatches = await fetchUsersMatches(page, 5);
+                console.log(1);
+                
+                const responseMatches = await fetchUsersMatches(0, 5);
+                console.log(2);
+
+                if (!responseMatches || !Array.isArray(responseMatches)) {
+                    throw new Error("❌ Данные матчей отсутствуют или имеют неверный формат!");
+                }
+
+                console.log("📡 Полученные матчи от сервера:", responseMatches); // ✅ Debugging API Response
 
                 setMatches(responseMatches);
                 setFilteredMatches(responseMatches);
+
 
                 const uniqueCities = [...new Set(responseMatches.map(match => match.city))];
                 setCities(uniqueCities);
