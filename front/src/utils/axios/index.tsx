@@ -297,12 +297,22 @@ export const updateMatch = async (matchUuid: string, updatedData: any) => {
         const token = Cookies.get("accessToken");
         if (!token) throw new Error("❌ Токен отсутствует, выполните вход.");
 
-        const requestBody = { token, ...updatedData }; // ✅ Ensure `token` is in request body
+        // ✅ Extract only required fields (removes uuid & id)
+        const requestBody = {
+            token,
+            teamA: updatedData.teamA,
+            teamB: updatedData.teamB,
+            date: updatedData.date,
+            time: updatedData.time,
+            stadium: updatedData.location, // ✅ Use `stadium`, not `location`
+            tickets: updatedData.tickets,
+            ticketPrice: updatedData.ticketPrice,
+        };
 
         console.log("📡 Отправка обновленных данных матча:", { uuid: matchUuid, requestBody });
 
         const response = await instance.put("/api/organizer_service/match", requestBody, {
-            params: { uuid: matchUuid }, // ✅ Backend expects `uuid` in params
+            params: { uuid: matchUuid }, // ✅ Send uuid ONLY as param
         });
 
         console.log("✅ Матч успешно обновлен:", response.data);
@@ -312,6 +322,7 @@ export const updateMatch = async (matchUuid: string, updatedData: any) => {
         throw new Error(error.response?.data?.message || "Ошибка при обновлении матча.");
     }
 };
+
 
 export const deleteMatch = async (matchUuid: string) => {
     try {

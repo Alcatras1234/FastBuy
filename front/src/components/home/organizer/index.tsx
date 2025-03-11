@@ -57,15 +57,35 @@ const OrganizerHomePage: React.FC = () => {
     
         loadMatches();
     }, []);
-   
-    const handleDeleteMatch = async (match: any) => { // ✅ Change matchId to matchUuid
+
+
+    const handleDeleteMatch = async (match: any) => { 
         if (!window.confirm("Вы уверены, что хотите удалить этот матч?")) return;
     
         try {
-            console.log(match.uuid);
-            await deleteMatch(match.uuid); // ✅ Use matchUuid instead of matchId
-            setMatches(matches.filter(match => match.uuid !== match.uuid)); // ✅ Filter using uuid
+            console.log("🚀 Удаляем матч с UUID:", match.uuid);
+    
+            await deleteMatch(match.uuid); // ✅ Deleting match
+    
+            // ✅ Fetch fresh matches after deleting one
+            const updatedMatches = await fetchOrganizerMatches(0, 10);
+                // ✅ Приводим к нужному формату
+            const formattedMatches = updatedMatches.map(match => ({
+                id: match.id || "Нет данных",
+                    uuid: match.uuid, // ✅ Add uuid 
+                    teamA: match.teamHomeName || "Неизвестно",
+                    teamB: match.teamAwayName || "Неизвестно",
+                    date: match.scheduleDate || "Неизвестно",
+                    time: match.scheduleTimeLocal || "Неизвестно",
+                    location: match.stadiumName || "Не указано",
+                    tickets: match.ticketsCount || 0,
+                    ticketPrice: match.ticketsPrice || 0,
+                }));
+            setMatches(formattedMatches);
+            
+            console.log("✅ Список матчей обновлен:", updatedMatches);
         } catch (error) {
+            console.error("❌ Ошибка при удалении:", error);
             alert("Ошибка удаления матча");
         }
     };
@@ -77,6 +97,7 @@ const OrganizerHomePage: React.FC = () => {
 
     const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+
         setEditingMatch((prev: any) => ({
             ...prev,
             [name]: value,
@@ -85,6 +106,7 @@ const OrganizerHomePage: React.FC = () => {
 
     const handleUpdateMatch = async () => {
         try {
+            console.log(editingMatch)
             if (!editingMatch || !editingMatch.uuid) { 
                 throw new Error("❌ Ошибка: UUID отсутствует");
             }
@@ -118,7 +140,7 @@ const OrganizerHomePage: React.FC = () => {
             {loading && <CircularProgress />}
             {error && <Typography color="error">{error}</Typography>}
 
-            <MatchList matches={matches} onEdit={handleEditMatch} onDelete={handleDeleteMatch} />
+            <MatchList matches={matches} onEdit={handleEditMatch} onDelete={(match) => handleDeleteMatch(match)} />
 
             <EditMatchModal open={openDialog} match={editingMatch} onClose={() => setOpenDialog(false)} onSave={handleUpdateMatch} onChange={handleEditChange} />
         </Container>
