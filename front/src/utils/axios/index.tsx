@@ -68,6 +68,8 @@ instance.interceptors.response.use(
 export const registerUser = async (email: string, password: string, role: string) => {
     try {
         console.log("Данные отправляются")
+        localStorage.setItem("pendingEmail", email);
+        localStorage.setItem("userRole", role);
         const response = await instance.post('/api/auth_service/registration', { email, password, role});
         console.log("Отправленные данные:", { email, password });
         console.log("Ответ сервера:", response);
