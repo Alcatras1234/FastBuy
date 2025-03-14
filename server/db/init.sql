@@ -66,3 +66,30 @@ CREATE TABLE matches (
     updated_dttm TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE stadiums(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    city VARCHAR(50)
+);
+
+CREATE TABLE seats (
+    id SERIAL PRIMARY KEY,
+    row INTEGER,
+    sector VARCHAR(10),
+    match_id INTEGER REFERENCES matches(id) NOT NULL,
+    price DECIMAL(12,2),
+    stadium_id INTEGER REFERENCES stadiums(id) NOT NULL,
+    status VARCHAR(50)
+);
+
+CREATE TABLE tickets (
+    id SERIAL PRIMARY KEY,
+    seat_id INTEGER REFERENCES seats(id) NOT NULL,
+    price DECIMAL(12,2),
+    user_id INTEGER REFERENCES users(id) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP,
+    statuc VARCHAR(50)
+);
+
+

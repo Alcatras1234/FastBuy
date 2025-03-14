@@ -9,11 +9,11 @@ import org.example.auth_server.dto.organizator.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.organizator.ContactOrganizatorInfoRequest;
 import org.example.auth_server.dto.organizator.OrganizatorUpdateDataRequest;
 import org.example.auth_server.dto.organizator.UnprovenOrganizationRequest;
-import org.example.auth_server.model.Match;
-import org.example.auth_server.model.Organizator;
-import org.example.auth_server.model.User;
+import org.example.auth_server.model.*;
 import org.example.auth_server.repository.MatchRepository;
 import org.example.auth_server.repository.OrganizatorRepository;
+import org.example.auth_server.repository.SeatsRepository;
+import org.example.auth_server.repository.StadiumRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public class OrganizatorService {
 
     private final OrganizatorRepository organizatorRepository;
     private final MatchRepository matchRepository;
+    private final StadiumRepository stadiumRepository;
+    private final SeatsRepository seatsRepository;
 
     private final ObjectMapper objectMapper;
 
@@ -47,9 +50,11 @@ public class OrganizatorService {
 
 
     @Autowired
-    public OrganizatorService(OrganizatorRepository organizatorRepository, MatchRepository matchRepository, ObjectMapper objectMapper, RedisTemplate<String, Object> redisTemplate, UserWorkService userWorkService) {
+    public OrganizatorService(OrganizatorRepository organizatorRepository, MatchRepository matchRepository, StadiumRepository stadiumRepository, SeatsRepository seatsRepository, ObjectMapper objectMapper, RedisTemplate<String, Object> redisTemplate, UserWorkService userWorkService) {
         this.organizatorRepository = organizatorRepository;
         this.matchRepository = matchRepository;
+        this.stadiumRepository = stadiumRepository;
+        this.seatsRepository = seatsRepository;
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
         this.userWorkService = userWorkService;
@@ -187,7 +192,6 @@ public class OrganizatorService {
         return organizators;
     }
 
-    //TODO: переписать, пусть организатор возвращается отдельной функцией
     @Transactional // Убирает организатора из одобренных
     public void setUnpproved(UnprovenOrganizationRequest info) {
         log.info("Начал процесс сохранения информации организатора: " + info.getEmail());
@@ -259,6 +263,8 @@ public class OrganizatorService {
         inOrganizators(user);
 
         Match match = new Match();
+        Stadium stadium = new Stadium();
+        Seats seats = new Seats();
 
 
         try {
@@ -274,6 +280,12 @@ public class OrganizatorService {
             log.info("Пользователь: " + user);
             match.setOrganizer(user);
             matchRepository.save(match);
+
+            stadium.setName(info.getStadium());
+            stadiumRepository.saveAndFlush(stadium);
+
+            addSeats(info.getTickets(), match, stadium, info.getTicketPrice());
+
             String key = "match:" + email + ":" + uuid;
             redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
         } catch (UnexpectedRollbackException e) {
@@ -404,5 +416,17 @@ public class OrganizatorService {
         if (!organizator.isApproved()) {
             throw new IllegalArgumentException("Организатор не подтвержден");
         }
+    }
+    @Transactional
+    protected void addSeats(Integer seatsCount, Match match, Stadium stadium, Integer ticketPrice) {
+        for (int i = 0; i < seatsCount; i++) {
+            Seats seat = new Seats();
+            seat.setPrice(BigDecimal.valueOf(ticketPrice));
+            seat.setMatchId(match);
+            seat.setStadiumId(stadium);
+            seat.setStatus("free");
+            seatsRepository.saveAndFlush(seat);
+        }
+        log.info("Закончил добавлять билеты на матч {}", match);
     }
 }
