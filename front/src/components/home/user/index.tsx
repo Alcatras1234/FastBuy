@@ -52,7 +52,7 @@ const UserHomePage: React.FC = () => {
             try {
                 setIsLoading(true);
                 console.log(1);
-                
+
                 const responseMatches = await fetchUsersMatches(0, 5);
                 console.log(2);
 
@@ -97,7 +97,10 @@ const UserHomePage: React.FC = () => {
     };
 
     const handleOpenBuyPage = () => {
-        navigate('/buy');
+        if (selectedMatch) {
+            console.log(selectedMatch);
+            navigate('/buy', { state: { match: selectedMatch } });
+        }
     };
 
     return (
@@ -179,7 +182,7 @@ const UserHomePage: React.FC = () => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        onClick={() => handleOpenBuyPage}  // Передаем саму функцию в onClick
+                        onClick={handleOpenBuyPage}  // Передаем саму функцию в onClick
                     >
                         Перейти к оплате
                     </Button>

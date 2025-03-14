@@ -36,35 +36,21 @@ const BuyPage: React.FC = () => {
     const [numberOfTickets, setNumberOfTickets] = useState<number>(1);
     const [totalPrice, setTotalPrice] = useState<number>(0);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const navigate = useNavigate();
     const location = useLocation();
-    const { matchId }: any = location.state || {}; // Получаем matchId из состояния маршрута
 
     useEffect(() => {
-        // Загружаем информацию о выбранном матче по matchId
-        const fetchMatch = async () => {
-            try {
-                // Здесь предполагается, что данные о матче можно загрузить через API или из глобального состояния
-                // В примере используется mock, где данные матчей загружаются по matchId
-                const response = await fetch(`https://api.example.com/matches/${matchId}`);
-                const matchData = await response.json();
-                setMatch(matchData);
-                setTotalPrice(matchData.ticketsPrice * numberOfTickets); // Начальная калькуляция
-            } catch (error) {
-                console.error("Ошибка загрузки данных о матче:", error);
-            }
-        };
-
-        if (matchId) {
-            fetchMatch();
+        const matchData = location.state?.match;
+        if (matchData) {
+            setMatch(matchData);
+            setTotalPrice(matchData.ticketsPrice); // Устанавливаем цену сразу
         }
-    }, [matchId, numberOfTickets]);
+    }, [location.state]);
 
     const handleTicketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const tickets = Number(event.target.value);
-        setNumberOfTickets(tickets);
-        if (match) {
-            setTotalPrice(match.ticketsPrice * tickets); // Пересчитываем цену
+        if (!isNaN(tickets) && tickets > 0 && match && tickets <= match.ticketsCount) {
+            setNumberOfTickets(tickets);
+            setTotalPrice(tickets * match.ticketsPrice);
         }
     };
 
@@ -73,7 +59,6 @@ const BuyPage: React.FC = () => {
     };
 
     const handleProceedToPurchase = () => {
-        // Здесь можно добавить логику перехода к оплате
         setOpenDialog(true);
     };
 
@@ -129,20 +114,21 @@ const BuyPage: React.FC = () => {
                         </Grid>
                     </Grid>
 
-                    {/* Диалог для подтверждения покупки */}
                     <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
                         <DialogTitle>Подтверждение покупки</DialogTitle>
                         <DialogContent>
-                            <Typography>Вы хотите купить {numberOfTickets} билетов за {totalPrice} Руб?</Typography>
+                            <Typography>Вы хотите купить {numberOfTickets} билетов на матч {match.teamHomeName} - {match.teamAwayName} за {totalPrice} Руб?</Typography>
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleCloseDialog} color="secondary">Отмена</Button>
-                            <Button variant="contained" color="primary">Подтвердить покупку</Button>
+                            <Button variant="contained" color="primary">
+                                Подтвердить покупку
+                            </Button>
                         </DialogActions>
                     </Dialog>
                 </>
             ) : (
-                <Typography variant="h6">Загрузка данных о матче...</Typography>
+                <Typography variant="h6" marginTop={4}>Загрузка данных о матче...</Typography>
             )}
         </Container>
     );

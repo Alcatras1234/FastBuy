@@ -41,9 +41,16 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
 
     useEffect(() => {
         if (location.pathname !== "/verify") return;
+        console.log(localStorage.getItem("pendingEmail"));
+        let storedEmail = localStorage.getItem("pendingEmail");
+        let storedRole = localStorage.getItem("userRole");
+        console.log(localStorage.getItem("pendingEmail"));
 
-        const storedEmail = localStorage.getItem("pendingEmail");
-        const storedRole = localStorage.getItem("userRole");
+        if (!storedEmail || !storedRole) {
+            console.warn("🔄 Повторное чтение localStorage...");
+            storedEmail = localStorage.getItem("pendingEmail");
+            storedRole = localStorage.getItem("userRole");
+        }
 
         if (!storedEmail || !storedRole) {
             console.error("🚨 Нет email или роли в localStorage! Останавливаем проверку.");
@@ -98,12 +105,16 @@ const AuthRootComponent: React.FC = (): JSX.Element => {
                 if (response?.status !== 200) {
                     throw new Error("Ошибка регистрации. Попробуйте снова.");
                 }
+                console.log(localStorage.getItem("pendingEmail"));
 
                 console.log("✅ Регистрация успешна! Сохранение данных в localStorage...");
                 setIsCheckingEmail(true);
 
                 console.log("🚀 Переход на страницу верификации...");
-                navigate("/verify", { state: { fromUserRegister: role === "USER", fromBaseInfo: role === "ORGANIZER" } });
+                setTimeout(() => {
+                    console.log(localStorage.getItem("pendingEmail"));
+                    navigate("/verify", { state: { fromUserRegister: role === "USER", fromBaseInfo: role === "ORGANIZER" } });
+                }, 100);
 
             } else if (location.pathname === "/organizer/register/corpInfo") {
                 console.log(localStorage.getItem("pendingEmail"));
