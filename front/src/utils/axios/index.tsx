@@ -308,7 +308,6 @@ export const updateMatch = async (matchUuid: string, updatedData: any) => {
             time: updatedData.time,
             stadium: updatedData.location, // ✅ Use `stadium`, not `location`
             tickets: updatedData.tickets,
-            ticketPrice: updatedData.ticketPrice,
         };
 
         console.log("📡 Отправка обновленных данных матча:", { uuid: matchUuid, requestBody });
