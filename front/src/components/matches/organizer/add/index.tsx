@@ -7,8 +7,7 @@ const AddMatchPage: React.FC = () => {
     const navigate = useNavigate();
     const [tickets, setTickets] = useState([{
         sector: "",
-        rowStart: "",
-        rowEnd: "",
+        row: "",
         seatStart: "",
         seatEnd: "",
         price: "" },
@@ -36,7 +35,7 @@ const AddMatchPage: React.FC = () => {
     };
 
     const handleAddRow = () => {
-        setTickets([...tickets, { sector: "", rowStart: "", rowEnd: "", seatStart: "", seatEnd: "", price: "" }]);
+        setTickets([...tickets, { sector: "", row: "", seatStart: "", seatEnd:"",  price: "" }]);
     };
 
     const handleRemoveRow = (index: number) => {
@@ -79,7 +78,7 @@ const AddMatchPage: React.FC = () => {
             return;
         }
 
-        setOpenDialog(true);
+        setConfirmationOpen(true);
     };
 
     //! Handle final submission after confirmation
@@ -132,8 +131,11 @@ const AddMatchPage: React.FC = () => {
                             <Button variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
                                 Главная
                             </Button>
-                            <Button type="submit" variant="contained" color="primary">
-                                Далее
+                            <Button type="submit" variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
+                                Добавить
+                            </Button>
+                            <Button onClick={()=> setOpenDialog(true)} variant="contained" color="primary">
+                                Билеты
                             </Button>
                         </Box>
                     </Grid>
@@ -181,17 +183,9 @@ const AddMatchPage: React.FC = () => {
                             </Grid>
                             <Grid item xs={2}>
                                 <TextField
-                                    label="С ряда"
-                                    value={ticket.rowStart}
-                                    onChange={(e) => handleChangeTickets(index, "rowStart", e.target.value)}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={2}>
-                                <TextField
-                                    label="До"
-                                    value={ticket.rowEnd}
-                                    onChange={(e) => handleChangeTickets(index, "rowEnd", e.target.value)}
+                                    label="Ряд"
+                                    value={ticket.row}
+                                    onChange={(e) => handleChangeTickets(index, "row", e.target.value)}
                                     fullWidth
                                 />
                             </Grid>
@@ -205,7 +199,7 @@ const AddMatchPage: React.FC = () => {
                             </Grid>
                             <Grid item xs={2}>
                                 <TextField
-                                    label="До"
+                                    label="до"
                                     value={ticket.seatEnd}
                                     onChange={(e) => handleChangeTickets(index, "seatEnd", e.target.value)}
                                     fullWidth

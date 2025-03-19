@@ -10,6 +10,12 @@ import Cookies from "js-cookie";
 
 const OrganizerHomePage: React.FC = () => {
     const navigate = useNavigate();
+    const [tickets, setTickets] = useState([{
+        sector: "",
+        row: "",
+        seatCount: "",
+        price: "" },
+    ]);
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -42,8 +48,8 @@ const OrganizerHomePage: React.FC = () => {
                     date: match.scheduleDate || "Неизвестно",
                     time: match.scheduleTimeLocal || "Неизвестно",
                     location: match.stadiumName || "Не указано",
-                    tickets: match.ticketsCount || 0,
-                    ticketPrice: match.ticketsPrice || 0,
+                    /*tickets: match.tickets || "Не указано",*/
+
                 }));
     
                 setMatches(formattedMatches);
@@ -78,8 +84,8 @@ const OrganizerHomePage: React.FC = () => {
                     date: match.scheduleDate || "Неизвестно",
                     time: match.scheduleTimeLocal || "Неизвестно",
                     location: match.stadiumName || "Не указано",
-                    tickets: match.ticketsCount || 0,
-                    ticketPrice: match.ticketsPrice || 0,
+                    /*tickets: match.ticketsCount || 0,
+                    ticketPrice: match.ticketsPrice || 0,*/
                 }));
             setMatches(formattedMatches);
             
