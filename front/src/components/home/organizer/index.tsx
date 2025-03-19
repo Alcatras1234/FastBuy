@@ -8,6 +8,7 @@ import EditMatchModal from "../../matches/organizer/edit"; // Match editing moda
 import Cookies from "js-cookie";
 
 
+
 const OrganizerHomePage: React.FC = () => {
     const navigate = useNavigate();
     const [matches, setMatches] = useState([]);
