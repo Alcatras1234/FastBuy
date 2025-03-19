@@ -390,38 +390,78 @@ export const updateOrganizerProfile = async (updatedData) => {
     }
 };
 
+// export const fetchUsersMatches = async (page = 0, count = 5) => {
+//     try {
+//         const access_token = Cookies.get("accessToken");
+//         console.log(access_token);
+//         if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+//         const response = await instance.get("/match", {
+//             params: { page, count, access_token }});
+//         const data = response.data;
+//         console.log(data);
+//         if (!Array.isArray(data)) {
+//             throw new Error("Некорректный формат данных от сервера");
+//         }
+
+//         return data.map((item) => ({
+//             id: item.id || "Нет данных",
+//             league: item.league || "Нет данных",
+//             scheduleDate: item.scheduleDate || "Нет данных",
+//             scheduleTimeLocal: item.scheduleTimeLocal || "Нет данных",
+//             stadiumName: item.stadiumName || "Нет данных",
+//             ticketsCount: item.ticketsCount || "Нет данных",
+//             ticketsPrice: item.ticketsPrice || "Нет данных",
+//             info: item.info || "Нет данных",
+//             teamHomeName: item.teamHomeName || "Нет данных",
+//             teamAwayName: item.teamAwayName || "Нет данных",
+//             photoUrl: item.photoUrl || "",
+//             /*organizer: item.organizer?.name ? `${item.organizer.name} ${item.organizer.surname}` : "Нет данных",*/
+//             status: item.status || "Нет данных",
+//             createdDateTime: item.createdDateTime || "Нет данных",
+//             updatedDateTime: item.updatedDateTime || "Нет данных",
+//         }));
+
+//     } catch (error) {
+//         throw new Error(error.message);
+//     }
+// }
+
+
 export const fetchUsersMatches = async (page = 0, count = 5) => {
-    try {
-        const access_token = Cookies.get("accessToken");
-        console.log(access_token);
-        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
-        const response = await instance.get("/match", {
-            params: { page, count, access_token }});
-        const data = response.data;
-        console.log(data);
-        if (!Array.isArray(data)) {
-            throw new Error("Некорректный формат данных от сервера");
+    console.log("⚠️ Симуляция данных, так как бэкенд не работает");
+
+    return [
+        {
+            id: 1,
+            league: "Премьер-Лига",
+            scheduleDate: "2025-06-15",
+            scheduleTimeLocal: "18:00",
+            stadiumName: "Лужники",
+            ticketsCount: 1500,
+            ticketsPrice: 300,
+            info: "Финал лиги",
+            teamHomeName: "Зенит",
+            teamAwayName: "Спартак",
+            photoUrl: "",
+            organizer: "Футбольная федерация",
+            status: "Scheduled",
+            city: "Москва",
+        },
+        {
+            id: 2,
+            league: "Чемпионат России",
+            scheduleDate: "2025-06-20",
+            scheduleTimeLocal: "17:00",
+            stadiumName: "Газпром Арена",
+            ticketsCount: 2000,
+            ticketsPrice: 450,
+            info: "Полуфинал кубка",
+            teamHomeName: "Локомотив",
+            teamAwayName: "ЦСКА",
+            photoUrl: "",
+            organizer: "Футбольная федерация",
+            status: "Scheduled",
+            city: "Санкт-Петербург",
         }
-
-        return data.map((item) => ({
-            id: item.id || "Нет данных",
-            league: item.league || "Нет данных",
-            scheduleDate: item.scheduleDate || "Нет данных",
-            scheduleTimeLocal: item.scheduleTimeLocal || "Нет данных",
-            stadiumName: item.stadiumName || "Нет данных",
-            ticketsCount: item.ticketsCount || "Нет данных",
-            ticketsPrice: item.ticketsPrice || "Нет данных",
-            info: item.info || "Нет данных",
-            teamHomeName: item.teamHomeName || "Нет данных",
-            teamAwayName: item.teamAwayName || "Нет данных",
-            photoUrl: item.photoUrl || "",
-            /*organizer: item.organizer?.name ? `${item.organizer.name} ${item.organizer.surname}` : "Нет данных",*/
-            status: item.status || "Нет данных",
-            createdDateTime: item.createdDateTime || "Нет данных",
-            updatedDateTime: item.updatedDateTime || "Нет данных",
-        }));
-
-    } catch (error) {
-        throw new Error(error.message);
-    }
-}
+    ];
+};
