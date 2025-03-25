@@ -3,17 +3,17 @@ package org.example.auth_server.service;
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.example.auth_server.dto.BuyTicketDTO;
-import org.example.auth_server.model.Seats;
-import org.example.auth_server.model.Ticket;
-import org.example.auth_server.model.User;
-import org.example.auth_server.repository.SeatsRepository;
-import org.example.auth_server.repository.TicketRepository;
+import org.example.auth_server.dto.match.BuyTicketRequest;
+import org.example.auth_server.dto.match.SeatsGetResponse;
+import org.example.auth_server.model.match.Match;
+import org.example.auth_server.model.match.Seats;
+import org.example.auth_server.model.match.Ticket;
+import org.example.auth_server.model.actors.User;
+import org.example.auth_server.repository.match.SeatsRepository;
+import org.example.auth_server.repository.match.TicketRepository;
 import org.example.auth_server.utils.JWTUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,44 +31,62 @@ public class BuyService {
     }
 
     @Transactional
-    public List<Ticket> buyTickets(BuyTicketDTO buyTicketDTO) {
-        String token = buyTicketDTO.getToken();
+    public Ticket buyTickets(BuyTicketRequest buyTicketRequest) {
+        String token = buyTicketRequest.getToken();
         if (!JWTUtils.validateToken(token)) {
             throw new JwtException("Токен не валиден");
         }
 
         String email = JWTUtils.extractClaim(token).get("email", String.class);
-        int ticketCount = Integer.parseInt(buyTicketDTO.getCount());
 
         User user = userWorkService.getUser(email);
 
-        // Найти нужное количество свободных мест
-        List<Seats> seats = seatsRepository.findTopNSeatsByStatus("free", ticketCount);
 
-        if (seats.size() < ticketCount) {
-            throw new IllegalStateException("Недостаточно свободных мест! Доступно только " + seats.size());
+        // Помечаем место как забронированное
+        Seats seat = seatsRepository.findSeatsBySeatNumber(buyTicketRequest.getSeatNumber()).orElseThrow(() -> {
+            throw new EntityNotFoundException("Место не найдено");
+        });
+        if (!seat.getStatus().equals("free")) {
+            throw new IllegalArgumentException("Место уже занято!");
         }
+        seat.setStatus("booked");
+        seatsRepository.save(seat);
 
-        List<Ticket> tickets = new ArrayList<>();
+        // Создаём билет
+        Ticket ticket = new Ticket();
+        ticket.setSeat(seat);
+        ticket.setUser(user);
+        ticket.setStatus("booked");
+        ticket.setPrice(seat.getPrice());
 
-        for (Seats seat : seats) {
-            // Помечаем место как забронированное
-            seat.setStatus("booked");
-            seatsRepository.saveAndFlush(seat);
 
-            // Создаём билет
-            Ticket ticket = new Ticket();
-            ticket.setSeat(seat);
-            ticket.setUser(user);
-            ticket.setStatus("booked");
-            ticket.setPrice(seat.getPrice());
 
-            tickets.add(ticket);
+
+        // Обновляем статус мест
+        ticketRepository.save(ticket); // Сохраняем билеты
+
+        return ticket;
+    }
+
+    @Transactional
+    public List<SeatsGetResponse> getSeatsForUserDependsMatch(String token, String uuid) {
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
         }
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+        Match match = userWorkService.findMatch(uuid, email);
 
-        seatsRepository.saveAll(seats);   // Обновляем статус мест
-        ticketRepository.saveAll(tickets); // Сохраняем билеты
+        List<Seats> seats = seatsRepository.getSeatsByMatchId(uuid);
 
-        return tickets;
+        return seats.stream()
+                .map(seat -> {
+                    SeatsGetResponse seatsGetResponse = new SeatsGetResponse();
+                    seatsGetResponse.setSeatNumber(seat.getSeatNumber());
+                    seatsGetResponse.setPrice(seat.getPrice());
+                    seatsGetResponse.setRow(seat.getRow());
+                    seatsGetResponse.setSector(seat.getSector());
+                    return seatsGetResponse;
+                })
+                .toList();
     }
 }

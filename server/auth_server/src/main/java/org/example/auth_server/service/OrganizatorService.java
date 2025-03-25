@@ -4,16 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
-import org.example.auth_server.dto.AddMatchRequest;
+import org.example.auth_server.dto.match.AddMatchRequest;
+import org.example.auth_server.dto.match.SeatsForAddMatchRequest;
 import org.example.auth_server.dto.organizator.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.organizator.ContactOrganizatorInfoRequest;
 import org.example.auth_server.dto.organizator.OrganizatorUpdateDataRequest;
 import org.example.auth_server.dto.organizator.UnprovenOrganizationRequest;
-import org.example.auth_server.model.*;
-import org.example.auth_server.repository.MatchRepository;
+import org.example.auth_server.model.actors.Organizator;
+import org.example.auth_server.model.actors.User;
+import org.example.auth_server.model.match.Match;
+import org.example.auth_server.model.match.Seats;
+import org.example.auth_server.model.match.Stadium;
+import org.example.auth_server.repository.match.MatchRepository;
 import org.example.auth_server.repository.OrganizatorRepository;
-import org.example.auth_server.repository.SeatsRepository;
-import org.example.auth_server.repository.StadiumRepository;
+import org.example.auth_server.repository.match.SeatsRepository;
+import org.example.auth_server.repository.match.StadiumRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +38,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 @Service
 @Log4j2
@@ -126,7 +133,6 @@ public class OrganizatorService {
         return organizators;
     }
 
-    // TODO: Переписать на отдельный метод
     @Transactional
     public void changeApproveState(ContactOrgInfoForApproveRequest info) {
         log.info("Начал процесс APPROVE информации организатора: " + info.getEmail());
@@ -245,7 +251,7 @@ public class OrganizatorService {
     }
 
     @Transactional
-    public Match addMatch(AddMatchRequest info) throws IllegalAccessException {
+    public Match addMatch(AddMatchRequest info) throws Exception {
         String token = info.getToken();
         if (!JWTUtils.validateToken(token)) {
             throw new JwtException("Токен не валиден");
@@ -264,7 +270,6 @@ public class OrganizatorService {
 
         Match match = new Match();
         Stadium stadium = new Stadium();
-        Seats seats = new Seats();
 
 
         try {
@@ -274,8 +279,7 @@ public class OrganizatorService {
             match.setScheduleDate(info.getDate());
             match.setScheduleTimeLocal(info.getTime());
             match.setStadiumName(info.getStadium());
-            match.setTicketsCount(info.getTickets());
-            match.setTicketsPrice(info.getTicketPrice());
+            match.setTicketsCount(info.getSeats().size());
             match.setUuid(uuid);
             log.info("Пользователь: " + user);
             match.setOrganizer(user);
@@ -284,13 +288,16 @@ public class OrganizatorService {
             stadium.setName(info.getStadium());
             stadiumRepository.saveAndFlush(stadium);
 
-            addSeats(info.getTickets(), match, stadium, info.getTicketPrice());
+            addSeats(info.getSeats(), match, stadium);
 
             String key = "match:" + email + ":" + uuid;
             redisTemplate.opsForValue().set(key, match, Duration.ofMinutes(10));
         } catch (UnexpectedRollbackException e) {
             log.error(e.getMessage());
             throw new UnexpectedRollbackException(e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new Exception(e.getMessage());
         }
         return match;
     }
@@ -359,6 +366,7 @@ public class OrganizatorService {
         return matches;
     }
 
+    // TODO: ПЕРЕПИСАТЬ
     @Transactional
     public Match updateMatch(AddMatchRequest info, String uuid) throws IllegalAccessException {
         String token = info.getToken();
@@ -380,8 +388,7 @@ public class OrganizatorService {
         match.setScheduleDate(info.getDate());
         match.setScheduleTimeLocal(info.getTime());
         match.setStadiumName(info.getStadium());
-        match.setTicketsCount(info.getTickets());
-        match.setTicketsPrice(info.getTicketPrice());
+        //match.setTicketsCount(info.getSeats().size());
 
         matchRepository.save(match);
 
@@ -417,16 +424,25 @@ public class OrganizatorService {
             throw new IllegalArgumentException("Организатор не подтвержден");
         }
     }
+
     @Transactional
-    protected void addSeats(Integer seatsCount, Match match, Stadium stadium, Integer ticketPrice) {
-        for (int i = 0; i < seatsCount; i++) {
-            Seats seat = new Seats();
-            seat.setPrice(BigDecimal.valueOf(ticketPrice));
-            seat.setMatchId(match);
-            seat.setStadiumId(stadium);
-            seat.setStatus("free");
-            seatsRepository.saveAndFlush(seat);
-        }
+    protected void addSeats(List<SeatsForAddMatchRequest> seats, Match match, Stadium stadium) {
+        seats.stream()
+                        .forEach(seatInfo -> {
+                            IntStream.rangeClosed(seatInfo.getSeatStart(), seatInfo.getSeatEnd())
+                                    .mapToObj(seatNumber -> {
+                                        Seats seat = new Seats();
+                                        seat.setRow(seatInfo.getRow());
+                                        seat.setSector(seatInfo.getSector());
+                                        seat.setSeatNumber(seatInfo.getSector() + seatInfo.getRow() + seatNumber);
+                                        seat.setStadiumId(stadium);
+                                        seat.setMatchId(match);
+                                        seat.setPrice(seatInfo.getPrice());
+                                        seat.setStatus("free");
+                                        return seat;
+                                    })
+                                    .forEach(seatsRepository::save);
+                        });
         log.info("Закончил добавлять билеты на матч {}", match);
     }
 }

@@ -1,6 +1,6 @@
 package org.example.auth_server.repository;
 
-import org.example.auth_server.model.Admin;
+import org.example.auth_server.model.actors.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

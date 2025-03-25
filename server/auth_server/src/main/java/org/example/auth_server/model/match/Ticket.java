@@ -1,10 +1,10 @@
-package org.example.auth_server.model;
+package org.example.auth_server.model.match;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.auth_server.model.actors.User;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,9 +20,6 @@ public class Ticket {
     @JoinColumn(name = "seat_id", nullable = false)
     private Seats seat;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal price;
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -35,6 +32,9 @@ public class Ticket {
 
     @Column(name = "statuc", nullable = false, length = 50)
     private String status;
+
+    @Column(name = "price")
+    private Integer price;
 
     @PrePersist
     protected void onCreate() {

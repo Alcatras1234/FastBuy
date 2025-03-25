@@ -1,7 +1,7 @@
 package org.example.auth_server.repository;
 
-import org.example.auth_server.model.Organizator;
-import org.example.auth_server.model.User;
+import org.example.auth_server.model.actors.Organizator;
+import org.example.auth_server.model.actors.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

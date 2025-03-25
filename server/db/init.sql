@@ -53,7 +53,6 @@ CREATE TABLE matches (
     stadium_name VARCHAR(255),
     -- stadium_id INTEGER REFERENCES stadiums(id) NOT NULL,
     tickets_cnt INTEGER NOT NULL,
-    ticket_price INTEGER NOT NULL,
     info TEXT,
     team_home_name VARCHAR(255) NOT NULL,
     team_away_name VARCHAR(255) NOT NULL,
@@ -76,6 +75,7 @@ CREATE TABLE seats (
     id SERIAL PRIMARY KEY,
     row INTEGER,
     sector VARCHAR(10),
+    seat_number VARCHAR(100),
     match_id INTEGER REFERENCES matches(id) NOT NULL,
     price DECIMAL(12,2),
     stadium_id INTEGER REFERENCES stadiums(id) NOT NULL,
@@ -85,8 +85,8 @@ CREATE TABLE seats (
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
     seat_id INTEGER REFERENCES seats(id) NOT NULL,
-    price DECIMAL(12,2),
     user_id INTEGER REFERENCES users(id) NOT NULL,
+    price INTEGER,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP,
     statuc VARCHAR(50)

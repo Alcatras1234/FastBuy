@@ -1,4 +1,4 @@
-package org.example.auth_server.model;
+package org.example.auth_server.model.match;
 
 import jakarta.persistence.*;
 import lombok.Getter;

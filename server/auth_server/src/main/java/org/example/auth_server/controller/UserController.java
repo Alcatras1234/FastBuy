@@ -3,7 +3,7 @@ package org.example.auth_server.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.example.auth_server.model.Match;
+import org.example.auth_server.model.match.Match;
 import org.example.auth_server.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,9 +1,8 @@
-package org.example.auth_server.model;
+package org.example.auth_server.model.match;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -22,12 +21,15 @@ public class Seats {
     @Column(name = "sector")
     private String sector;
 
+    @Column(name = "seat_number")
+    private String seatNumber;
+
     @ManyToOne
     @JoinColumn(name = "match_id", nullable = false)
     private Match matchId;
 
     @Column(name = "price")
-    private BigDecimal price;
+    private Integer price;
 
     @ManyToOne
     @JoinColumn(name = "stadium_id", nullable = false)

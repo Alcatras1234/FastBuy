@@ -1,7 +1,7 @@
-package org.example.auth_server.repository;
+package org.example.auth_server.repository.match;
 
-import org.example.auth_server.model.Match;
-import org.example.auth_server.model.User;
+import org.example.auth_server.model.match.Match;
+import org.example.auth_server.model.actors.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

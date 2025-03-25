@@ -1,6 +1,5 @@
 package org.example.auth_server.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityExistsException;
@@ -9,7 +8,7 @@ import org.example.auth_server.dto.reg_auth.RegRequest;
 import org.example.auth_server.enums.RoleEnum;
 import org.example.auth_server.enums.StatusEnum;
 import org.example.auth_server.exeptions.ExpiredJWTException;
-import org.example.auth_server.model.User;
+import org.example.auth_server.model.actors.User;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Log4j2

@@ -26,7 +26,7 @@ services:
       - auth_data:/var/lib/postgresql/data/pgdata
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "2750:5432"
+      - "2751:5432"
     networks:
       - dev
 

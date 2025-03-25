@@ -1,13 +1,13 @@
 package org.example.auth_server.controller;
 
 import jakarta.validation.Valid;
-import org.example.auth_server.dto.AddMatchRequest;
+import org.example.auth_server.dto.match.AddMatchRequest;
 import org.example.auth_server.dto.organizator.ContactOrgInfoForApproveRequest;
 import org.example.auth_server.dto.organizator.ContactOrganizatorInfoRequest;
 import org.example.auth_server.dto.organizator.OrganizatorUpdateDataRequest;
 import org.example.auth_server.dto.organizator.UnprovenOrganizationRequest;
-import org.example.auth_server.model.Match;
-import org.example.auth_server.model.Organizator;
+import org.example.auth_server.model.match.Match;
+import org.example.auth_server.model.actors.Organizator;
 import org.example.auth_server.service.OrganizatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -102,7 +102,7 @@ public class OrganizatorController {
             @ApiResponse(responseCode = "200", description = "Match added successfully")
     })
     @PostMapping("/match")
-    public ResponseEntity<Match> addMatch(@RequestBody @Valid AddMatchRequest info) throws IllegalAccessException {
+    public ResponseEntity<Match> addMatch(@RequestBody @Valid AddMatchRequest info) throws Exception {
         return ResponseEntity.ok(organizatorService.addMatch(info));
     }
 

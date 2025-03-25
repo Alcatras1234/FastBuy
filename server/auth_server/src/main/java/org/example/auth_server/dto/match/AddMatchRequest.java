@@ -1,7 +1,9 @@
-package org.example.auth_server.dto;
+package org.example.auth_server.dto.match;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class AddMatchRequest {
@@ -18,7 +20,5 @@ public class AddMatchRequest {
     @NotBlank
     private String stadium;
 
-    private Integer tickets;
-
-    private Integer ticketPrice;
+    private List<SeatsForAddMatchRequest> seats;
 }

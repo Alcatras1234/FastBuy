@@ -1,8 +1,9 @@
-package org.example.auth_server.model;
+package org.example.auth_server.model.match;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.auth_server.model.actors.User;
 
 import java.time.LocalDateTime;
 
@@ -33,9 +34,6 @@ public class Match {
 
     @Column(name = "tickets_cnt", nullable = false)
     private Integer ticketsCount;
-
-    @Column(name = "ticket_price", nullable = false)
-    private Integer ticketsPrice;
 
     @Column(name = "info")
     private String info;
