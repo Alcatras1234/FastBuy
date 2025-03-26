@@ -3,26 +3,25 @@ import { useLocation } from "react-router-dom";
 import {
     Container, Typography, Grid, Card, CardContent, TextField, Button, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
-//import { buyTicket } from "../../../utils/axios"; // ✅ Import API function
+import { fetchUsersMatchTickets } from "../../../../utils/axios";
+import { buyTickets } from "../../../../utils/axios"; // Импортируем функцию покупки билета
 
-const mockSeats = [
-    { sector: "A", row: 1, seatNumber: 5, price: 500 },
-    { sector: "A", row: 1, seatNumber: 6, price: 500 },
-    { sector: "A", row: 2, seatNumber: 4, price: 550 },
-    { sector: "B", row: 1, seatNumber: 1, price: 600 },
-    { sector: "B", row: 2, seatNumber: 3, price: 650 },
-    { sector: "C", row: 1, seatNumber: 7, price: 700 },
-];
+interface ITicket {
+    sector: string;
+    row: string;
+    seatNumber: string;
+    price: string;
+}
 
 const BuyPage: React.FC = () => {
     const [match, setMatch] = useState<any>(null);
     const location = useLocation();
-
+    const [tickets, setTickets] = useState<ITicket[]>([]);
     const [selectedSector, setSelectedSector] = useState<string | null>(null);
-    const [selectedRow, setSelectedRow] = useState<number | null>(null);
-    const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-    const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
-    
+    const [selectedRow, setSelectedRow] = useState<string | null>(null);
+    const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+    const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+
     // ✅ Payment state
     const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(false);
     const [bankCard, setBankCard] = useState<string>("");
@@ -34,7 +33,18 @@ const BuyPage: React.FC = () => {
         if (matchData) {
             setMatch(matchData);
         }
-    }, [location.state]);
+
+        // Fetch tickets for the selected match
+        const fetchTickets = async () => {
+            if (match?.uuid) {
+                console.log(match);
+                const ticketsData = await fetchUsersMatchTickets(match.uuid);
+                console.log(ticketsData);
+                setTickets(ticketsData);
+            }
+        };
+        fetchTickets();
+    }, [location.state, match?.uuid]);
 
     // ✅ Handles Payment
     const handleConfirmPayment = async () => {
@@ -43,18 +53,16 @@ const BuyPage: React.FC = () => {
                 alert("Выберите место перед оплатой!");
                 return;
             }
-
-            const token = "yourUserToken"; // Get from authentication
+            // Get from authentication
             const paymentData = {
-                token,
-                seatNumber: selectedSeat.toString(),
-                bankCard,
-                cvv,
-                expireDate,
+                seatNumber: selectedSeat,
+                bankCard: bankCard,
+                cvv: cvv,
+                expireDate: expireDate,
             };
 
             console.log("📡 Отправка данных на сервер:", paymentData);
-            await buyTicket(paymentData); // ✅ Call API function
+            await buyTickets(selectedSeat, bankCard, cvv, expireDate); // Отправляем данные на сервер для покупки билета
 
             alert("✅ Оплата прошла успешно!");
             setOpenPaymentDialog(false);
@@ -89,14 +97,14 @@ const BuyPage: React.FC = () => {
                         {/* Select Sector */}
                         <Grid item xs={4}>
                             <TextField select label="Сектор" fullWidth
-                                value={selectedSector || ""}
-                                onChange={(e) => {
-                                    setSelectedSector(e.target.value);
-                                    setSelectedRow(null);
-                                    setSelectedSeat(null);
-                                    setSelectedPrice(null);
-                                }}>
-                                {Array.from(new Set(mockSeats.map(seat => seat.sector))).map(sector => (
+                                       value={selectedSector || ""}
+                                       onChange={(e) => {
+                                           setSelectedSector(e.target.value);
+                                           setSelectedRow(null);
+                                           setSelectedSeat(null);
+                                           setSelectedPrice(null);
+                                       }}>
+                                {Array.from(new Set(tickets.map(ticket => ticket.sector))).map(sector => (
                                     <MenuItem key={sector} value={sector}>{sector}</MenuItem>
                                 ))}
                             </TextField>
@@ -105,15 +113,15 @@ const BuyPage: React.FC = () => {
                         {/* Select Row */}
                         <Grid item xs={4}>
                             <TextField select label="Ряд" fullWidth disabled={!selectedSector}
-                                value={selectedRow || ""}
-                                onChange={(e) => {
-                                    setSelectedRow(Number(e.target.value));
-                                    setSelectedSeat(null);
-                                    setSelectedPrice(null);
-                                }}>
-                                {Array.from(new Set(mockSeats
-                                    .filter(seat => seat.sector === selectedSector)
-                                    .map(seat => seat.row)))
+                                       value={selectedRow || ""}
+                                       onChange={(e) => {
+                                           setSelectedRow(e.target.value);
+                                           setSelectedSeat(null);
+                                           setSelectedPrice(null);
+                                       }}>
+                                {Array.from(new Set(tickets
+                                    .filter(ticket => ticket.sector === selectedSector)
+                                    .map(ticket => ticket.row)))
                                     .map(row => (
                                         <MenuItem key={row} value={row}>Ряд {row}</MenuItem>
                                     ))}
@@ -123,20 +131,20 @@ const BuyPage: React.FC = () => {
                         {/* Select Seat */}
                         <Grid item xs={4}>
                             <TextField select label="Место" fullWidth disabled={!selectedRow}
-                                value={selectedSeat || ""}
-                                onChange={(e) => {
-                                    const seat = mockSeats.find(seat =>
-                                        seat.sector === selectedSector &&
-                                        seat.row === selectedRow &&
-                                        seat.seatNumber === Number(e.target.value));
-                                    setSelectedSeat(seat?.seatNumber || null);
-                                    setSelectedPrice(seat?.price || null);
-                                }}>
-                                {mockSeats.filter(seat =>
-                                    seat.sector === selectedSector && seat.row === selectedRow)
-                                    .map(seat => (
-                                        <MenuItem key={seat.seatNumber} value={seat.seatNumber}>
-                                            Место {seat.seatNumber}
+                                       value={selectedSeat || ""}
+                                       onChange={(e) => {
+                                           const selectedTicket = tickets.find(ticket =>
+                                               ticket.sector === selectedSector &&
+                                               ticket.row === selectedRow &&
+                                               ticket.seatNumber === e.target.value);
+                                           setSelectedSeat(selectedTicket?.seatNumber || null);
+                                           setSelectedPrice(selectedTicket?.price || null);
+                                       }}>
+                                {tickets.filter(ticket =>
+                                    ticket.sector === selectedSector && ticket.row === selectedRow)
+                                    .map(ticket => (
+                                        <MenuItem key={ticket.seatNumber} value={ticket.seatNumber}>
+                                            Место {ticket.seatNumber}
                                         </MenuItem>
                                     ))}
                             </TextField>

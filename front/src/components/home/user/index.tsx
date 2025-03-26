@@ -20,12 +20,12 @@ import SearchIcon from "@mui/icons-material/Search";
 
 interface IMatch {
     id: number;
+    uuid: string;
     league: string;
     scheduleDate: string;
     scheduleTimeLocal: string;
     stadiumName: string;
     ticketsCount: number;
-    ticketsPrice: number;
     info: string;
     teamHomeName: string;
     teamAwayName: string;

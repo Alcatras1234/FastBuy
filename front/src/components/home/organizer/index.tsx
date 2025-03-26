@@ -13,7 +13,8 @@ const OrganizerHomePage: React.FC = () => {
     const [tickets, setTickets] = useState([{
         sector: "",
         row: "",
-        seatCount: "",
+        seatStart: "",
+        seatEnd: "",
         price: "" },
     ]);
     const [matches, setMatches] = useState([]);
@@ -48,8 +49,7 @@ const OrganizerHomePage: React.FC = () => {
                     date: match.scheduleDate || "Неизвестно",
                     time: match.scheduleTimeLocal || "Неизвестно",
                     location: match.stadiumName || "Не указано",
-                    /*tickets: match.tickets || "Не указано",*/
-
+                    tickets: match.ticketsCount || "Не указано"
                 }));
     
                 setMatches(formattedMatches);
@@ -84,8 +84,7 @@ const OrganizerHomePage: React.FC = () => {
                     date: match.scheduleDate || "Неизвестно",
                     time: match.scheduleTimeLocal || "Неизвестно",
                     location: match.stadiumName || "Не указано",
-                    /*tickets: match.ticketsCount || 0,
-                    ticketPrice: match.ticketsPrice || 0,*/
+                    tickets: match.ticketsCount || 0
                 }));
             setMatches(formattedMatches);
             

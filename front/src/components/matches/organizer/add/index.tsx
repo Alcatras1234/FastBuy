@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, Grid, Box, Container, Typography, Alert, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { createMatch } from "../../../../utils/axios"; // API Call function
+import { createMatch } from "../../../../utils/axios";
 
 const AddMatchPage: React.FC = () => {
     const navigate = useNavigate();
@@ -20,11 +20,19 @@ const AddMatchPage: React.FC = () => {
         stadium: "",
         tickets: tickets,
     });
+    useEffect(() => {
+        setMatchData((prev) => ({
+            ...prev,
+            tickets: tickets,
+        }));
+    }, [tickets]);
 
     const [error, setError] = useState<string | null>(null);
     const [confirmationOpen, setConfirmationOpen] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
+
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -43,11 +51,12 @@ const AddMatchPage: React.FC = () => {
     };
 
     const handleChangeTickets = (index: number, field: string, value: string) => {
-        setTickets((prevTickets) =>
-            prevTickets.map((ticket, i) =>
+        setTickets((prevTickets) => {
+            const newTickets = prevTickets.map((ticket, i) =>
                 i === index ? { ...ticket, [field]: value } : ticket
-            )
-        );
+            );
+            return newTickets;
+        });
     };
 
     //! More meaningful validations
@@ -85,6 +94,8 @@ const AddMatchPage: React.FC = () => {
     const handleConfirmSubmit = async () => {
         setConfirmationOpen(false); // Close confirmation popup
         try {
+            console.log(tickets)
+            console.log(matchData)
             await createMatch(matchData);
             console.log("Матч успешно добавлен");
             setSuccessOpen(true); // Open success message
@@ -131,7 +142,7 @@ const AddMatchPage: React.FC = () => {
                             <Button variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
                                 Главная
                             </Button>
-                            <Button type="submit" variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
+                            <Button type="submit" variant="outlined" color="secondary" >
                                 Добавить
                             </Button>
                             <Button onClick={()=> setOpenDialog(true)} variant="contained" color="primary">

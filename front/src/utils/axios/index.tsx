@@ -258,7 +258,15 @@ export const createMatch = async (matchData) => {
         const token = Cookies.get("accessToken"); 
         if (!token) throw new Error("Токен отсутствует, выполните вход");
 
-        const requestBody = { token, ...matchData };
+        const requestBody = {
+            token: token,
+            teamA: matchData.teamA,
+            teamB: matchData.teamB,
+            date: matchData.date,
+            time: matchData.time,
+            stadium: matchData.stadium,
+            seats: matchData.tickets // Переименовываем tickets → seats
+        };
 
         console.log("📡 Отправка данных матча:", requestBody);
 
@@ -282,10 +290,9 @@ export const fetchOrganizerMatches = async (page = 0, count = 10) => {
         
         console.log("📡 Загружаем матчи организатора...", { page, count });
 
-        const response = await instance.get("/api/organizer_service/match/data", { 
+        const response = await instance.get("/api/organizer_service/match/data", {
             params: { token, page, count } // Добавили параметры
         });
-
         console.log("✅ Данные матчей:", response.data);
         return response.data;
     } catch (error) {
@@ -390,43 +397,93 @@ export const updateOrganizerProfile = async (updatedData) => {
     }
 };
 
-// export const fetchUsersMatches = async (page = 0, count = 5) => {
-//     try {
-//         const access_token = Cookies.get("accessToken");
-//         console.log(access_token);
-//         if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
-//         const response = await instance.get("/match", {
-//             params: { page, count, access_token }});
-//         const data = response.data;
-//         console.log(data);
-//         if (!Array.isArray(data)) {
-//             throw new Error("Некорректный формат данных от сервера");
-//         }
+export const fetchUsersMatches = async (page = 0, count = 5) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+        console.log(access_token);
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+        const response = await instance.get("/match", {
+            params: { page, count, access_token }});
+        const data = response.data;
+        console.log(data);
+        if (!Array.isArray(data)) {
+            throw new Error("Некорректный формат данных от сервера");
+        }
 
-//         return data.map((item) => ({
-//             id: item.id || "Нет данных",
-//             league: item.league || "Нет данных",
-//             scheduleDate: item.scheduleDate || "Нет данных",
-//             scheduleTimeLocal: item.scheduleTimeLocal || "Нет данных",
-//             stadiumName: item.stadiumName || "Нет данных",
-//             ticketsCount: item.ticketsCount || "Нет данных",
-//             ticketsPrice: item.ticketsPrice || "Нет данных",
-//             info: item.info || "Нет данных",
-//             teamHomeName: item.teamHomeName || "Нет данных",
-//             teamAwayName: item.teamAwayName || "Нет данных",
-//             photoUrl: item.photoUrl || "",
-//             /*organizer: item.organizer?.name ? `${item.organizer.name} ${item.organizer.surname}` : "Нет данных",*/
-//             status: item.status || "Нет данных",
-//             createdDateTime: item.createdDateTime || "Нет данных",
-//             updatedDateTime: item.updatedDateTime || "Нет данных",
-//         }));
+        return data.map((item) => ({
+            id: item.id || "Нет данных",
+            uuid: item.uuid || "Нет данных",
+            league: item.league || "Нет данных",
+            scheduleDate: item.scheduleDate || "Нет данных",
+            scheduleTimeLocal: item.scheduleTimeLocal || "Нет данных",
+            stadiumName: item.stadiumName || "Нет данных",
+            ticketsCount: item.ticketsCount || "Нет данных",
+/*            ticketsPrice: item.ticketsPrice || "Нет данных",*/
+            info: item.info || "Нет данных",
+            teamHomeName: item.teamHomeName || "Нет данных",
+            teamAwayName: item.teamAwayName || "Нет данных",
+            photoUrl: item.photoUrl || "",
+            /*organizer: item.organizer?.name ? `${item.organizer.name} ${item.organizer.surname}` : "Нет данных",*/
+            status: item.status || "Нет данных",
+            createdDateTime: item.createdDateTime || "Нет данных",
+            updatedDateTime: item.updatedDateTime || "Нет данных",
+        }));
 
-//     } catch (error) {
-//         throw new Error(error.message);
-//     }
-// }
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
 
+export const fetchUsersMatchTickets = async (matchUuid: string) => {
+    try{
+        const access_token = Cookies.get("accessToken");
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
 
+        console.log("Получение билетов")
+        console.log(access_token);
+        console.log(matchUuid);
+        const response = await instance.get(`/api/buyservice/ticket`, {
+            params: {
+                token: access_token, // Параметр для токена
+                match_uuid: matchUuid, // Параметр для UUID матча
+            }
+        });
+        const data = response.data;
+        return data.map((item) => ({
+            sector: item.sector,
+            row: item.row,
+            seatNumber: item.seatNumber,
+            price: item.price,
+        }))
+
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
+export const buyTickets = async (seatNumber: string, bankCard: string, cvv: string, expireDate: string) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+        console.log(access_token);
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+
+        // Запрос на сервер с правильными параметрами
+        const response = await instance.post(`/api/buyservice/ticket`, {
+            token: access_token, // Параметр для токена
+            seatNumber: seatNumber, // Параметр для номера места
+            bankCard: bankCard, // Параметр для номера карты
+            cvv: cvv, // Параметр для CVV
+            expireDate: expireDate, // Параметр для срока действия карты
+        });
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Ошибка при оплате:", error);
+        throw new Error(error.message || "Ошибка при оплате");
+    }
+};
+/*
 export const fetchUsersMatches = async (page = 0, count = 5) => {
     console.log("⚠️ Симуляция данных, так как бэкенд не работает");
 
@@ -464,4 +521,4 @@ export const fetchUsersMatches = async (page = 0, count = 5) => {
             city: "Санкт-Петербург",
         }
     ];
-};
+};*/
