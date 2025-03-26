@@ -74,7 +74,7 @@ CREATE TABLE stadiums(
 CREATE TABLE seats (
     id SERIAL PRIMARY KEY,
     row INTEGER,
-    sector VARCHAR(10),
+    sector VARCHAR(255),
     seat_number VARCHAR(100),
     match_id INTEGER REFERENCES matches(id) NOT NULL,
     price DECIMAL(12,2),
