@@ -49,7 +49,7 @@ const OrganizerHomePage: React.FC = () => {
                     date: match.scheduleDate || "Неизвестно",
                     time: match.scheduleTimeLocal || "Неизвестно",
                     location: match.stadiumName || "Не указано",
-                    tickets: match.ticketsCount || "Не указано"
+/*                    tickets: match.ticketsCount || "Не указано"*/
                 }));
     
                 setMatches(formattedMatches);
@@ -84,7 +84,7 @@ const OrganizerHomePage: React.FC = () => {
                     date: match.scheduleDate || "Неизвестно",
                     time: match.scheduleTimeLocal || "Неизвестно",
                     location: match.stadiumName || "Не указано",
-                    tickets: match.ticketsCount || 0
+/*                    tickets: match.ticketsCount || 0*/
                 }));
             setMatches(formattedMatches);
             

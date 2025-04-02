@@ -34,6 +34,7 @@ export interface IAuthState {
 
 export interface IPublicUser {
     id: number | null,
-    fullName: string,
+    fullName: string | null,
     email: string,
+    role: string | null
 }
