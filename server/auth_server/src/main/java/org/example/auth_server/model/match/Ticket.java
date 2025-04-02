@@ -46,4 +46,15 @@ public class Ticket {
         updatedAt = LocalDateTime.now();
     }
 
+    @Override
+    public String toString() {
+        return "Ticket" +
+                ", seat "  + seat.getSeatNumber() +
+                ", match " + seat.getMatchId().getStadiumName() +
+                ", teams " + seat.getMatchId().getTeamAwayName() + " | " + seat.getMatchId().getTeamHomeName() +
+                ", createdAt " + createdAt +
+                ", status '" + status + '\'' +
+                ", price " + price;
+    }
+
 }
