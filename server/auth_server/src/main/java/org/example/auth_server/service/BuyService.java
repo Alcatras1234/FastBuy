@@ -23,11 +23,13 @@ public class BuyService {
     private final SeatsRepository seatsRepository;
     private final TicketRepository ticketRepository;
     private final UserWorkService userWorkService;
+    private final EmailService emailService;
 
-    public BuyService(SeatsRepository seatsRepository, TicketRepository ticketRepository, UserWorkService userWorkService) {
+    public BuyService(SeatsRepository seatsRepository, TicketRepository ticketRepository, UserWorkService userWorkService, EmailService emailService) {
         this.seatsRepository = seatsRepository;
         this.ticketRepository = ticketRepository;
         this.userWorkService = userWorkService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -64,6 +66,8 @@ public class BuyService {
 
         // Обновляем статус мест
         ticketRepository.save(ticket); // Сохраняем билеты
+
+        emailService.sendEmailWithTicket(email, ticket);
 
         return ticket;
     }
