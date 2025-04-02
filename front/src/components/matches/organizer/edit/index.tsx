@@ -22,9 +22,9 @@ const EditMatchModal: React.FC<EditMatchModalProps> = ({ open, match, onClose, o
                 <TextField label="Дата" name="date" type="date" value={match?.date} onChange={onChange} fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
                 <TextField label="Время" name="time" type="time" value={match?.time} onChange={onChange} fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
                 <TextField label="Место" name="location" value={match?.location} onChange={onChange} fullWidth margin="normal" />
-                <TextField label="Билеты" name="tickets" type="number" value={match?.tickets} onChange={onChange} fullWidth margin="normal" />
+                {/*<TextField label="Билеты" name="tickets" type="number" value={match?.tickets} onChange={onChange} fullWidth margin="normal" />
                 <TextField label="Цена билета" name="ticketPrice" type="number" value={match?.ticketPrice} onChange={onChange} fullWidth margin="normal"
-/>
+/>*/}
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="secondary">Отмена</Button>
