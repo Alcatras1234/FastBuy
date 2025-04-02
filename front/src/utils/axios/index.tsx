@@ -522,3 +522,34 @@ export const fetchUsersMatches = async (page = 0, count = 5) => {
         }
     ];
 };*/
+
+export const fetchUserTickets = async (page: number, count: number) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+
+        if (!access_token) {
+            console.error("❌ Ошибка: отсутствует access_token!");
+            return [];
+        }
+
+        console.log("📡 Отправляем запрос на получение билетов...");
+
+        const response = await instance.get(`/ticket`, {
+            params: {
+                access_token,  // ✅ Добавляем в query, как требует Swagger
+                page: Number(page),
+                count: Number(count),
+            },
+        });
+
+        console.log("✅ Полученные билеты:", response.data);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error("❌ Ответ от сервера:", error.response.data);
+        } else {
+            console.error("❌ Ошибка запроса:", error.message);
+        }
+        return [];
+    }
+};

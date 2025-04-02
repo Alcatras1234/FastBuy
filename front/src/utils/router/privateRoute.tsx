@@ -3,6 +3,7 @@ import {useAuth} from "../hook";
 
 const PrivateRoute = (role: "USER" | "ORGANIZER") => {
     const auth = useAuth(role);
+    console.log(auth);
     return (
         auth ? <Outlet/> : <Navigate to="login/users"/>
     )
