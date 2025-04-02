@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authSlice from "./slice/auth"; // Импортируем authSlice.reducer как authReducer
+import authUserReducer from "./slice/auth/user";
+import authOrganizerReducer from "./slice/auth/organizer";
 
 const store = configureStore({
     reducer: {
-        auth: authSlice
+        authUser: authUserReducer,  // ✅ Используем только reducer
+        authOrganizer: authOrganizerReducer,  // ✅ Используем только reducer
     },
 });
 
