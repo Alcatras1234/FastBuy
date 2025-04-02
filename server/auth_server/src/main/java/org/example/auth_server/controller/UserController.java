@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.example.auth_server.model.match.Match;
+import org.example.auth_server.model.match.Ticket;
 import org.example.auth_server.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,5 +34,12 @@ public class UserController {
                                                          @RequestParam(name = "count", defaultValue = "10") Integer count,
                                                          @RequestParam(name = "access_token") String accessToken) {
         return ResponseEntity.ok().body(userService.getMatchForUser(accessToken, page, count));
+    }
+
+    @GetMapping("/ticket")
+    public ResponseEntity<List<Ticket>> getTickets(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                   @RequestParam(name = "count", defaultValue = "10") Integer count,
+                                                   @RequestParam(name = "access_token") String accessToken) {
+        return ResponseEntity.ok().body(userService.getTicketsForUser(accessToken, page, count));
     }
 }
