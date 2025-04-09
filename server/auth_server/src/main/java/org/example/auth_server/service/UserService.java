@@ -18,9 +18,11 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -92,6 +94,7 @@ public class UserService {
         return matches;
     }
 
+    @Transactional(readOnly = true)
     public List<Ticket> getTicketsForUser(String token, int page, int pageSize) {
         List<Ticket> tickets = new ArrayList<>();
 
@@ -111,6 +114,35 @@ public class UserService {
             throw new EntityNotFoundException("Билеты не найдены");
         }
 
+        List<Ticket> bookedTickets = tickets.stream()
+                .filter(ticket -> !ticket.getStatus().equals("canceled"))
+                .toList();
+
         return tickets;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Ticket> getCanceledTickets(String token,  int page, int pageSize) {
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+
+        User user = userWorkService.getUser(email);
+
+        List<Ticket> tickets = new ArrayList<>();
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Ticket> ticketPage = ticketRepository.findTicketsByUser(pageable, user);
+        tickets = ticketPage.getContent();
+
+        if (tickets.isEmpty()) {
+            throw new EntityNotFoundException("Билеты не найдены");
+        }
+
+        List<Ticket> canceledTickets = tickets.stream()
+                .filter(ticket -> ticket.getStatus().equals("canceled"))
+                .toList();
+        return canceledTickets;
     }
 }

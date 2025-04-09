@@ -10,9 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface TicketRepository extends JpaRepository<Ticket, Integer> {
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Page<Ticket> findTicketsByUser(Pageable pageable, User user);
+    Optional<Ticket> getTicketById(Long id);
 }

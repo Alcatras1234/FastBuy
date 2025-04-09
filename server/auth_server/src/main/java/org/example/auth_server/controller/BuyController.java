@@ -1,7 +1,9 @@
 package org.example.auth_server.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.example.auth_server.dto.match.BuyTicketRequest;
+import org.example.auth_server.dto.match.ReturnTicketRequest;
 import org.example.auth_server.dto.match.SeatsGetResponse;
 import org.example.auth_server.model.match.Ticket;
 import org.example.auth_server.service.BuyService;
@@ -20,14 +22,23 @@ public class BuyController {
         this.buyService = buyService;
     }
 
+    @Operation(summary = "Купить билет")
     @PostMapping("/ticket")
     public ResponseEntity<Ticket> buyTicket(@Valid @RequestBody BuyTicketRequest buyTicketRequest) {
         return ResponseEntity.ok().body(buyService.buyTickets(buyTicketRequest));
     }
 
+    @Operation(summary = "Получить билеты на матч")
     @GetMapping("/ticket")
     public ResponseEntity<List<SeatsGetResponse>> getTickets(@RequestParam(name="token") String token,
                                                              @RequestParam(name="match_uuid") String uuid) {
         return ResponseEntity.ok().body(buyService.getSeatsForUserDependsMatch(token, uuid));
+    }
+
+    @Operation(summary = "Вернуть билет")
+    @PatchMapping("/ticket")
+    public ResponseEntity<String> cancelTicket(@RequestBody @Valid ReturnTicketRequest returnTicketRequest) {
+        buyService.cancelTicket(returnTicketRequest);
+        return ResponseEntity.ok().body("Ticket canceled");
     }
 }

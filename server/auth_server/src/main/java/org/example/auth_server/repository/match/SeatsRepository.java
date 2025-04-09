@@ -15,4 +15,6 @@ public interface SeatsRepository extends JpaRepository<Seats, Integer> {
 
     @Query("SELECT s FROM Seats s WHERE s.matchId.uuid = :uuid AND s.status = 'free'")
     List<Seats> getSeatsByMatchId(@Param("uuid") String uuid);
+
+    Optional<Seats> getSeatsBySeatNumber(String seatNumber);
 }

@@ -35,11 +35,18 @@ public class UserController {
                                                          @RequestParam(name = "access_token") String accessToken) {
         return ResponseEntity.ok().body(userService.getMatchForUser(accessToken, page, count));
     }
-
+    @Operation(summary = "Получить купленные билеты пользователя")
     @GetMapping("/ticket")
     public ResponseEntity<List<Ticket>> getTickets(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                                    @RequestParam(name = "count", defaultValue = "10") Integer count,
                                                    @RequestParam(name = "access_token") String accessToken) {
         return ResponseEntity.ok().body(userService.getTicketsForUser(accessToken, page, count));
+    }
+    @Operation(summary = "Получить возвращенные билеты пользователя")
+    @GetMapping("/ticket/cancel")
+    public ResponseEntity<List<Ticket>> listCanceledTicket(@RequestParam(name="token") String token,
+                                                           @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                           @RequestParam(name = "count", defaultValue = "10") Integer count) {
+        return ResponseEntity.ok().body(userService.getCanceledTickets(token, page, count));
     }
 }
