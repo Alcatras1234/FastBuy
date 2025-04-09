@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUsersMatches } from "../../../utils/axios";
+import { fetchUsersMatches, fetchUserTickets} from "../../../utils/axios";
 import {useNavigate} from "react-router-dom";
 import {
     Container,
@@ -106,6 +106,14 @@ const UserHomePage: React.FC = () => {
     return (
         <Container>
             <Typography variant="h5" gutterBottom>Бронирование билетов</Typography>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => navigate("/user/tickets")}
+                style={{ marginBottom: "20px" }}
+            >
+                Мои билеты
+            </Button>
 
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={4}>
@@ -188,6 +196,7 @@ const UserHomePage: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
         </Container>
     );
 };
