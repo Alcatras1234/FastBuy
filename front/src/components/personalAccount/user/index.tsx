@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUserTickets } from "../../../utils/axios";
+import { fetchUserTickets, refundTicket } from "../../../utils/axios";
 import { 
   Container, 
   Card, 
@@ -48,6 +48,8 @@ interface ITicket {
 const UserTicketsPage: React.FC = () => {
     const [tickets, setTickets] = useState<ITicket[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isRefunding, setIsRefunding] = useState<boolean>(false);
+    const [refundingTicketId, setRefundingTicketId] = useState<number | null>(null);
     const [page, setPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
     const [hasAnyTickets, setHasAnyTickets] = useState<boolean>(false);
@@ -60,27 +62,25 @@ const UserTicketsPage: React.FC = () => {
         if (!window.confirm("Вы уверены, что хотите вернуть этот билет?")) return;
 
         try {
+            setIsRefunding(true);
+            setRefundingTicketId(ticket.id);
+            console.log("🚀 Подробная информация о билете:", ticket);
             console.log("🚀 Возвращаем билет с ID:", ticket.id);
 
-            // Временная имитация возврата билета на стороне клиента
-            // Просто удаляем билет из массива
-            setTickets(prevTickets => prevTickets.filter(t => t.id !== ticket.id));
+            // Вызов API для возврата билета с использованием ID билета
+            await refundTicket(ticket.id);
             
-            // Проверка, остались ли еще билеты на текущей странице
-            if (tickets.length === 1 && page > 1) {
-                // Если это последний билет на странице и это не первая страница,
-                // переходим на предыдущую страницу
-                setPage(prevPage => prevPage - 1);
-            } else if (tickets.length === 1 && page === 1) {
-                // Если это последний билет на первой странице, обновляем флаг
-                setHasAnyTickets(false);
-            }
+            // После успешного возврата обновляем список билетов
+            await loadTickets();
             
             console.log("✅ Билет успешно возвращен");
             alert("Билет успешно возвращен");
         } catch (error) {
             console.error("❌ Ошибка при возврате билета:", error);
             alert("Ошибка при возврате билета");
+        } finally {
+            setIsRefunding(false);
+            setRefundingTicketId(null);
         }
     };
 
@@ -127,6 +127,11 @@ const UserTicketsPage: React.FC = () => {
         window.scrollTo(0, 0); // Прокрутка вверх при смене страницы
     };
 
+    // Проверка, можно ли вернуть билет (не является отмененным)
+    const canRefundTicket = (ticket: ITicket): boolean => {
+        return ticket.status !== "canceled" //&& ticket.status === "ACTIVE";
+    };
+
     return (
         <Container>
             {/* Заголовок страницы */}
@@ -161,16 +166,20 @@ const UserTicketsPage: React.FC = () => {
                                                 <Typography>Цена: {ticket.price} Руб.</Typography>
                                                 <Typography>Статус: {ticket.status}</Typography>
                                                 
-                                                <Box mt={2} display="flex" justifyContent="flex-start">
-                                                    <Button 
-                                                        variant="contained" 
-                                                        color="secondary" 
-                                                        size="small" 
-                                                        onClick={() => handleRefundTicket(ticket)}
-                                                    >
-                                                        Вернуть билет
-                                                    </Button>
-                                                </Box>
+                                                {/* Показываем кнопку возврата только для активных билетов */}
+                                                {canRefundTicket(ticket) && (
+                                                    <Box mt={2} display="flex" justifyContent="flex-start">
+                                                        <Button 
+                                                            variant="contained" 
+                                                            color="secondary" 
+                                                            size="small" 
+                                                            onClick={() => handleRefundTicket(ticket)}
+                                                            disabled={isRefunding && refundingTicketId === ticket.id}
+                                                        >
+                                                            {isRefunding && refundingTicketId === ticket.id ? "Обработка..." : "Вернуть билет"}
+                                                        </Button>
+                                                    </Box>
+                                                )}
                                             </CardContent>
                                         </Card>
                                     </Grid>

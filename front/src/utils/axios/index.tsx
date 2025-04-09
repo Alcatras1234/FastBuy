@@ -553,3 +553,28 @@ export const fetchUserTickets = async (page: number, count: number) => {
         return [];
     }
 };
+
+
+
+
+export const refundTicket = async (ticketId) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+        console.log("Используемый токен:", access_token);
+        console.log("ID билета для возврата:", ticketId);
+        
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+
+        // Запрос на сервер для возврата билета
+        const response = await instance.patch(`/api/buyservice/ticket`, {
+            token: access_token,
+            id: ticketId
+        });
+
+        console.log("Успешный ответ сервера при возврате билета:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при возврате билета:", error);
+        throw new Error(error.message || "Ошибка при возврате билета");
+    }
+};
