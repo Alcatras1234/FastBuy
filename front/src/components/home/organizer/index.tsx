@@ -38,7 +38,8 @@ const OrganizerHomePage: React.FC = () => {
                 console.log(realData);
     
                 // ✅ Фильтруем только матчи этого организатора
-                const filteredMatches = realData.filter(match => match.organizer?.email === organizerEmail && match.status !== "CANCELLED");
+                const filteredMatches = realData.filter(match => match.organizer?.email === organizerEmail &&
+                    match?.status?.toLowerCase() !== "cancelled");
     
                 console.log("🚀 Фильтрованные матчи:", filteredMatches);
                 // ✅ Приводим к нужному формату

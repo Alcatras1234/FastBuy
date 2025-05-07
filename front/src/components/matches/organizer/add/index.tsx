@@ -188,7 +188,13 @@ const AddMatchPage: React.FC = () => {
                                 <TextField
                                     label="Сектор"
                                     value={ticket.sector}
-                                    onChange={(e) => handleChangeTickets(index, "sector", e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^[A-Za-z]+$/.test(val)) {
+                                            handleChangeTickets(index, "sector", val)
+                                        }
+                                    }}
+
                                     fullWidth
                                 />
                             </Grid>
@@ -196,7 +202,14 @@ const AddMatchPage: React.FC = () => {
                                 <TextField
                                     label="Ряд"
                                     value={ticket.row}
-                                    onChange={(e) => handleChangeTickets(index, "row", e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                            handleChangeTickets(index, "row", val)
+                                        }
+                                  
+                                    }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                                     fullWidth
                                 />
                             </Grid>
@@ -204,7 +217,13 @@ const AddMatchPage: React.FC = () => {
                                 <TextField
                                     label="С места"
                                     value={ticket.seatStart}
-                                    onChange={(e) => handleChangeTickets(index, "seatStart", e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                            handleChangeTickets(index, "seatStart", val)
+                                        }
+                                    }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                                     fullWidth
                                 />
                             </Grid>
@@ -212,7 +231,13 @@ const AddMatchPage: React.FC = () => {
                                 <TextField
                                     label="до"
                                     value={ticket.seatEnd}
-                                    onChange={(e) => handleChangeTickets(index, "seatEnd", e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                            handleChangeTickets(index, "seatEnd", val)
+                                        }
+                                    }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                                     fullWidth
                                 />
                             </Grid>
@@ -220,7 +245,13 @@ const AddMatchPage: React.FC = () => {
                                 <TextField
                                     label="Цена"
                                     value={ticket.price}
-                                    onChange={(e) => handleChangeTickets(index, "price", e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                          handleChangeTickets(index, "price", val);
+                                        }
+                                      }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                                     fullWidth
                                 />
                             </Grid>
