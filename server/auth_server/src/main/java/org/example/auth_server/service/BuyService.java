@@ -2,17 +2,19 @@ package org.example.auth_server.service;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 import org.example.auth_server.dto.match.BuyTicketRequest;
 import org.example.auth_server.dto.match.ReturnTicketRequest;
 import org.example.auth_server.dto.match.SeatsGetResponse;
 import org.example.auth_server.model.actors.User;
+import org.example.auth_server.model.match.Match;
 import org.example.auth_server.model.match.Seats;
 import org.example.auth_server.model.match.Ticket;
+import org.example.auth_server.repository.match.MatchRepository;
 import org.example.auth_server.repository.match.SeatsRepository;
 import org.example.auth_server.repository.match.TicketRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -47,6 +49,7 @@ public class BuyService {
         Seats seat = seatsRepository.findSeatsBySeatNumber(buyTicketRequest.getSeatNumber()).orElseThrow(() -> {
             throw new EntityNotFoundException("Место не найдено");
         });
+        Match match = seat.getMatchId();
         if (!seat.getStatus().equals("free")) {
             throw new IllegalArgumentException("Место уже занято!");
         }
@@ -58,6 +61,7 @@ public class BuyService {
         ticket.setSeat(seat);
         ticket.setUser(user);
         ticket.setStatus("booked");
+        ticket.setMatch(match);
         ticket.setPrice(seat.getPrice());
 
 

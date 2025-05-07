@@ -17,4 +17,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Page<Ticket> findTicketsByUser(Pageable pageable, User user);
     Optional<Ticket> getTicketById(Long id);
+
+    Optional<List<Ticket>> findAllByMatchUuid(String matchUuid);
 }

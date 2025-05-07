@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.auth_server.model.actors.User;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.LocalDateTime;
 
@@ -51,8 +52,8 @@ public class Match {
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
 
-    @Column(nullable = false, length = 50)
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StatusConverter.class)
+    @Column(name = "status", nullable = false, length = 50)
     private Status status;
 
     @Column(name = "created_dttm", updatable = false, nullable = false)
@@ -62,9 +63,34 @@ public class Match {
     private LocalDateTime updatedDateTime;
 
     public enum Status {
-        SCHEDULED,
-        ONGOING,
-        COMPLETED,
-        CANCELLED
+        SCHEDULED("scheduled"),
+        ONGOING("ongoing"),
+        COMPLETED("completed"),
+        CANCELLED("cancelled");
+
+        private final String dbValue;
+
+        Status(String dbValue) {
+            this.dbValue = dbValue;
+        }
+
+        public String getDbValue() {
+            return dbValue;
+        }
+
+        // Метод для преобразования из строки БД в enum
+        public static Status fromDbValue(String dbValue) {
+            for (Status status : values()) {
+                if (status.dbValue.equalsIgnoreCase(dbValue)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Unknown status: " + dbValue);
+        }
     }
+
 }
+
+
+
+

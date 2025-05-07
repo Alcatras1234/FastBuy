@@ -23,6 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
+        log.error(ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult()
                 .getFieldErrors()
@@ -37,16 +38,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleValidationException(EntityNotFoundException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
     @ExceptionHandler(EntityExistsException.class)
     public ResponseEntity<String> handleEntityExistsException(EntityExistsException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 
@@ -57,17 +61,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleValidationException(RuntimeException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(500).body(ex.getMessage());
     }
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<String> handleJwtException(JwtException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(401).body(ex.getMessage());
     }
 
     @ExceptionHandler(ExpiredJWTException.class)
     public ResponseEntity<Resource> handleExpiredJWTException(ExpiredJWTException ex) {
-        log.info("Токен не действителен");
+        log.error("Токен не действителен");
         Path path = Paths.get("src/main/resources/templates/not_confirmed.html");
         Resource resource = new FileSystemResource(path);
         return ResponseEntity.status(401)
@@ -77,11 +83,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnexpectedRollbackException.class)
     public ResponseEntity<String> handleUnexpectedRollbackException(UnexpectedRollbackException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(500).body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalAccessException.class)
     public ResponseEntity<String> handleIllegalAccessException(IllegalAccessException ex) {
+        log.error(ex.getMessage());
         return ResponseEntity.status(403).body(ex.getMessage());
     }
 }
