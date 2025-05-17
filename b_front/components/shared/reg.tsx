@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export const Auth = () => {
+export function Registration() {
     const router = useRouter();
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-
     const handleLogin = async () => {
         setError(null);
         console.log(login, password);
@@ -48,27 +48,37 @@ export const Auth = () => {
         }
     }, [error]); // вот это фигня запускается каждый раз когда меняется ошибка
 
+    const handleCheckPasswords = () => {
+        if (confirmPassword !== password) {
+            setError("Passwords do not match");
+        } else {
+            setError(null);
+            handleLogin();
+        }
+    }
+
     return (
         <div className="flex min-h-screen">
             {/* Left Side - Login Form */}
             <div className="flex flex-col justify-center items-center w-1/2 p-10 bg-white">
-                <h1 className="text-4xl font-bold mb-13 text-green-900 items-start">Logging in</h1>
+                <h1 className="text-4xl font-bold mb-13 text-green-900 items-start">Sing in</h1>
 
                 <div className="flex flex-col space-y-4 w-full max-w-sm">
-                    <Input type="email" placeholder="Your email..." className="bg-gray-100" onChange={e => setLogin(e.target.value)}/>
-                    <Input type="password" placeholder="Password..." className="bg-gray-100" onChange={e => setPassword(e.target.value)}/>
+                    <Input type="email" placeholder="Your email..." className="bg-gray-100" onChange={e => setLogin(e.target.value)} />
+                    <Input type="password" placeholder="Password..." className="bg-gray-100" onChange={e => setPassword(e.target.value)} />
+                    <Input type="password" placeholder="Password..." className="bg-gray-100" onChange={e => setConfirmPassword(e.target.value)} />
 
                     <div className="flex justify-between text-sm text-gray-400">
                         <span>Enter as admin</span>
                         <span>Forgot password?</span>
                     </div>
 
-                    <Button className="bg-green-800 hover:bg-green-900 text-white font-bold py-2 mt-4" onClick={handleLogin}>
-                        Log in
+                    <Button className="bg-green-800 hover:bg-green-900 text-white font-bold py-2 mt-4" onClick={handleCheckPasswords}>
+                        Sing in
                     </Button>
 
                     <p className="text-sm text-gray-500 text-center mt-4">
-                        Don’t have account? <span className="text-green-800 font-semibold cursor-pointer" onClick={() => router.push("/registration")}>Sign up!</span>
+                        Registired? <span className="text-green-800 font-semibold cursor-pointer" onClick={() => router.push("/auth")}>Sign up!</span>
                     </p>
                 </div>
             </div>
