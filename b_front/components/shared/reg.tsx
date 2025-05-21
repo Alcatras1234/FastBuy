@@ -16,15 +16,19 @@ export function Registration() {
         setError(null);
         console.log(login, password);
         try {
-            const response = await fetch('http://127.0.0.1/api/auth/admin', {
-                method: "GET",
-                credentials: "include",
+            localStorage.setItem('email', login);
+            const response = await fetch('http://localhost:8080/api/auth_service/registration', {
+                method: "POST",
+                // credentials: "include", - указывать когда используем куки
                 headers: {
                     "Content-Type": "application/json",
-                    "Login": login,
-                    "Password": password
                 },
-            });
+                body: JSON.stringify({
+                    email: login,
+                    password: password,
+                    role: "USER"
+                }),
+            })
 
             if (!response.ok) {
                 const errorMessage = await response.text();
@@ -32,8 +36,7 @@ export function Registration() {
                 throw new Error(errorMessage);
             }
 
-            // Перевести на стрницу с матчами
-            // router.push('/dashboard');
+            router.push('/registration/email-confirm');
 
         } catch (error: unknown) {
             if (error instanceof Error) {

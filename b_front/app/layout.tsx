@@ -12,8 +12,8 @@ const nunito = Nunito({
 
 
 export const metadata: Metadata = {
-  title: "VoiceBuy",
-  description: "Продажа озвучки для видео и аудио",
+  title: "FastBuy",
+  description: "Предзаказ билетов на футбольные матчи",
 };
 
 export default function RootLayout({

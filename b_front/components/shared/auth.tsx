@@ -16,14 +16,16 @@ export const Auth = () => {
         setError(null);
         console.log(login, password);
         try {
-            const response = await fetch('http://127.0.0.1/api/auth/admin', {
+            const response = await fetch('http://localhost:8080/api/auth_service/auth', {
                 method: "GET",
-                credentials: "include",
+                // credentials: "include", - пока нет ключей 
                 headers: {
                     "Content-Type": "application/json",
-                    "Login": login,
-                    "Password": password
                 },
+                body: JSON.stringify({
+                    email: login,
+                    password: password,
+                }),
             });
 
             if (!response.ok) {
