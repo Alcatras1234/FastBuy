@@ -12,6 +12,7 @@ export function EmailConfirm() {
     const handleCheckEmail = async () => {
         try {
             const email = localStorage.getItem('email');
+            const role = localStorage.getItem('role');
             const response = await fetch(`http://localhost:8080/api/auth_service/email?email=${email}`, {
                 method: "GET",
                 // credentials: "include", - указывать когда используем куки
@@ -28,9 +29,13 @@ export function EmailConfirm() {
             }
 
             toast.success("Email подтвержден");
-
+            localStorage.removeItem('email');
             setTimeout(() => {
-                router.push('/auth');
+                if (role === "USER") {
+                    router.push('/auth');
+                } else {    
+                    router.push('/registration/organizer-confirm');
+                }
             }, 2000);
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -40,6 +45,31 @@ export function EmailConfirm() {
         }
 
 
+    }
+
+    const handleSendEmail = async () => {
+        try {
+            const email = localStorage.getItem('email');
+            const response = await fetch(`http://localhost:8080/api/auth_service/sender?email=${email}`, {
+                method: "GET",
+                // credentials: "include", - указывать когда используем куки
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                setError(errorMessage);
+                throw new Error(errorMessage);
+            }
+
+            toast.success("Email отправлен");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setError(error.message);
+            }
+        }
     }
     
     useEffect(() => {
@@ -62,6 +92,7 @@ export function EmailConfirm() {
                 <CardHeader>
                     <CardTitle>Подтвердите свой email</CardTitle>
                     <CardDescription>В письме на почте кликните на ссылку</CardDescription>
+                    <Button className="mt-4" onClick={handleSendEmail}>Отправить письмо повторно</Button>
                 </CardHeader>
             </Card>
         </div>

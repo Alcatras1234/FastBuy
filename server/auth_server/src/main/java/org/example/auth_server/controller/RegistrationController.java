@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.reg_auth.RegRequest;
 import org.example.auth_server.exeptions.ExpiredJWTException;
+import org.example.auth_server.service.EmailService;
 import org.example.auth_server.service.RegAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -27,10 +28,12 @@ import java.nio.file.Paths;
 public class RegistrationController {
 
     private final RegAdminService regAdminService;
+    private final EmailService emailService;
 
     @Autowired
-    public RegistrationController(RegAdminService regAdminService) {
+    public RegistrationController(RegAdminService regAdminService, EmailService emailService) {
         this.regAdminService = regAdminService;
+        this.emailService = emailService;
     }
 
     @Operation(summary = "Users registration")
@@ -71,5 +74,11 @@ public class RegistrationController {
     public ResponseEntity<String> checkValidation(@RequestParam(name = "email") String email) {
         regAdminService.checkValidation(email);
         return ResponseEntity.ok("email провалидирован!");
+    }
+
+    @GetMapping("/sender")
+    public ResponseEntity<String> sender(@RequestParam(name = "email") String email) {
+        emailService.sendEmailForVerify(email);
+        return ResponseEntity.ok("Письмо отправлено!");
     }
 }

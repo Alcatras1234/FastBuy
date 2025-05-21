@@ -12,11 +12,14 @@ export function Registration() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [role, setRole] = useState("USER");
+    const [isAdmin, setIsAdmin] = useState(false);
     const handleLogin = async () => {
         setError(null);
-        console.log(login, password);
+        console.log(login, password, role);
         try {
             localStorage.setItem('email', login);
+            localStorage.setItem('role', role);
             const response = await fetch('http://localhost:8080/api/auth_service/registration', {
                 method: "POST",
                 // credentials: "include", - указывать когда используем куки
@@ -26,7 +29,7 @@ export function Registration() {
                 body: JSON.stringify({
                     email: login,
                     password: password,
-                    role: "USER"
+                    role: role
                 }),
             })
 
@@ -72,7 +75,16 @@ export function Registration() {
                     <Input type="password" placeholder="Password..." className="bg-gray-100" onChange={e => setConfirmPassword(e.target.value)} />
 
                     <div className="flex justify-between text-sm text-gray-400">
-                        <span>Enter as admin</span>
+                        <span
+                            onClick={() => {
+                                setIsAdmin((prev) => !prev);
+                                setRole(isAdmin ? "USER" : "ORGANIZER");
+                                toast(isAdmin ? "You are signing up as a user" : "You are signing up as an organizer");
+                            }}
+                            className="cursor-pointer"
+                        >
+                            {isAdmin ? "Enter as user" : "Enter as admin"}
+                        </span>
                         <span>Forgot password?</span>
                     </div>
 
