@@ -1,80 +1,78 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
-    Container,
-    Typography,
-    Grid,
-    Card,
-    CardContent,
-    TextField,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions
+    Container, Typography, Grid, Card, CardContent, TextField, Button, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
+import { fetchUsersMatchTickets } from "../../../../utils/axios";
+import { buyTickets } from "../../../../utils/axios"; // Импортируем функцию покупки билета
 
-interface IMatch {
-    id: number;
-    league: string;
-    scheduleDate: string;
-    scheduleTimeLocal: string;
-    stadiumName: string;
-    ticketsCount: number;
-    ticketsPrice: number;
-    info: string;
-    teamHomeName: string;
-    teamAwayName: string;
-    photoUrl: string;
-    organizer: string;
-    status: string;
-    city: string;
+interface ITicket {
+    sector: string;
+    row: string;
+    seatNumber: string;
+    price: string;
 }
 
 const BuyPage: React.FC = () => {
-    const [match, setMatch] = useState<IMatch | null>(null);
-    const [numberOfTickets, setNumberOfTickets] = useState<number>(1);
-    const [totalPrice, setTotalPrice] = useState<number>(0);
-    const [openDialog, setOpenDialog] = useState<boolean>(false);
-    const navigate = useNavigate();
+    const [match, setMatch] = useState<any>(null);
     const location = useLocation();
-    const { matchId }: any = location.state || {}; // Получаем matchId из состояния маршрута
+    const [tickets, setTickets] = useState<ITicket[]>([]);
+    const [selectedSector, setSelectedSector] = useState<string | null>(null);
+    const [selectedRow, setSelectedRow] = useState<string | null>(null);
+    const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+    const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+
+    // ✅ Payment state
+    const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(false);
+    const [bankCard, setBankCard] = useState<string>("");
+    const [cvv, setCvv] = useState<string>("");
+    const [expireDate, setExpireDate] = useState<string>("");
 
     useEffect(() => {
-        // Загружаем информацию о выбранном матче по matchId
-        const fetchMatch = async () => {
-            try {
-                // Здесь предполагается, что данные о матче можно загрузить через API или из глобального состояния
-                // В примере используется mock, где данные матчей загружаются по matchId
-                const response = await fetch(`https://api.example.com/matches/${matchId}`);
-                const matchData = await response.json();
-                setMatch(matchData);
-                setTotalPrice(matchData.ticketsPrice * numberOfTickets); // Начальная калькуляция
-            } catch (error) {
-                console.error("Ошибка загрузки данных о матче:", error);
+        const matchData = location.state?.match;
+        if (matchData) {
+            setMatch(matchData);
+        }
+
+        // Fetch tickets for the selected match
+        const fetchTickets = async () => {
+            if (match?.uuid) {
+                console.log(match);
+                const ticketsData = await fetchUsersMatchTickets(match.uuid);
+                console.log(ticketsData);
+                setTickets(ticketsData);
             }
         };
+        fetchTickets();
+    }, [location.state, match?.uuid]);
 
-        if (matchId) {
-            fetchMatch();
+    // ✅ Handles Payment
+    const handleConfirmPayment = async () => {
+        try {
+            if (!selectedSeat || !selectedPrice) {
+                alert("Выберите место перед оплатой!");
+                return;
+            }
+            // Get from authentication
+            const paymentData = {
+                seatNumber: selectedSeat,
+                bankCard: bankCard,
+                cvv: cvv,
+                expireDate: expireDate,
+            };
+
+            console.log("📡 Отправка данных на сервер:", paymentData);
+            await buyTickets(selectedSeat, bankCard, cvv, expireDate); // Отправляем данные на сервер для покупки билета
+
+            alert("✅ Оплата прошла успешно!");
+            setOpenPaymentDialog(false);
+            setBankCard("");
+            setCvv("");
+            setExpireDate("");
+        } catch (error) {
+            console.error("❌ Ошибка при оплате билета:", error);
+            alert("Ошибка при оплате билета, попробуйте снова.");
         }
-    }, [matchId, numberOfTickets]);
-
-    const handleTicketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const tickets = Number(event.target.value);
-        setNumberOfTickets(tickets);
-        if (match) {
-            setTotalPrice(match.ticketsPrice * tickets); // Пересчитываем цену
-        }
-    };
-
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-    };
-
-    const handleProceedToPurchase = () => {
-        // Здесь можно добавить логику перехода к оплате
-        setOpenDialog(true);
     };
 
     return (
@@ -91,58 +89,96 @@ const BuyPage: React.FC = () => {
                                     <Typography>{match.scheduleDate} | {match.scheduleTimeLocal}</Typography>
                                     <Typography>{match.stadiumName}, {match.city}</Typography>
                                     <Typography>Лига: {match.league}</Typography>
-                                    <Typography>Цена за билет: {match.ticketsPrice} Руб</Typography>
                                     <Typography>Осталось билетов: {match.ticketsCount}</Typography>
                                 </CardContent>
                             </Card>
                         </Grid>
 
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                label="Количество билетов"
-                                type="number"
-                                fullWidth
-                                value={numberOfTickets}
-                                onChange={handleTicketChange}
-                                InputProps={{
-                                    inputProps: {
-                                        min: 1,
-                                        max: match.ticketsCount
-                                    }
-                                }}
-                            />
+                        {/* Select Sector */}
+                        <Grid item xs={4}>
+                            <TextField select label="Сектор" fullWidth
+                                       value={selectedSector || ""}
+                                       onChange={(e) => {
+                                           setSelectedSector(e.target.value);
+                                           setSelectedRow(null);
+                                           setSelectedSeat(null);
+                                           setSelectedPrice(null);
+                                       }}>
+                                {Array.from(new Set(tickets.map(ticket => ticket.sector))).map(sector => (
+                                    <MenuItem key={sector} value={sector}>{sector}</MenuItem>
+                                ))}
+                            </TextField>
                         </Grid>
 
-                        <Grid item xs={12} sm={6}>
-                            <Typography variant="h6" gutterBottom>Итого: {totalPrice} Руб</Typography>
+                        {/* Select Row */}
+                        <Grid item xs={4}>
+                            <TextField select label="Ряд" fullWidth disabled={!selectedSector}
+                                       value={selectedRow || ""}
+                                       onChange={(e) => {
+                                           setSelectedRow(e.target.value);
+                                           setSelectedSeat(null);
+                                           setSelectedPrice(null);
+                                       }}>
+                                {Array.from(new Set(tickets
+                                    .filter(ticket => ticket.sector === selectedSector)
+                                    .map(ticket => ticket.row)))
+                                    .map(row => (
+                                        <MenuItem key={row} value={row}>Ряд {row}</MenuItem>
+                                    ))}
+                            </TextField>
                         </Grid>
 
-                        <Grid item xs={12}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                onClick={handleProceedToPurchase}
-                            >
-                                Перейти к оплате
-                            </Button>
+                        {/* Select Seat */}
+                        <Grid item xs={4}>
+                            <TextField select label="Место" fullWidth disabled={!selectedRow}
+                                       value={selectedSeat || ""}
+                                       onChange={(e) => {
+                                           const selectedTicket = tickets.find(ticket =>
+                                               ticket.sector === selectedSector &&
+                                               ticket.row === selectedRow &&
+                                               ticket.seatNumber === e.target.value);
+                                           setSelectedSeat(selectedTicket?.seatNumber || null);
+                                           setSelectedPrice(selectedTicket?.price || null);
+                                       }}>
+                                {tickets.filter(ticket =>
+                                    ticket.sector === selectedSector && ticket.row === selectedRow)
+                                    .map(ticket => (
+                                        <MenuItem key={ticket.seatNumber} value={ticket.seatNumber}>
+                                            Место {ticket.seatNumber}
+                                        </MenuItem>
+                                    ))}
+                            </TextField>
                         </Grid>
+
+                        {/* Payment Button */}
+                        {selectedSeat && selectedPrice && (
+                            <Grid item xs={12}>
+                                <Typography variant="h6">Цена билета: {selectedPrice} Руб</Typography>
+                                <Button variant="contained" color="primary" fullWidth onClick={() => setOpenPaymentDialog(true)}>
+                                    Оплатить билет
+                                </Button>
+                            </Grid>
+                        )}
                     </Grid>
 
-                    {/* Диалог для подтверждения покупки */}
-                    <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-                        <DialogTitle>Подтверждение покупки</DialogTitle>
+                    {/* Payment Dialog */}
+                    <Dialog open={openPaymentDialog} onClose={() => setOpenPaymentDialog(false)} fullWidth maxWidth="sm">
+                        <DialogTitle>Введите данные для оплаты</DialogTitle>
                         <DialogContent>
-                            <Typography>Вы хотите купить {numberOfTickets} билетов за {totalPrice} Руб?</Typography>
+                            <TextField label="Номер карты" fullWidth value={bankCard} onChange={(e) => setBankCard(e.target.value)} margin="dense"/>
+                            <TextField label="CVV" fullWidth value={cvv} onChange={(e) => setCvv(e.target.value)} margin="dense" type="password"/>
+                            <TextField label="Дата истечения (MM/YY)" fullWidth value={expireDate} onChange={(e) => setExpireDate(e.target.value)} margin="dense"/>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={handleCloseDialog} color="secondary">Отмена</Button>
-                            <Button variant="contained" color="primary">Подтвердить покупку</Button>
+                            <Button onClick={() => setOpenPaymentDialog(false)} color="secondary">Отмена</Button>
+                            <Button variant="contained" color="primary" onClick={handleConfirmPayment}>
+                                Подтвердить оплату
+                            </Button>
                         </DialogActions>
                     </Dialog>
                 </>
             ) : (
-                <Typography variant="h6">Загрузка данных о матче...</Typography>
+                <Typography variant="h6" marginTop={4}>Загрузка данных о матче...</Typography>
             )}
         </Container>
     );

@@ -24,12 +24,10 @@ services:
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - auth_data:/var/lib/postgresql/data/pgdata
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "2750:5432"
+      - "2751:5432"
     networks:
       - dev
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U amogus -d auth_DB"]
       interval: 10s
@@ -43,7 +41,21 @@ services:
           cpus: '1'
           memory: 4G
 
-          
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - auth_db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - dev
+
   auth:
     build:
        context: ./auth_server
@@ -65,7 +77,28 @@ services:
     restart: unless-stopped
     networks:
       - dev
+  
+  liquibase-migrations:
+      container_name: migrations_fastbuy
+      image: liquibase/liquibase:4.29
+      depends_on:
+        - auth_db
+      command:
+        - --searchPath=/changesets
+        - --changelog-file=master.yaml
+        - --driver=org.postgresql.Driver
+        - --url=jdbc:postgresql://auth_db:5432/auth_DB
+        - --username=amogus
+        - --password=1234
+        - update
+      volumes:
+        - ./db/init.sql:/changesets/init.sql
+        - ./db/master.yaml:/changesets/master.yaml
+      networks:
+        - dev
+
 volumes:
   auth_data:
   redis-data:
+  pgadmin_data:
 

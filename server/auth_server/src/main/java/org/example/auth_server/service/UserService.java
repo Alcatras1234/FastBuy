@@ -2,9 +2,13 @@ package org.example.auth_server.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.log4j.Log4j2;
-import org.example.auth_server.model.Match;
-import org.example.auth_server.repository.MatchRepository;
+import org.example.auth_server.model.actors.User;
+import org.example.auth_server.model.match.Match;
+import org.example.auth_server.model.match.Ticket;
+import org.example.auth_server.repository.match.MatchRepository;
+import org.example.auth_server.repository.match.TicketRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,9 +18,11 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -25,12 +31,14 @@ public class UserService {
     private final UserWorkService userWorkService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
+    private final TicketRepository ticketRepository;
 
-    public UserService(MatchRepository matchRepository, UserWorkService userWorkService, RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
+    public UserService(MatchRepository matchRepository, UserWorkService userWorkService, RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper, TicketRepository ticketRepository) {
         this.matchRepository = matchRepository;
         this.userWorkService = userWorkService;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
+        this.ticketRepository = ticketRepository;
     }
 
     public List<Match> getMatchForUser(String token, int page, int pageSize) {
@@ -84,5 +92,57 @@ public class UserService {
         }
         log.info("Закончил процесс GET информации матчи: ");
         return matches;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Ticket> getTicketsForUser(String token, int page, int pageSize) {
+        List<Ticket> tickets = new ArrayList<>();
+
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+
+        User user = userWorkService.getUser(email);
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Ticket> ticketPage = ticketRepository.findTicketsByUser(pageable, user);
+        tickets = ticketPage.getContent();
+
+        if (tickets.isEmpty()) {
+            throw new EntityNotFoundException("Билеты не найдены");
+        }
+
+        List<Ticket> bookedTickets = tickets.stream()
+                .filter(ticket -> !ticket.getStatus().equals("canceled"))
+                .toList();
+
+        return tickets;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Ticket> getCanceledTickets(String token,  int page, int pageSize) {
+        if (!JWTUtils.validateToken(token)) {
+            throw new JwtException("Токен не валиден");
+        }
+        String email = JWTUtils.extractClaim(token).get("email", String.class);
+
+        User user = userWorkService.getUser(email);
+
+        List<Ticket> tickets = new ArrayList<>();
+
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Ticket> ticketPage = ticketRepository.findTicketsByUser(pageable, user);
+        tickets = ticketPage.getContent();
+
+        if (tickets.isEmpty()) {
+            throw new EntityNotFoundException("Билеты не найдены");
+        }
+
+        List<Ticket> canceledTickets = tickets.stream()
+                .filter(ticket -> ticket.getStatus().equals("canceled"))
+                .toList();
+        return canceledTickets;
     }
 }

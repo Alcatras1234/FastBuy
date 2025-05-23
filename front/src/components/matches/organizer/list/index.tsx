@@ -34,7 +34,7 @@ const MatchList: React.FC<MatchListProps> = ({ matches, onEdit, onDelete }) => {
                                 <Button variant="contained" color="primary" size="small" onClick={() => onEdit(match)}>
                                     Редактировать
                                 </Button>
-                                <Button variant="contained" color="secondary" size="small" style={{ marginLeft: "0.5rem" }} onClick={() => onDelete(match.id)}>
+                                <Button variant="contained" color="secondary" size="small" style={{ marginLeft: "0.5rem" }} onClick={() => onDelete(match)}>
                                     Удалить
                                 </Button>
                             </CardContent>

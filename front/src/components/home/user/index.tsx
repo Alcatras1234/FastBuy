@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchUsersMatches } from "../../../utils/axios";
+import { fetchUsersMatches, fetchUserTickets} from "../../../utils/axios";
 import {useNavigate} from "react-router-dom";
 import {
     Container,
@@ -20,12 +20,12 @@ import SearchIcon from "@mui/icons-material/Search";
 
 interface IMatch {
     id: number;
+    uuid: string;
     league: string;
     scheduleDate: string;
     scheduleTimeLocal: string;
     stadiumName: string;
     ticketsCount: number;
-    ticketsPrice: number;
     info: string;
     teamHomeName: string;
     teamAwayName: string;
@@ -51,10 +51,20 @@ const UserHomePage: React.FC = () => {
         const loadMatches = async () => {
             try {
                 setIsLoading(true);
-                const responseMatches = await fetchUsersMatches(page, 5);
+                console.log(1);
+
+                const responseMatches = await fetchUsersMatches(0, 5);
+                console.log(2);
+
+                if (!responseMatches || !Array.isArray(responseMatches)) {
+                    throw new Error("❌ Данные матчей отсутствуют или имеют неверный формат!");
+                }
+
+                console.log("📡 Полученные матчи от сервера:", responseMatches); // ✅ Debugging API Response
 
                 setMatches(responseMatches);
                 setFilteredMatches(responseMatches);
+
 
                 const uniqueCities = [...new Set(responseMatches.map(match => match.city))];
                 setCities(uniqueCities);
@@ -87,12 +97,23 @@ const UserHomePage: React.FC = () => {
     };
 
     const handleOpenBuyPage = () => {
-        navigate('/buy');
+        if (selectedMatch) {
+            console.log(selectedMatch);
+            navigate('/buy', { state: { match: selectedMatch } });
+        }
     };
 
     return (
         <Container>
             <Typography variant="h5" gutterBottom>Бронирование билетов</Typography>
+            <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => navigate("/user/tickets")}
+                style={{ marginBottom: "20px" }}
+            >
+                Мои билеты
+            </Button>
 
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={4}>
@@ -169,12 +190,13 @@ const UserHomePage: React.FC = () => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        onClick={() => handleOpenBuyPage}  // Передаем саму функцию в onClick
+                        onClick={handleOpenBuyPage}  // Передаем саму функцию в onClick
                     >
                         Перейти к оплате
                     </Button>
                 </DialogActions>
             </Dialog>
+
         </Container>
     );
 };

@@ -1,15 +1,13 @@
 package org.example.auth_server.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
-import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityExistsException;
 import lombok.extern.log4j.Log4j2;
 import org.example.auth_server.dto.reg_auth.RegRequest;
 import org.example.auth_server.enums.RoleEnum;
 import org.example.auth_server.enums.StatusEnum;
 import org.example.auth_server.exeptions.ExpiredJWTException;
-import org.example.auth_server.model.User;
+import org.example.auth_server.model.actors.User;
 import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -44,31 +42,37 @@ public class RegAdminService {
     }
 
     @Transactional
-    public void registrateUser(RegRequest regRequest) throws MessagingException {
+    public void registrateUser(RegRequest regRequest) {
         String toAddress = regRequest.getEmail();
         String hashedPassword = hasherPassword(regRequest.getPassword());
-        userRepository.findUserByEmail(regRequest.getEmail()).ifPresent(
-                user -> {
-                    log.error("Пользователь уже зарегестрирован");
-                    throw new EntityExistsException("Пользователь существует!");
-                }
-        );
 
+        // Найти пользователя по email
+        Optional<User> userOpt = userRepository.findUserByEmail(regRequest.getEmail());
 
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (user.isVerify()) {
+                throw new EntityExistsException("Пользователь с такой почтой уже существует");
+            }
+            // Если пользователь найден, но не верифицирован — можно обновить/повторно отправить письмо
+            emailService.sendEmailForVerify(toAddress);
+            return;
+        }
+
+        // Если пользователь не найден — создать нового
         User user = new User();
-        emailService.sendEmailForVerify(toAddress);
-
         user.setEmail(regRequest.getEmail());
         user.setRole(RoleEnum.valueOf(regRequest.getRole()));
         user.setPassword(hashedPassword);
         user.setCreatedDttm(LocalDateTime.now());
         user.setStatus(StatusEnum.ACTIVE);
-        userRepository.save(user);
 
+        userRepository.save(user);
         userWorkService.saveUserInCache(user);
 
-        log.info("Пользователь " + user);
+        emailService.sendEmailForVerify(toAddress);
 
+        log.info("Пользователь " + user);
     }
 
 
@@ -107,7 +111,6 @@ public class RegAdminService {
     private String hasherPassword(String password) {
         return passwordEncoder.encode(password);
     }
-
 
 
 }

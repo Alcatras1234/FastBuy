@@ -68,6 +68,8 @@ instance.interceptors.response.use(
 export const registerUser = async (email: string, password: string, role: string) => {
     try {
         console.log("Данные отправляются")
+        localStorage.setItem("pendingEmail", email);
+        localStorage.setItem("userRole", role);
         const response = await instance.post('/api/auth_service/registration', { email, password, role});
         console.log("Отправленные данные:", { email, password });
         console.log("Ответ сервера:", response);
@@ -256,7 +258,15 @@ export const createMatch = async (matchData) => {
         const token = Cookies.get("accessToken"); 
         if (!token) throw new Error("Токен отсутствует, выполните вход");
 
-        const requestBody = { token, ...matchData };
+        const requestBody = {
+            token: token,
+            teamA: matchData.teamA,
+            teamB: matchData.teamB,
+            date: matchData.date,
+            time: matchData.time,
+            stadium: matchData.stadium,
+            seats: matchData.tickets // Переименовываем tickets → seats
+        };
 
         console.log("📡 Отправка данных матча:", requestBody);
 
@@ -280,10 +290,9 @@ export const fetchOrganizerMatches = async (page = 0, count = 10) => {
         
         console.log("📡 Загружаем матчи организатора...", { page, count });
 
-        const response = await instance.get("/api/organizer_service/match/data", { 
+        const response = await instance.get("/api/organizer_service/match/data", {
             params: { token, page, count } // Добавили параметры
         });
-
         console.log("✅ Данные матчей:", response.data);
         return response.data;
     } catch (error) {
@@ -297,12 +306,21 @@ export const updateMatch = async (matchUuid: string, updatedData: any) => {
         const token = Cookies.get("accessToken");
         if (!token) throw new Error("❌ Токен отсутствует, выполните вход.");
 
-        const requestBody = { token, ...updatedData }; // ✅ Ensure `token` is in request body
+        // ✅ Extract only required fields (removes uuid & id)
+        const requestBody = {
+            token,
+            teamA: updatedData.teamA,
+            teamB: updatedData.teamB,
+            date: updatedData.date,
+            time: updatedData.time,
+            stadium: updatedData.location, // ✅ Use `stadium`, not `location`
+            tickets: updatedData.tickets,
+        };
 
         console.log("📡 Отправка обновленных данных матча:", { uuid: matchUuid, requestBody });
 
         const response = await instance.put("/api/organizer_service/match", requestBody, {
-            params: { uuid: matchUuid }, // ✅ Backend expects `uuid` in params
+            params: { uuid: matchUuid }, // ✅ Send uuid ONLY as param
         });
 
         console.log("✅ Матч успешно обновлен:", response.data);
@@ -312,6 +330,7 @@ export const updateMatch = async (matchUuid: string, updatedData: any) => {
         throw new Error(error.response?.data?.message || "Ошибка при обновлении матча.");
     }
 };
+
 
 export const deleteMatch = async (matchUuid: string) => {
     try {
@@ -378,26 +397,28 @@ export const updateOrganizerProfile = async (updatedData) => {
     }
 };
 
-export const fetchUsersMatches = async (page: number, count: number) => {
+export const fetchUsersMatches = async (page = 0, count = 5) => {
     try {
-        const token = Cookies.get("accessToken");
-        if (!token) throw new Error("Токен отсутствует, выполните вход.");
+        const access_token = Cookies.get("accessToken");
+        console.log(access_token);
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
         const response = await instance.get("/match", {
-            params: { page, count, token }});
+            params: { page, count, access_token }});
         const data = response.data;
-
+        console.log(data);
         if (!Array.isArray(data)) {
             throw new Error("Некорректный формат данных от сервера");
         }
 
         return data.map((item) => ({
             id: item.id || "Нет данных",
+            uuid: item.uuid || "Нет данных",
             league: item.league || "Нет данных",
             scheduleDate: item.scheduleDate || "Нет данных",
             scheduleTimeLocal: item.scheduleTimeLocal || "Нет данных",
             stadiumName: item.stadiumName || "Нет данных",
             ticketsCount: item.ticketsCount || "Нет данных",
-            ticketsPrice: item.ticketsPrice || "Нет данных",
+/*            ticketsPrice: item.ticketsPrice || "Нет данных",*/
             info: item.info || "Нет данных",
             teamHomeName: item.teamHomeName || "Нет данных",
             teamAwayName: item.teamAwayName || "Нет данных",
@@ -412,3 +433,148 @@ export const fetchUsersMatches = async (page: number, count: number) => {
         throw new Error(error.message);
     }
 }
+
+export const fetchUsersMatchTickets = async (matchUuid: string) => {
+    try{
+        const access_token = Cookies.get("accessToken");
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+
+        console.log("Получение билетов")
+        console.log(access_token);
+        console.log(matchUuid);
+        const response = await instance.get(`/api/buyservice/ticket`, {
+            params: {
+                token: access_token, // Параметр для токена
+                match_uuid: matchUuid, // Параметр для UUID матча
+            }
+        });
+        const data = response.data;
+        return data.map((item) => ({
+            sector: item.sector,
+            row: item.row,
+            seatNumber: item.seatNumber,
+            price: item.price,
+        }))
+
+    } catch (error) {
+        throw new Error(error.message);
+    }
+}
+
+export const buyTickets = async (seatNumber: string, bankCard: string, cvv: string, expireDate: string) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+        console.log(access_token);
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+
+        // Запрос на сервер с правильными параметрами
+        const response = await instance.post(`/api/buyservice/ticket`, {
+            token: access_token, // Параметр для токена
+            seatNumber: seatNumber, // Параметр для номера места
+            bankCard: bankCard, // Параметр для номера карты
+            cvv: cvv, // Параметр для CVV
+            expireDate: expireDate, // Параметр для срока действия карты
+        });
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Ошибка при оплате:", error);
+        throw new Error(error.message || "Ошибка при оплате");
+    }
+};
+/*
+export const fetchUsersMatches = async (page = 0, count = 5) => {
+    console.log("⚠️ Симуляция данных, так как бэкенд не работает");
+
+    return [
+        {
+            id: 1,
+            league: "Премьер-Лига",
+            scheduleDate: "2025-06-15",
+            scheduleTimeLocal: "18:00",
+            stadiumName: "Лужники",
+            ticketsCount: 1500,
+            ticketsPrice: 300,
+            info: "Финал лиги",
+            teamHomeName: "Зенит",
+            teamAwayName: "Спартак",
+            photoUrl: "",
+            organizer: "Футбольная федерация",
+            status: "Scheduled",
+            city: "Москва",
+        },
+        {
+            id: 2,
+            league: "Чемпионат России",
+            scheduleDate: "2025-06-20",
+            scheduleTimeLocal: "17:00",
+            stadiumName: "Газпром Арена",
+            ticketsCount: 2000,
+            ticketsPrice: 450,
+            info: "Полуфинал кубка",
+            teamHomeName: "Локомотив",
+            teamAwayName: "ЦСКА",
+            photoUrl: "",
+            organizer: "Футбольная федерация",
+            status: "Scheduled",
+            city: "Санкт-Петербург",
+        }
+    ];
+};*/
+
+export const fetchUserTickets = async (page: number, count: number) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+
+        if (!access_token) {
+            console.error("❌ Ошибка: отсутствует access_token!");
+            return [];
+        }
+
+        console.log("📡 Отправляем запрос на получение билетов...");
+
+        const response = await instance.get(`/ticket`, {
+            params: {
+                access_token,  // ✅ Добавляем в query, как требует Swagger
+                page: Number(page),
+                count: Number(count),
+            },
+        });
+
+        console.log("✅ Полученные билеты:", response.data);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error("❌ Ответ от сервера:", error.response.data);
+        } else {
+            console.error("❌ Ошибка запроса:", error.message);
+        }
+        return [];
+    }
+};
+
+
+
+
+export const refundTicket = async (ticketId) => {
+    try {
+        const access_token = Cookies.get("accessToken");
+        console.log("Используемый токен:", access_token);
+        console.log("ID билета для возврата:", ticketId);
+        
+        if (!access_token) throw new Error("Токен отсутствует, выполните вход.");
+
+        // Запрос на сервер для возврата билета
+        const response = await instance.patch(`/api/buyservice/ticket`, {
+            token: access_token,
+            id: ticketId
+        });
+
+        console.log("Успешный ответ сервера при возврате билета:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при возврате билета:", error);
+        throw new Error(error.message || "Ошибка при возврате билета");
+    }
+};

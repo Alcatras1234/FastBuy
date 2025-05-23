@@ -1,23 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, Grid, Box, Container, Typography, Alert, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { createMatch } from "../../../../utils/axios"; // API Call function
+import { createMatch } from "../../../../utils/axios";
 
 const AddMatchPage: React.FC = () => {
     const navigate = useNavigate();
+    const [tickets, setTickets] = useState([{
+        sector: "",
+        row: "",
+        seatStart: "",
+        seatEnd: "",
+        price: "" },
+    ]);
     const [matchData, setMatchData] = useState({
         teamA: "",
         teamB: "",
         date: "",
         time: "",
         stadium: "",
-        tickets: "",
-        ticketPrice: "",
+        tickets: tickets,
     });
+    useEffect(() => {
+        setMatchData((prev) => ({
+            ...prev,
+            tickets: tickets,
+        }));
+    }, [tickets]);
 
     const [error, setError] = useState<string | null>(null);
     const [confirmationOpen, setConfirmationOpen] = useState(false);
     const [successOpen, setSuccessOpen] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -27,9 +42,26 @@ const AddMatchPage: React.FC = () => {
         }));
     };
 
+    const handleAddRow = () => {
+        setTickets([...tickets, { sector: "", row: "", seatStart: "", seatEnd:"",  price: "" }]);
+    };
+
+    const handleRemoveRow = (index: number) => {
+        setTickets((prevTickets) => prevTickets.filter((_, i) => i !== index));
+    };
+
+    const handleChangeTickets = (index: number, field: string, value: string) => {
+        setTickets((prevTickets) => {
+            const newTickets = prevTickets.map((ticket, i) =>
+                i === index ? { ...ticket, [field]: value } : ticket
+            );
+            return newTickets;
+        });
+    };
+
     //! More meaningful validations
     const validateFields = () => {
-        const { teamA, teamB, date, time, stadium, tickets, ticketPrice } = matchData;
+        const { teamA, teamB, date, time, stadium, /*tickets, ticketPrice */} = matchData;
 
         if (!teamA.trim() || !teamB.trim()) return "Введите названия обеих команд.";
         if (teamA.trim().toLowerCase() === teamB.trim().toLowerCase()) return "Команды должны быть разными.";
@@ -38,9 +70,9 @@ const AddMatchPage: React.FC = () => {
         if (!time) return "Выберите время матча.";
         if (!/^\d{2}:\d{2}$/.test(time)) return "Неверный формат времени (HH:MM).";
         if (!stadium.trim()) return "Введите место проведения.";
-        if (!tickets || isNaN(Number(tickets)) || Number(tickets) <= 0) return "Количество билетов должно быть положительным числом.";
+        /*if (!tickets || isNaN(Number(tickets)) || Number(tickets) <= 0) return "Количество билетов должно быть положительным числом.";
         if (!ticketPrice || isNaN(Number(ticketPrice)) || Number(ticketPrice) <= 0) return "Цена билета должна быть положительным числом.";
-
+*/
         return null;
     };
 
@@ -62,6 +94,8 @@ const AddMatchPage: React.FC = () => {
     const handleConfirmSubmit = async () => {
         setConfirmationOpen(false); // Close confirmation popup
         try {
+            console.log(tickets)
+            console.log(matchData)
             await createMatch(matchData);
             console.log("Матч успешно добавлен");
             setSuccessOpen(true); // Open success message
@@ -97,19 +131,22 @@ const AddMatchPage: React.FC = () => {
                     <Grid item xs={12}>
                         <TextField label="Место проведения" name="stadium" value={matchData.stadium} onChange={handleChange} fullWidth required />
                     </Grid>
-                    <Grid item xs={12}>
+{/*                    <Grid item xs={12}>
                         <TextField label="Количество доступных билетов" name="tickets" type="number" value={matchData.tickets} onChange={handleChange} fullWidth required />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField label="Цена билета" name="ticketPrice" type="number" value={matchData.ticketPrice} onChange={handleChange} fullWidth required />
-                    </Grid>
+                    </Grid>*/}
                     <Grid item xs={12}>
                         <Box display="flex" justifyContent="space-between">
                             <Button variant="outlined" color="secondary" onClick={() => navigate("/organizer/home")}>
                                 Главная
                             </Button>
-                            <Button type="submit" variant="contained" color="primary">
-                                Добавить матч
+                            <Button type="submit" variant="outlined" color="secondary" >
+                                Добавить
+                            </Button>
+                            <Button onClick={()=> setOpenDialog(true)} variant="contained" color="primary">
+                                Билеты
                             </Button>
                         </Box>
                     </Grid>
@@ -139,6 +176,104 @@ const AddMatchPage: React.FC = () => {
                 <DialogActions>
                     <Button onClick={() => setSuccessOpen(false)} color="secondary">Остаться</Button>
                     <Button onClick={() => navigate("/organizer/home")} color="primary">На главную</Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="md">
+                <DialogTitle>Добавление билетов</DialogTitle>
+                <DialogContent>
+                    <Typography variant="h6">Введите данные билетов:</Typography>
+                    {tickets.map((ticket, index) => (
+                        <Grid container spacing={2} key={index} alignItems="center" sx={{ marginBottom: 2 }}>
+                            <Grid item xs={2}>
+                                <TextField
+                                    label="Сектор"
+                                    value={ticket.sector}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^[A-Za-z]+$/.test(val)) {
+                                            handleChangeTickets(index, "sector", val)
+                                        }
+                                    }}
+
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <TextField
+                                    label="Ряд"
+                                    value={ticket.row}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                            handleChangeTickets(index, "row", val)
+                                        }
+                                  
+                                    }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <TextField
+                                    label="С места"
+                                    value={ticket.seatStart}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                            handleChangeTickets(index, "seatStart", val)
+                                        }
+                                    }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <TextField
+                                    label="до"
+                                    value={ticket.seatEnd}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                            handleChangeTickets(index, "seatEnd", val)
+                                        }
+                                    }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={2}>
+                                <TextField
+                                    label="Цена"
+                                    value={ticket.price}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^\d+$/.test(val)) {
+                                          handleChangeTickets(index, "price", val);
+                                        }
+                                      }}
+                                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                                    fullWidth
+                                />
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Button variant="contained"  onClick={() => handleRemoveRow(index)}>
+                                    Удалить
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    ))}
+                    <Button variant="contained" color="primary" onClick={handleAddRow}>
+                        Добавить еще
+                    </Button>
+
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)} color="secondary">
+                        Закрыть
+                    </Button>
+                    <Button onClick={() => setOpenDialog(false)} variant="contained" color="primary">
+                        Сохранить
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Container>

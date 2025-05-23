@@ -1,15 +1,12 @@
 package org.example.auth_server.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.example.auth_server.dto.reg_auth.AuthRequest;
-import org.example.auth_server.model.Admin;
-import org.example.auth_server.model.User;
+import org.example.auth_server.model.actors.Admin;
+import org.example.auth_server.model.actors.User;
 import org.example.auth_server.repository.AdminRepository;
-import org.example.auth_server.repository.UserRepository;
 import org.example.auth_server.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
