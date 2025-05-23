@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import { ClientHeader } from "./clientHeader";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const nunito = Nunito({
-  subsets: ['cyrillic'],
-  variable: '--font-nunito',
+const notoSans = Noto_Sans({
+  subsets: ['cyrillic', 'latin'],
+  variable: '--font-noto-sans',
   weight: ['400', '500', '600', '700', '800', '900'],
 });
 
@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className={`${nunito.variable} antialiased`}>
+      <body className={`${notoSans.variable} antialiased`}>
         <ClientHeader />
         <main className="min-h-screen">
           {children}
