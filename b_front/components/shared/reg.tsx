@@ -102,7 +102,7 @@ export function Registration() {
             <div className="flex justify-center items-center w-1/2 bg-gray-50">
                 <div className="flex items-center space-x-4">
                     <div className="text-green-800 text-5xl">⚽️</div>
-                    <span className="text-green-800 text-5xl font-medium">FastBuy</span>
+                    <span className="text-green-800 text-5xl font-medium italic">FastBuy</span>
                 </div>
             </div>
         </div>
