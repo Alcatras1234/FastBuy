@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 // Create an axios instance with default configurations
 export const instance = axios.create({
-    baseURL: "http://localhost:8080", // Use your backend API URL
+    baseURL: "http://176.114.69.240:80", // Use your backend API URL
     timeout: 10000,
     headers: { 'X-Custom-Header': 'foobar' }
 });
@@ -37,7 +37,7 @@ instance.interceptors.response.use(
 
             try {
                 console.log("🔄 Попытка обновления `accessToken`...");
-                const response = await axios.post("http://localhost:8080/api/auth_service/refresh", {
+                const response = await axios.post("http://176.114.69.240:80/api/auth_service/refresh", {
                     refreshToken,
                 });
 
