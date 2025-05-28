@@ -28,7 +28,6 @@ services:
       - "2751:5432"
     networks:
       - dev
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U amogus -d auth_DB"]
       interval: 10s
@@ -42,7 +41,21 @@ services:
           cpus: '1'
           memory: 4G
 
-          
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - auth_db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - dev
+
   auth:
     build:
        context: ./auth_server
@@ -87,4 +100,5 @@ services:
 volumes:
   auth_data:
   redis-data:
+  pgadmin_data:
 
